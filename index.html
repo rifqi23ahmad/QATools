@@ -3,259 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>All-in-One Dev Tools</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>QaTools</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/diff_match_patch/20121119/diff_match_patch.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
-    <div class="container">
-        <h1>Developer Tools</h1>
-        <p class="subtitle">Kumpulan alat bantu untuk pekerjaan pengembangan Anda sehari-hari.</p>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-terminal"></i>
+                <h2>QaTools</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="nav-item active" data-tool="JsonFormatter"><a href="#"><i class="fas fa-code fa-fw"></i><span>JSON Formatter</span></a></li>
+                    <li class="nav-item" data-tool="JsonValueExtractor"><a href="#"><i class="fas fa-filter fa-fw"></i><span>JSON Value Extractor</span></a></li>
+                    <li class="nav-item" data-tool="JsonCompare"><a href="#"><i class="fas fa-exchange-alt fa-fw"></i><span>JSON Compare</span></a></li>
+                    <li class="nav-item" data-tool="DataCompare"><a href="#"><i class="fas fa-table-list fa-fw"></i><span>Data Compare</span></a></li>
+                    <li class="nav-item" data-tool="FileSplitter"><a href="#"><i class="fas fa-file-zipper fa-fw"></i><span>File Splitter</span></a></li>
+                    <li class="nav-item" data-tool="ImageCompare"><a href="#"><i class="fas fa-images fa-fw"></i><span>Image Compare</span></a></li>
+                    <li class="nav-item" data-tool="SqlFormatter"><a href="#"><i class="fas fa-database fa-fw"></i><span>SQL Formatter</span></a></li>
+                    <li class="nav-item" data-tool="SqlScriptGenerator"><a href="#"><i class="fas fa-file-code fa-fw"></i><span>SQL Script Gen</span></a></li>
+                    <li class="nav-item" data-tool="WordingCompare"><a href="#"><i class="fas fa-file-alt fa-fw"></i><span>Doc Compare</span></a></li>
+                    <li class="nav-item" data-tool="DummyImageGenerator"><a href="#"><i class="fas fa-file-image fa-fw"></i><span>Dummy File Gen</span></a></li>
+                    
+                    <li class="nav-item nav-item-dev" data-tool="DevMenu1"><a href="#"><i class="fas fa-wrench fa-fw"></i><span>Dev Menu 1</span></a></li>
+                    <li class="nav-item nav-item-dev" data-tool="DevMenu2"><a href="#"><i class="fas fa-wrench fa-fw"></i><span>Dev Menu 2</span></a></li>
+                    <li class="nav-item nav-item-dev" data-tool="DevMenu3"><a href="#"><i class="fas fa-wrench fa-fw"></i><span>Dev Menu 3</span></a></li>
+                    <li class="nav-item nav-item-dev" data-tool="DevMenu4"><a href="#"><i class="fas fa-wrench fa-fw"></i><span>Dev Menu 4</span></a></li>
+                    <li class="nav-item nav-item-dev" data-tool="DevMenu5"><a href="#"><i class="fas fa-wrench fa-fw"></i><span>Dev Menu 5</span></a></li>
+                    <li class="nav-item nav-item-dev" data-tool="DevMenu6"><a href="#"><i class="fas fa-wrench fa-fw"></i><span>Dev Menu 6</span></a></li>
+                    <li class="nav-item nav-item-dev" data-tool="DevMenu7"><a href="#"><i class="fas fa-wrench fa-fw"></i><span>Dev Menu 7</span></a></li>
+                    <li class="nav-item nav-item-dev" data-tool="DevMenu8"><a href="#"><i class="fas fa-wrench fa-fw"></i><span>Dev Menu 8</span></a></li>
+                    <li class="nav-item nav-item-dev" data-tool="DevMenu9"><a href="#"><i class="fas fa-wrench fa-fw"></i><span>Dev Menu 9</span></a></li>
+                    <li class="nav-item nav-item-dev" data-tool="DevMenu10"><a href="#"><i class="fas fa-wrench fa-fw"></i><span>Dev Menu 10</span></a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="#" id="sidebar-toggle">
+                    <i class="fas fa-chevron-left"></i>
+                    <span>Minimize</span>
+                </a>
+            </div>
+        </aside>
 
-        <div class="tabs">
-            <button class="tab-link active" onclick="openTool(event, 'JsonFormatter')">JSON Formatter</button>
-            <button class="tab-link" onclick="openTool(event, 'JsonCompare')">JSON Compare</button>
-            <button class="tab-link" onclick="openTool(event, 'ImageCompare')">Image Compare</button>
-            <button class="tab-link" onclick="openTool(event, 'SqlFormatter')">SQL Number Formatter</button>
-            <button class="tab-link" onclick="openTool(event, 'WordingCompare')">Advanced Document Compare</button>
-            <button class="tab-link" onclick="openTool(event, 'ApiTester')">API Tester</button>
-        </div>
-        
-        <div id="JsonFormatter" class="tab-content" style="display: block;">
-            <div class="formatter-container">
-                <div class="editor-wrapper">
-                    <div class="line-numbers" id="input-line-numbers"><span>1</span></div>
-                    <textarea id="json-input" placeholder="Tempel atau ketik JSON Anda di sini..."></textarea>
-                </div>
-                <div class="formatter-controls">
-                    <button id="json-upload-btn" class="formatter-btn">Unggah Data</button>
-                    <button id="json-validate-btn" class="formatter-btn">Validasi</button>
-                    <select id="json-indent-select">
-                        <option value="2">2 Spasi</option>
-                        <option value="4">4 Spasi</option>
-                        <option value="tab">Tab</option>
-                    </select>
-                    <button id="json-format-btn" class="formatter-btn main">Format / Beautify</button>
-                    <button id="json-minify-btn" class="formatter-btn">Minify / Compact</button>
-                    <button id="json-copy-btn" class="formatter-btn">Salin Hasil</button>
-                    <button id="json-download-btn" class="formatter-btn">Download</button>
-                </div>
-                <div class="editor-wrapper">
-                     <div class="line-numbers" id="output-line-numbers"><span>1</span></div>
-                    <pre id="json-output" class="json-highlight-area" aria-readonly="true"></pre>
-                </div>
-            </div>
-            <input type="file" id="json-file-input" class="hidden-file-input" accept=".json, .txt">
-        </div>
-
-        <div id="JsonCompare" class="tab-content">
-             <h2>JSON Compare</h2>
-             <div class="json-compare-container">
-                 <div class="compare-panel">
-                     <h3>JSON Asli</h3>
-                     <textarea id="json-compare-input1" placeholder="Masukkan JSON pertama..."></textarea>
-                 </div>
-                 <div class="compare-panel">
-                     <h3>JSON Revisi</h3>
-                     <textarea id="json-compare-input2" placeholder="Masukkan JSON kedua..."></textarea>
-                 </div>
-                 <div class="compare-controls">
-                    <button id="json-compare-btn" class="sql-btn">Bandingkan</button>
-                 </div>
-                 <div class="compare-results-side-by-side">
-                    <div class="result-panel">
-                        <div class="result-header" id="diff-header-left"></div>
-                        <pre id="json-compare-output-left" class="diff-output"></pre>
-                    </div>
-                    <div class="result-panel">
-                        <div class="result-header" id="diff-header-right"></div>
-                        <pre id="json-compare-output-right" class="diff-output"></pre>
-                    </div>
-                 </div>
-             </div>
-        </div>
-
-        <div id="ImageCompare" class="tab-content">
-            <div class="status-message">
-                <span>Siap membandingkan gambar - Klik di sini dan tekan Ctrl+V untuk menempelkan!</span>
-            </div>
-            <div class="how-to-use">
-                <h2>Cara Menggunakan</h2>
-                <div class="steps">
-                    <div class="step"><span>1</span><div><h3>Unggah Gambar:</h3><p>Salin gambar (Ctrl+C) lalu tempel di sini (Ctrl+V), atau seret & jatuhkan file.</p></div></div>
-                    <div class="step"><span>2</span><div><h3>Bandingkan:</h3><p>Gunakan slider transparansi dan kontrol lainnya untuk membandingkan.</p></div></div>
-                    <div class="step"><span>3</span><div><h3>Mode Presisi:</h3><p>Aktifkan untuk menyesuaikan skala dan posisi untuk penyejajaran piksel-sempurna.</p></div></div>
-                </div>
-            </div>
-            <div class="image-upload-section">
-                <div class="image-upload-box" id="image1-box">
-                    <h3>Gambar 1</h3><div class="upload-area"><p>Tempel (Ctrl+V) atau seret & jatuhkan</p></div><img id="image1-display" class="image-display" src="" alt="Image 1">
-                </div>
-                <div class="image-upload-box" id="image2-box">
-                    <h3>Gambar 2</h3><div class="upload-area"><p>Tempel (Ctrl+V) atau seret & jatuhkan</p></div><img id="image2-display" class="image-display" src="" alt="Image 2">
-                </div>
-            </div>
-            <div class="comparison-section">
-                <div class="image-comparison-view">
-                    <img id="comparison-image1" class="comparison-image" src="" alt="Comparison Image 1"><img id="comparison-image2" class="comparison-image" src="" alt="Comparison Image 2">
-                    <div class="no-image-placeholder"><p>Unggah dua gambar untuk mulai membandingkan</p></div>
-                </div>
-                <div class="comparison-controls-sidebar">
-                    <h2>Kontrol</h2>
-                    <div class="control-group"><label for="image2-transparency">Transparansi Gambar 2: <span>44%</span></label><input type="range" id="image2-transparency" min="0" max="100" value="44"></div>
-                    <div class="precision-mode"><h3>Mode Presisi</h3><button class="enable-precision-btn">Nonaktif</button></div>
-                    <div class="precision-controls-container">
-                        <div class="control-group"><label for="image1-scale">Skala Gambar 1: <span>100%</span></label><input type="range" id="image1-scale" min="10" max="400" value="100"></div>
-                        <div class="control-group"><label for="image2-scale">Skala Gambar 2: <span>100%</span></label><input type="range" id="image2-scale" min="10" max="400" value="100"></div>
-                        <div class="position-controls">
-                            <label>Posisi Gambar 1 (X/Y)</label><div class="control-row"><input type="range" id="image1-horizontal" min="-200" max="200" value="0" title="Image 1 Horizontal"><input type="range" id="image1-vertical" min="-200" max="200" value="0" title="Image 1 Vertical"></div>
-                            <label>Posisi Gambar 2 (X/Y)</label><div class="control-row"><input type="range" id="image2-horizontal" min="-200" max="200" value="0" title="Image 2 Horizontal"><input type="range" id="image2-vertical" min="-200" max="200" value="0" title="Image 2 Vertical"></div>
-                        </div>
-                    </div>
-                    <div class="controls-footer"><button class="reset-btn">Reset</button><button class="clear-all-btn">Hapus Semua</button></div>
-                </div>
-            </div>
-        </div>
-
-        <div id="SqlFormatter" class="tab-content">
-            <h2>SQL Number Formatter</h2>
-            <p>Masukkan angka yang dipisahkan oleh spasi, koma, atau baris baru.</p>
-            <textarea id="sql-input" class="sql-textarea" placeholder="Contoh: 123 456, 789..."></textarea>
-            <br>
-            <button class="sql-btn" onclick="formatSqlNumbers()">Format ke SQL</button>
-            <button class="sql-btn" onclick="copySqlOutput()">Salin Hasil</button>
-            <br>
-            <textarea id="sql-output" class="sql-textarea" readonly></textarea>
-        </div>
-
-        <div id="WordingCompare" class="tab-content">
-            <div class="adv-compare-container">
-                <div class="pdf-viewer-wrapper" id="pdf-viewer-1">
-                    <div class="upload-prompt"><h3>Dokumen Asli</h3><p>Jatuhkan file di sini atau klik untuk mengunggah</p></div>
-                    <div class="render-container" id="render-container-1"></div>
-                </div>
-                <div class="pdf-viewer-wrapper" id="pdf-viewer-2">
-                    <div class="upload-prompt"><h3>Dokumen Revisi</h3><p>Jatuhkan file di sini atau klik untuk mengunggah</p></div>
-                    <div class="render-container" id="render-container-2"></div>
-                </div>
-                <div class="changes-sidebar">
-                    <div class="changes-header">
-                        <h4>Daftar Perubahan</h4>
-                        <div class="toggle-control">
-                            <label for="scroll-sync-toggle">Sinkronisasi Gulir</label>
-                            <label class="switch"><input type="checkbox" id="scroll-sync-toggle" checked><span class="slider round"></span></label>
-                        </div>
-                    </div>
-                    <div id="changes-list" class="changes-list">
-                        <p class="no-changes-yet">Unggah dua dokumen untuk melihat daftar perubahan di sini.</p>
-                    </div>
-                    <button id="compare-wording-btn" class="main-action-btn" disabled>Bandingkan & Sorot Perbedaan</button>
-                </div>
-            </div>
-            <input type="file" id="file-input-1" class="hidden-file-input" accept=".pdf,.txt,.xlsx,.xls">
-            <input type="file" id="file-input-2" class="hidden-file-input" accept=".pdf,.txt,.xlsx,.xls">
-        </div>
-        
-        <div id="ApiTester" class="tab-content bg-gray-900 text-gray-200">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div class="md:col-span-3">
-                    <header class="mb-6">
-                        <h1 class="text-3xl font-bold text-white">API Test Client</h1>
-                        <p class="text-gray-400">Didukung oleh Gemini AI. Tempelkan cURL untuk mengisi otomatis.</p>
-                    </header>
-                    <div class="bg-gray-800 rounded-lg p-4 mb-6">
-                        <form id="api-form">
-                            <div class="flex flex-col sm:flex-row items-center gap-2 mb-4">
-                                <select id="method" class="w-full sm:w-32 bg-gray-700 border border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                    <option>GET</option>
-                                    <option>POST</option>
-                                    <option>PUT</option>
-                                    <option>PATCH</option>
-                                    <option>DELETE</option>
-                                </select>
-                                <input type="text" id="url" placeholder="Paste cURL command or enter URL here" class="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" required>
-                                <button type="submit" id="send-btn" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-md transition-colors duration-200 flex items-center justify-center">
-                                    <svg id="send-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" /></svg>
-                                    <svg id="loading-spinner" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                                    <span id="send-text">Send</span>
-                                </button>
-                            </div>
-                        </form>
-                        <div>
-                            <div class="border-b border-gray-700"><nav class="flex space-x-4" aria-label="Tabs"><button id="tab-headers-req" class="px-3 py-2 font-medium text-sm rounded-t-md border-b-2 api-tab-active">Headers</button><button id="tab-body-req" class="px-3 py-2 font-medium text-sm rounded-t-md border-b-2 border-transparent hover:border-gray-500 hover:text-gray-300">Body</button></nav></div>
-                            <div id="content-headers-req" class="py-4"><div id="headers-container" class="space-y-2"></div><button id="add-header-btn" class="mt-3 text-sm bg-gray-600 hover:bg-gray-500 text-white font-medium py-1 px-3 rounded-md">+ Add Header</button></div>
-                            <div id="content-body-req" class="py-4 hidden"><div class="flex justify-end mb-2"><button id="beautify-req-btn" class="text-sm bg-gray-600 hover:bg-gray-500 text-white font-medium py-1 px-3 rounded-md">Beautify</button></div><textarea id="request-body" class="w-full h-40 bg-gray-900 text-mono font-mono text-sm p-3 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder='{ "key": "value" }'></textarea></div>
-                        </div>
-                    </div>
-                    <div id="response-section" class="bg-gray-800 rounded-lg p-4 hidden">
-                        <div class="flex justify-between items-center mb-4">
-                             <div class="flex items-center gap-4">
-                                <h2 class="text-xl font-semibold">Response</h2>
-                                <button id="show-gemini-modal-btn" class="text-sm bg-purple-600 hover:bg-purple-700 text-white font-semibold py-1 px-3 rounded-md flex items-center gap-2">
-                                    ✨ Analisis Respons
-                                </button>
-                             </div>
-                             <div class="flex items-center space-x-4 text-sm">
-                                <span id="response-status" class="font-semibold"></span>
-                                <span id="response-time" class="text-gray-400"></span>
-                             </div>
-                        </div>
-                        <div>
-                            <div class="border-b border-gray-700"><nav class="flex space-x-4" aria-label="Tabs"><button id="tab-body-res" class="px-3 py-2 font-medium text-sm rounded-t-md border-b-2 api-tab-active">Body</button><button id="tab-headers-res" class="px-3 py-2 font-medium text-sm rounded-t-md border-b-2 border-transparent hover:border-gray-500 hover:text-gray-300">Headers</button></nav></div>
-                            <div id="content-body-res" class="py-4"><div class="bg-gray-900 rounded-md relative"><div class="absolute top-2 right-2 flex gap-2"><button id="beautify-res-btn" class="text-xs bg-gray-700 hover:bg-gray-600 text-white font-medium py-1 px-2 rounded-md">Beautify</button><button id="copy-res-btn" class="text-xs bg-gray-700 hover:bg-gray-600 text-white font-medium py-1 px-2 rounded-md">Copy</button></div><pre class="w-full h-64 overflow-auto p-3 pt-8 text-sm"><code id="response-body"></code></pre></div></div>
-                            <div id="content-headers-res" class="py-4 hidden"><div class="bg-gray-900 rounded-md p-1"><pre class="w-full h-64 overflow-auto p-3 text-sm"><code id="response-headers"></code></pre></div></div>
-                        </div>
-                    </div>
-                </div>
-                <aside class="md:col-span-1 bg-gray-800 rounded-lg p-4 flex flex-col">
-                    <div class="flex justify-between items-center mb-4">
-                        <h2 class="text-lg font-bold text-white">Riwayat</h2>
-                        <button id="clear-history-btn" class="text-xs text-red-400 hover:text-red-300">Bersihkan</button>
-                    </div>
-                    <div id="history-list" class="flex-grow overflow-y-auto space-y-2 pr-2">
-                        </div>
-                </aside>
-            </div>
-            <div id="gemini-modal" class="fixed inset-0 z-50 items-center justify-center hidden p-4">
-                <div class="bg-gray-800 rounded-lg shadow-xl w-full max-w-3xl mx-auto flex flex-col" style="max-height: 90vh;">
-                    <div class="p-6 border-b border-gray-700">
-                        <h3 class="text-xl font-semibold text-white">✨ Analisis Respons API dengan Gemini</h3>
-                        <p class="text-sm text-gray-400 mt-1">Dapatkan penjelasan, saran, dan contoh kode untuk respons API Anda.</p>
-                    </div>
-                    <div id="gemini-analysis-content" class="p-6 overflow-y-auto flex-grow">
-                         <div id="gemini-prompt-options" class="flex flex-col gap-3">
-                            <button data-prompt-type="explain" class="gemini-prompt-btn w-full text-left p-3 bg-gray-700 hover:bg-gray-600 rounded-lg">
-                                <h4 class="font-semibold">Jelaskan Respons Ini</h4>
-                                <p class="text-sm text-gray-400">Berikan ringkasan sederhana tentang apa arti respons ini.</p>
-                            </button>
-                             <button data-prompt-type="issues" class="gemini-prompt-btn w-full text-left p-3 bg-gray-700 hover:bg-gray-600 rounded-lg">
-                                <h4 class="font-semibold">Identifikasi Potensi Masalah</h4>
-                                <p class="text-sm text-gray-400">Analisis respons untuk kemungkinan error, masalah keamanan, atau perbaikan.</p>
-                            </button>
-                             <button data-prompt-type="code" class="gemini-prompt-btn w-full text-left p-3 bg-gray-700 hover:bg-gray-600 rounded-lg">
-                                <h4 class="font-semibold">Buat Contoh Kode</h4>
-                                <p class="text-sm text-gray-400">Hasilkan contoh kode JavaScript (fetch) untuk menangani respons ini.</p>
-                            </button>
-                        </div>
-                        <div id="gemini-loading" class="text-center py-10 hidden">
-                            <svg class="animate-spin mx-auto h-8 w-8 text-purple-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                            <p class="mt-2 text-gray-400">Gemini sedang berpikir...</p>
-                        </div>
-                        <div id="gemini-result" class="prose prose-invert max-w-none text-gray-300"></div>
-                    </div>
-                    <div class="bg-gray-700 px-6 py-3 flex justify-end gap-3 rounded-b-lg">
-                        <button id="close-gemini-modal-btn" class="bg-gray-600 hover:bg-gray-500 text-white font-semibold px-4 py-2 rounded-md">Tutup</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <main class="main-content">
+            <div class="tool-page active" id="JsonFormatter"></div>
+            <div class="tool-page" id="JsonValueExtractor"></div>
+            <div class="tool-page" id="JsonCompare"></div>
+            <div class="tool-page" id="DataCompare"></div>
+            <div class="tool-page" id="FileSplitter"></div>
+            <div class="tool-page" id="ImageCompare"></div>
+            <div class="tool-page" id="SqlFormatter"></div>
+            <div class="tool-page" id="SqlScriptGenerator"></div>
+            <div class="tool-page" id="WordingCompare"></div>
+            <div class="tool-page" id="DummyImageGenerator"></div>
+            
+            <div class="tool-page" id="DevMenu1"></div>
+            <div class="tool-page" id="DevMenu2"></div>
+            <div class="tool-page" id="DevMenu3"></div>
+            <div class="tool-page" id="DevMenu4"></div>
+            <div class="tool-page" id="DevMenu5"></div>
+            <div class="tool-page" id="DevMenu6"></div>
+            <div class="tool-page" id="DevMenu7"></div>
+            <div class="tool-page" id="DevMenu8"></div>
+            <div class="tool-page" id="DevMenu9"></div>
+            <div class="tool-page" id="DevMenu10"></div>
+        </main>
     </div>
 
+    <script src="JSONFormatter.js"></script>
+    <script src="JSONValueExtractor.js"></script>
+    <script src="JSONCompare.js"></script>
+    <script src="DataCompare.js"></script>
+    <script src="FileSplitter.js"></script>
+    <script src="ImageCompare.js"></script>
+    <script src="SQLNumberFormatter.js"></script>
+    <script src="SQLScriptGenerator.js"></script>
+    <script src="AdvancedDocumentCompare.js"></script>
+    <script src="DummyImageGenerator.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
