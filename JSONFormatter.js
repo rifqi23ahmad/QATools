@@ -46,13 +46,19 @@ function initJsonFormatter() {
     if (!inputArea) return;
 
     const updateLineNumbers = (textArea, lineNumbersContainer) => {
-        const lineCount = textArea.value.split('\n').length;
+        // --- PERUBAHAN 1: Menangani kasus saat textarea mungkin tidak ada ---
+        const text = (textArea.value || textArea.innerHTML);
+        const lineCount = text.split('\n').length;
         lineNumbersContainer.innerHTML = Array.from({ length: lineCount }, (_, i) => `<span>${i + 1}</span>`).join('');
     };
     
     const syncScroll = (source, target) => { target.scrollTop = source.scrollTop; };
     
-    inputArea.addEventListener('input', () => updateLineNumbers(inputArea, inputLineNumbers));
+    // --- PERUBAHAN 2: Memanggil processJson() saat input berubah ---
+    inputArea.addEventListener('input', () => {
+        updateLineNumbers(inputArea, inputLineNumbers);
+        processJson('format'); // Format secara real-time
+    });
     inputArea.addEventListener('scroll', () => syncScroll(inputArea, inputLineNumbers));
     outputArea.addEventListener('scroll', () => syncScroll(outputArea, outputLineNumbers));
 
@@ -71,7 +77,12 @@ function initJsonFormatter() {
 
     const processJson = (action) => {
         const jsonString = inputArea.value.trim();
-        if (!jsonString) { outputArea.innerHTML = '<span class="json-error">Error: Input JSON kosong.</span>'; return; }
+        // --- PERUBAHAN 3: Mengosongkan output jika input kosong ---
+        if (!jsonString) { 
+            outputArea.innerHTML = '';
+            outputLineNumbers.innerHTML = '<span>1</span>';
+            return; 
+        }
         try {
             const jsonObj = JSON.parse(jsonString);
             let formattedJson;
@@ -79,8 +90,7 @@ function initJsonFormatter() {
                 const indentValue = (action === 'minify') ? '' : (indentSelect.value === 'tab' ? '\t' : parseInt(indentSelect.value, 10));
                 formattedJson = JSON.stringify(jsonObj, null, indentValue);
                 outputArea.innerHTML = highlightJsonSyntax(formattedJson);
-                const lineCount = formattedJson.split('\n').length;
-                outputLineNumbers.innerHTML = Array.from({ length: lineCount }, (_, i) => `<span>${i + 1}</span>`).join('');
+                updateLineNumbers(outputArea, outputLineNumbers); // Menggunakan fungsi updateLineNumbers yang sudah ada
             } else if (action === 'validate') {
                 outputArea.innerHTML = '<span style="color: green; font-weight: bold;">JSON valid!</span>';
                 outputLineNumbers.innerHTML = '<span>1</span>';
@@ -101,7 +111,10 @@ function initJsonFormatter() {
         const file = event.target.files[0];
         if (file) {
             const reader = new FileReader();
-            reader.onload = (e) => { inputArea.value = e.target.result; processJson('format'); };
+            reader.onload = (e) => { 
+                inputArea.value = e.target.result; 
+                processJson('format'); // Langsung format setelah upload
+            };
             reader.readAsText(file);
         }
     });

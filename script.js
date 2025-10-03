@@ -18,41 +18,20 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- Initialize All Tool Modules ---
-    initJsonFormatter(); 
-    initJsonValueExtractor();
-    initJsonCompare(); 
-    initDataCompare();
-    initFileSplitter();
-    initImageCompare();
-    initSqlFormatter();
-    initSqlScriptGenerator();
-    initAdvancedCompare();
-    initDummyImageGenerator();
+    // Pastikan hanya fungsi yang file-nya ada yang dipanggil
+    if (typeof initJsonFormatter === 'function') initJsonFormatter();
+    if (typeof initJsonCompare === 'function') initJsonCompare();
+    if (typeof initDataCompare === 'function') initDataCompare();
+    if (typeof initFileSplitter === 'function') initFileSplitter();
+    if (typeof initImageCompare === 'function') initImageCompare();
+    if (typeof initSqlFormatter === 'function') initSqlFormatter();
+    if (typeof initSqlInjector === 'function') initSqlInjector();
+    if (typeof initAdvancedCompare === 'function') initAdvancedCompare();
+    if (typeof initDummyImageGenerator === 'function') initDummyImageGenerator();
+    // Fungsi initApiTester() dihapus karena filenya tidak ada
 
     // Activate the first tool by default
-    document.querySelector('.sidebar-nav .nav-item').click();
-
-    // --- Sidebar Toggle Logic ---
-    const sidebar = document.querySelector('.sidebar');
-    const sidebarToggle = document.getElementById('sidebar-toggle');
-
-    if (sidebarToggle) {
-        sidebarToggle.addEventListener('click', (e) => {
-            e.preventDefault();
-            sidebar.classList.toggle('minimized');
-
-            const icon = sidebarToggle.querySelector('i');
-            const label = sidebarToggle.querySelector('span');
-
-            if (sidebar.classList.contains('minimized')) {
-                icon.classList.remove('fa-chevron-left');
-                icon.classList.add('fa-chevron-right');
-                label.textContent = "Maximize";
-            } else {
-                icon.classList.remove('fa-chevron-right');
-                icon.classList.add('fa-chevron-left');
-                label.textContent = "Minimize";
-            }
-        });
+    if (document.querySelector('.sidebar-nav .nav-item')) {
+        document.querySelector('.sidebar-nav .nav-item').click();
     }
 });

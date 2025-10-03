@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/diff_match_patch/20121119/diff_match_patch.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -24,72 +24,61 @@
             </div>
             <nav class="sidebar-nav">
                 <ul>
-                    <li class="nav-item active" data-tool="JsonFormatter"><a href="#"><i class="fas fa-code fa-fw"></i><span>JSON Formatter</span></a></li>
-                    <li class="nav-item" data-tool="JsonValueExtractor"><a href="#"><i class="fas fa-filter fa-fw"></i><span>JSON Value Extractor</span></a></li>
-                    <li class="nav-item" data-tool="JsonCompare"><a href="#"><i class="fas fa-exchange-alt fa-fw"></i><span>JSON Compare</span></a></li>
-                    <li class="nav-item" data-tool="DataCompare"><a href="#"><i class="fas fa-table-list fa-fw"></i><span>Data Compare</span></a></li>
-                    <li class="nav-item" data-tool="FileSplitter"><a href="#"><i class="fas fa-file-zipper fa-fw"></i><span>File Splitter</span></a></li>
-                    <li class="nav-item" data-tool="ImageCompare"><a href="#"><i class="fas fa-images fa-fw"></i><span>Image Compare</span></a></li>
-                    <li class="nav-item" data-tool="SqlFormatter"><a href="#"><i class="fas fa-database fa-fw"></i><span>SQL Formatter</span></a></li>
-                    <li class="nav-item" data-tool="SqlScriptGenerator"><a href="#"><i class="fas fa-file-code fa-fw"></i><span>SQL Script Gen</span></a></li>
-                    <li class="nav-item" data-tool="WordingCompare"><a href="#"><i class="fas fa-file-alt fa-fw"></i><span>Doc Compare</span></a></li>
-                    <li class="nav-item" data-tool="DummyImageGenerator"><a href="#"><i class="fas fa-file-image fa-fw"></i><span>Dummy File Gen</span></a></li>
-                    
-                    <li class="nav-item nav-item-dev" data-tool="DevMenu1"><a href="#"><i class="fas fa-wrench fa-fw"></i><span>Dev Menu 1</span></a></li>
-                    <li class="nav-item nav-item-dev" data-tool="DevMenu2"><a href="#"><i class="fas fa-wrench fa-fw"></i><span>Dev Menu 2</span></a></li>
-                    <li class="nav-item nav-item-dev" data-tool="DevMenu3"><a href="#"><i class="fas fa-wrench fa-fw"></i><span>Dev Menu 3</span></a></li>
-                    <li class="nav-item nav-item-dev" data-tool="DevMenu4"><a href="#"><i class="fas fa-wrench fa-fw"></i><span>Dev Menu 4</span></a></li>
-                    <li class="nav-item nav-item-dev" data-tool="DevMenu5"><a href="#"><i class="fas fa-wrench fa-fw"></i><span>Dev Menu 5</span></a></li>
-                    <li class="nav-item nav-item-dev" data-tool="DevMenu6"><a href="#"><i class="fas fa-wrench fa-fw"></i><span>Dev Menu 6</span></a></li>
-                    <li class="nav-item nav-item-dev" data-tool="DevMenu7"><a href="#"><i class="fas fa-wrench fa-fw"></i><span>Dev Menu 7</span></a></li>
-                    <li class="nav-item nav-item-dev" data-tool="DevMenu8"><a href="#"><i class="fas fa-wrench fa-fw"></i><span>Dev Menu 8</span></a></li>
-                    <li class="nav-item nav-item-dev" data-tool="DevMenu9"><a href="#"><i class="fas fa-wrench fa-fw"></i><span>Dev Menu 9</span></a></li>
-                    <li class="nav-item nav-item-dev" data-tool="DevMenu10"><a href="#"><i class="fas fa-wrench fa-fw"></i><span>Dev Menu 10</span></a></li>
+                    <li class="nav-item active" data-tool="JsonFormatter">
+                        <a href="#"><i class="fas fa-code fa-fw"></i><span>JSON Formatter</span></a>
+                    </li>
+                    <li class="nav-item" data-tool="JsonCompare">
+                        <a href="#"><i class="fas fa-exchange-alt fa-fw"></i><span>JSON Compare</span></a>
+                    </li>
+                    <li class="nav-item" data-tool="DataCompare">
+                        <a href="#"><i class="fas fa-table-list fa-fw"></i><span>Data Compare</span></a>
+                    </li>
+                     <li class="nav-item" data-tool="FileSplitter">
+                        <a href="#"><i class="fas fa-file-zipper fa-fw"></i><span>File Splitter</span></a>
+                    </li>
+                    <li class="nav-item" data-tool="ImageCompare">
+                        <a href="#"><i class="fas fa-images fa-fw"></i><span>Image Compare</span></a>
+                    </li>
+                    <li class="nav-item" data-tool="SqlFormatter">
+                        <a href="#"><i class="fas fa-database fa-fw"></i><span>SQL Formatter</span></a>
+                    </li>
+                     <li class="nav-item" data-tool="SqlInjector">
+                        <a href="#"><i class="fas fa-syringe fa-fw"></i><span>SQL Injector</span></a>
+                    </li>
+                    <li class="nav-item" data-tool="WordingCompare">
+                        <a href="#"><i class="fas fa-file-alt fa-fw"></i><span>Doc Compare</span></a>
+                    </li>
+                
+                    <li class="nav-item" data-tool="DummyImageGenerator">
+                        <a href="#"><i class="fas fa-file-image fa-fw"></i><span>Dummy File Gen</span></a>
+                    </li>
                 </ul>
             </nav>
-            <div class="sidebar-footer">
-                <a href="#" id="sidebar-toggle">
-                    <i class="fas fa-chevron-left"></i>
-                    <span>Minimize</span>
-                </a>
-            </div>
         </aside>
 
         <main class="main-content">
             <div class="tool-page active" id="JsonFormatter"></div>
-            <div class="tool-page" id="JsonValueExtractor"></div>
             <div class="tool-page" id="JsonCompare"></div>
             <div class="tool-page" id="DataCompare"></div>
             <div class="tool-page" id="FileSplitter"></div>
             <div class="tool-page" id="ImageCompare"></div>
             <div class="tool-page" id="SqlFormatter"></div>
-            <div class="tool-page" id="SqlScriptGenerator"></div>
+            <div class="tool-page" id="SqlInjector"></div>
             <div class="tool-page" id="WordingCompare"></div>
             <div class="tool-page" id="DummyImageGenerator"></div>
-            
-            <div class="tool-page" id="DevMenu1"></div>
-            <div class="tool-page" id="DevMenu2"></div>
-            <div class="tool-page" id="DevMenu3"></div>
-            <div class="tool-page" id="DevMenu4"></div>
-            <div class="tool-page" id="DevMenu5"></div>
-            <div class="tool-page" id="DevMenu6"></div>
-            <div class="tool-page" id="DevMenu7"></div>
-            <div class="tool-page" id="DevMenu8"></div>
-            <div class="tool-page" id="DevMenu9"></div>
-            <div class="tool-page" id="DevMenu10"></div>
         </main>
     </div>
 
     <script src="JSONFormatter.js"></script>
-    <script src="JSONValueExtractor.js"></script>
     <script src="JSONCompare.js"></script>
     <script src="DataCompare.js"></script>
     <script src="FileSplitter.js"></script>
     <script src="ImageCompare.js"></script>
     <script src="SQLNumberFormatter.js"></script>
-    <script src="SQLScriptGenerator.js"></script>
+    <script src="SQLInjector.js"></script>
     <script src="AdvancedDocumentCompare.js"></script>
     <script src="DummyImageGenerator.js"></script>
+    
     <script src="script.js"></script>
 </body>
 </html>
