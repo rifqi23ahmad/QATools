@@ -3,56 +3,64 @@ function initJsonCompare() {
     page.innerHTML = `
         <div class="tool-header">
             <h1>JSON Compare</h1>
-            <p>Bandingkan dua objek JSON dan temukan perbedaannya secara visual.</p>
+            <p>Bandingkan dua objek JSON untuk menemukan perbedaan properti dan nilai secara visual.</p>
         </div>
         <div class="card">
             <div class="grid grid-cols-2">
                 <div>
-                    <h3 style="font-weight: 600; margin-bottom: 0.5rem;">JSON Asli</h3>
+                    <h3 style="font-weight: 600; margin-bottom: 0.5rem;">JSON Asli (Kiri)</h3>
                     <textarea id="json-compare-input1" class="textarea textarea-editor" style="height: 25vh;" placeholder="Tempel JSON pertama..."></textarea>
                 </div>
                 <div>
-                    <h3 style="font-weight: 600; margin-bottom: 0.5rem;">JSON Revisi</h3>
+                    <h3 style="font-weight: 600; margin-bottom: 0.5rem;">JSON Revisi (Kanan)</h3>
                     <textarea id="json-compare-input2" class="textarea textarea-editor" style="height: 25vh;" placeholder="Tempel JSON kedua..."></textarea>
                 </div>
             </div>
             <div style="text-align: center; margin-top: 1.5rem;">
                 <button id="json-compare-btn" class="button primary">Bandingkan Perbedaan</button>
             </div>
-            <hr style="margin: 2rem 0; border-color: var(--card-border);">
-            <div class="grid grid-cols-2">
-                <div class="result-panel">
-                    <div class="result-header" id="diff-header-left">Perbedaan (Asli)</div>
-                    <pre id="json-compare-output-left" class="diff-output"></pre>
+        </div>
+
+        <div id="compare-results-section" class="is-hidden" style="margin-top: 2rem;">
+            <div class="diff-layout">
+                <div class="diff-view">
+                    <div class="diff-pane">
+                        <div class="diff-pane-header">JSON Asli</div>
+                        <pre id="json-compare-output-left" class="diff-output"></pre>
+                    </div>
+                    <div class="diff-pane">
+                        <div class="diff-pane-header">JSON Revisi</div>
+                        <pre id="json-compare-output-right" class="diff-output"></pre>
+                    </div>
                 </div>
-                <div class="result-panel">
-                    <div class="result-header" id="diff-header-right">Perbedaan (Revisi)</div>
-                    <pre id="json-compare-output-right" class="diff-output"></pre>
+                <div class="diff-summary-sidebar">
+                    <h3 id="summary-header">Ringkasan Perubahan</h3>
+                    <div id="summary-list" class="summary-list"></div>
                 </div>
             </div>
         </div>
     `;
 
-    const input1 = document.getElementById('json-compare-input1');
-    const input2 = document.getElementById('json-compare-input2');
-    const compareBtn = document.getElementById('json-compare-btn');
-    const outputLeft = document.getElementById('json-compare-output-left');
-    const outputRight = document.getElementById('json-compare-output-right');
-    const headerLeft = document.getElementById('diff-header-left');
-    const headerRight = document.getElementById('diff-header-right');
+    const input1 = page.querySelector('#json-compare-input1');
+    const input2 = page.querySelector('#json-compare-input2');
+    const compareBtn = page.querySelector('#json-compare-btn');
+    const resultsSection = page.querySelector('#compare-results-section');
+    const outputLeft = page.querySelector('#json-compare-output-left');
+    const outputRight = page.querySelector('#json-compare-output-right');
+    const summaryHeader = page.querySelector('#summary-header');
+    const summaryList = page.querySelector('#summary-list');
 
-    if (!input1) return;
+    const escapeHtml = (text) => text ? text.replace(/</g, '&lt;').replace(/>/g, '&gt;') : '';
 
-    const escapeHtml = (text) => text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-
-    const createLineHtml = (lineNumber, content, type, highlightWords = '') => {
-        let finalContent = highlightWords || escapeHtml(content || '');
-        return `<div class="diff-line ${type}">` +
+    // --- FUNGSI BARU: Menambahkan ID unik untuk target scroll ---
+    const createLineHtml = (pane, lineNumber, content, type, isPreformatted = false) => {
+        const finalContent = isPreformatted ? content : escapeHtml(content);
+        return `<div class="diff-line ${type}" id="diff-${pane}-line-${lineNumber}">` +
                `<div class="line-number">${lineNumber}</div>` +
                `<div class="line-content">${finalContent || '&nbsp;'}</div>` +
                `</div>`;
     };
-    
+
     compareBtn.addEventListener('click', () => {
         let json1, json2;
         try { json1 = JSON.parse(input1.value); } catch (e) { alert(`Error pada JSON Asli: ${e.message}`); return; }
@@ -68,47 +76,79 @@ function initJsonCompare() {
         
         let htmlLeft = '', htmlRight = '';
         let lineNumLeft = 1, lineNumRight = 1;
-        let removals = 0, additions = 0;
+        let changes = [];
 
         for (let i = 0; i < diffs.length; i++) {
             const [op, data] = diffs[i];
-            const lines = data.split('\n').filter(line => line);
+            const lines = data.split('\n').filter(l => l);
+            const nextDiff = (i + 1 < diffs.length) ? diffs[i+1] : null;
 
-            if (op === 0) { // Unchanged
+            if (op === -1 && nextDiff && nextDiff[0] === 1) {
+                const data2 = nextDiff[1];
+                const lines2 = data2.split('\n').filter(l => l);
+                if (lines.length === 1 && lines2.length === 1) {
+                    const wordDiffs = dmp.diff_main(lines[0], lines2[0]);
+                    dmp.diff_cleanupSemantic(wordDiffs);
+                    const leftContent = wordDiffs.map(([op, text]) => op !== 1 ? `<span class="${op === -1 ? 'highlight' : ''}">${escapeHtml(text)}</span>` : '').join('');
+                    const rightContent = wordDiffs.map(([op, text]) => op !== -1 ? `<span class="${op === 1 ? 'highlight' : ''}">${escapeHtml(text)}</span>` : '').join('');
+                    
+                    htmlLeft += createLineHtml('left', lineNumLeft++, leftContent, 'changed', true);
+                    htmlRight += createLineHtml('right', lineNumRight++, rightContent, 'changed', true);
+                    changes.push({ type: 'changed', line: lineNumLeft-1, pane: 'left', text: lines[0] });
+                    i++; continue;
+                }
+            }
+            
+            if (op === 0) {
                 lines.forEach(line => {
-                    htmlLeft += createLineHtml(lineNumLeft++, line, 'context');
-                    htmlRight += createLineHtml(lineNumRight++, line, 'context');
+                    htmlLeft += createLineHtml('left', lineNumLeft++, line, 'context');
+                    htmlRight += createLineHtml('right', lineNumRight++, line, 'context');
                 });
-            } else if (op === -1) { // Deletion
+            } else if (op === -1) {
                 lines.forEach(line => {
-                    htmlLeft += createLineHtml(lineNumLeft++, line, 'removed');
-                    removals++;
+                    htmlLeft += createLineHtml('left', lineNumLeft++, line, 'removed');
+                    htmlRight += createLineHtml('right', lineNumRight++, '&nbsp;', 'placeholder');
                 });
-            } else if (op === 1) { // Insertion
+                changes.push({ type: 'removed', line: lineNumLeft-1, pane: 'left', text: lines[0] });
+            } else if (op === 1) {
                 lines.forEach(line => {
-                    htmlRight += createLineHtml(lineNumRight++, line, 'added');
-                    additions++;
+                    htmlRight += createLineHtml('right', lineNumRight++, line, 'added');
+                    htmlLeft += createLineHtml('left', lineNumLeft++, '&nbsp;', 'placeholder');
                 });
+                changes.push({ type: 'added', line: lineNumRight-1, pane: 'right', text: lines[0] });
             }
         }
         
-        // Pad the shorter column to align lines
-        const leftLines = htmlLeft.split('</div>').length - 1;
-        const rightLines = htmlRight.split('</div>').length - 1;
-        
-        if (leftLines > rightLines) {
-            for(let i = 0; i < leftLines - rightLines; i++) {
-                htmlRight += createLineHtml('&nbsp;', '', 'placeholder');
-            }
-        } else if (rightLines > leftLines) {
-             for(let i = 0; i < rightLines - leftLines; i++) {
-                htmlLeft += createLineHtml('&nbsp;', '', 'placeholder');
-            }
-        }
-
         outputLeft.innerHTML = htmlLeft;
         outputRight.innerHTML = htmlRight;
-        headerLeft.innerHTML = removals > 0 ? `<span style="color: #c0392b;">- ${removals} removals</span>` : 'JSON Asli';
-        headerRight.innerHTML = additions > 0 ? `<span style="color: #27ae60;">+ ${additions} additions</span>` : 'JSON Revisi';
+
+        summaryHeader.textContent = `Ditemukan ${changes.length} perbedaan`;
+        summaryList.innerHTML = changes.map(c => {
+            const cleanText = escapeHtml(c.text.trim().substring(0, 50));
+            return `<div class="summary-list-item item-${c.type} clickable-summary" data-line="${c.line}" data-pane="${c.pane}">
+                        <strong>${c.type.charAt(0).toUpperCase() + c.type.slice(1)}</strong> on line ${c.line}
+                        <code>...${cleanText}...</code>
+                    </div>`;
+        }).join('');
+
+        resultsSection.classList.remove('is-hidden');
+    });
+
+    // --- FUNGSI BARU: Event listener untuk klik pada ringkasan ---
+    summaryList.addEventListener('click', (e) => {
+        const summaryItem = e.target.closest('.clickable-summary');
+        if (!summaryItem) return;
+
+        const line = summaryItem.dataset.line;
+        const pane = summaryItem.dataset.pane;
+        const targetElement = page.querySelector(`#diff-${pane}-line-${line}`);
+
+        if (targetElement) {
+            targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            targetElement.classList.add('line-highlighted');
+            setTimeout(() => {
+                targetElement.classList.remove('line-highlighted');
+            }, 2500);
+        }
     });
 }

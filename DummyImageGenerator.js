@@ -2,45 +2,66 @@ function initDummyImageGenerator() {
     const page = document.getElementById('DummyImageGenerator');
     page.innerHTML = `
         <div class="tool-header">
-            <h1>Dummy Image Generator</h1>
-            <p>Satu file akan dibuat per deskripsi, dengan format acak dari pilihan Anda.</p>
+            <h1>Advanced Dummy File Generator</h1>
+            <p>Buat file dummy (termasuk file korup) dan unduh secara individual.</p>
         </div>
-        <div class="card" style="max-width: 700px; margin: 0 auto;">
-            <div>
-                <label for="text-input" class="label">Deskripsi (satu per baris)</label>
-                <textarea id="text-input" rows="6" class="textarea" placeholder="Contoh:\\nKTP Atas Nama John Doe\\nSurat Kuasa Pengambilan Barang\\nLogo untuk kedai kopi 'Senja Menyapa'"></textarea>
-            </div>
-            <div class="grid grid-cols-2" style="margin-top: 1.5rem;">
+        <div class="card" style="max-width: 800px; margin: 0 auto;">
+            <div class="flex flex-col" style="gap: 2rem;">
+
                 <div>
-                    <label class="label">Pilih Format yang Diizinkan</label>
-                    <div id="format-options" class="grid grid-cols-3" style="gap: 0.5rem;">
-                        <div><input type="checkbox" id="format-png" value="png" class="is-hidden checkbox-input" checked><label for="format-png" class="checkbox-label button secondary">PNG</label></div>
-                        <div><input type="checkbox" id="format-jpg" value="jpg" class="is-hidden checkbox-input"><label for="format-jpg" class="checkbox-label button secondary">JPG</label></div>
-                        <div><input type="checkbox" id="format-pdf" value="pdf" class="is-hidden checkbox-input"><label for="format-pdf" class="checkbox-label button secondary">PDF</label></div>
-                        <div><input type="checkbox" id="format-xlsx" value="xlsx" class="is-hidden checkbox-input"><label for="format-xlsx" class="checkbox-label button secondary">XLSX</label></div>
-                        <div><input type="checkbox" id="format-doc" value="doc" class="is-hidden checkbox-input"><label for="format-doc" class="checkbox-label button secondary">DOC</label></div>
-                        <div><input type="checkbox" id="format-corrupt" value="corrupt" class="is-hidden checkbox-input"><label for="format-corrupt" class="checkbox-label button secondary">Rusak</label></div>
+                    <h3 class="label" style="font-size: 1.1rem; border-bottom: 1px solid var(--card-border); padding-bottom: 0.5rem; margin-bottom: 1rem;">1. Masukkan Deskripsi File</h3>
+                    <textarea id="text-input" rows="6" class="textarea textarea-editor" placeholder="Satu deskripsi per baris...\nSetiap baris akan menjadi satu file."></textarea>
+                </div>
+
+                <div class="grid grid-cols-2" style="gap: 2rem;">
+                    <div>
+                        <h3 class="label" style="font-size: 1.1rem; border-bottom: 1px solid var(--card-border); padding-bottom: 0.5rem; margin-bottom: 1rem;">2. Pilih Format File</h3>
+                        <div id="format-options" class="grid grid-cols-3" style="gap: 0.75rem;">
+                            <div><input type="checkbox" id="format-png" value="png" class="is-hidden checkbox-input" checked><label for="format-png" class="checkbox-label button secondary">PNG</label></div>
+                            <div><input type="checkbox" id="format-jpg" value="jpg" class="is-hidden checkbox-input"><label for="format-jpg" class="checkbox-label button secondary">JPG</label></div>
+                            <div><input type="checkbox" id="format-pdf" value="pdf" class="is-hidden checkbox-input"><label for="format-pdf" class="checkbox-label button secondary">PDF</label></div>
+                            <div><input type="checkbox" id="format-xlsx" value="xlsx" class="is-hidden checkbox-input"><label for="format-xlsx" class="checkbox-label button secondary">XLSX</label></div>
+                            <div><input type="checkbox" id="format-doc" value="doc" class="is-hidden checkbox-input"><label for="format-doc" class="checkbox-label button secondary">DOC</label></div>
+                            <div><input type="checkbox" id="format-corrupt" value="corrupt" class="is-hidden checkbox-input"><label for="format-corrupt" class="checkbox-label button secondary">Rusak</label></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="label" style="font-size: 1.1rem; border-bottom: 1px solid var(--card-border); padding-bottom: 0.5rem; margin-bottom: 1rem;">3. Atur Ukuran (Opsional)</h3>
+                        <select id="size-select" class="select">
+                            <option value="default" selected>Ukuran Default (Kecil)</option>
+                            <option value="<2mb">&lt; 2MB (Acak)</option>
+                            <option value="<5mb">&lt; 5MB (Acak)</option>
+                            <option value=">2mb">&gt; 2MB (Acak)</option>
+                            <option value=">5mb">&gt; 5MB (Acak)</option>
+                            <option value="custom">Ukuran Custom...</option>
+                        </select>
+                        <div id="custom-size-wrapper" class="is-hidden" style="margin-top: 0.75rem;">
+                            <input type="number" id="custom-size-input" class="input" placeholder="Ukuran Custom (MB)">
+                        </div>
                     </div>
                 </div>
-                <div>
-                    <label for="size-select" class="label">Pilih Ukuran (Per File)</label>
-                    <select id="size-select" class="select">
-                        <option value="default" selected>Default</option>
-                        <option value="<2mb">&lt; 2MB (Acak)</option>
-                        <option value="<5mb">&lt; 5MB (Acak)</option>
-                        <option value=">2mb">&gt; 2MB (Acak)</option>
-                        <option value=">5mb">&gt; 5MB (Acak)</option>
-                        <option value="custom">Custom...</option>
+
+                <div id="corrupt-options-wrapper" class="is-hidden">
+                    <h3 class="label" style="font-size: 1.1rem; border-bottom: 1px solid var(--card-border); padding-bottom: 0.5rem; margin-bottom: 1rem;">Pilih Ekstensi untuk File Rusak</h3>
+                    <select id="corrupt-extension-select" class="select">
+                        <option value="pdf">PDF</option>
+                        <option value="jpg">JPG</option>
+                        <option value="png">PNG</option>
+                        <option value="xlsx">XLSX</option>
+                        <option value="doc">DOC</option>
+                        <option value="txt">TXT</option>
                     </select>
-                    <div id="custom-size-wrapper" class="is-hidden" style="margin-top: 0.5rem;">
-                        <input type="number" id="custom-size-input" class="input" placeholder="Ukuran Custom (MB)">
-                    </div>
                 </div>
+
+                <div>
+                    <button id="generate-btn" class="button primary" style="width: 100%; padding: 0.8rem; font-size: 1.1rem;">
+                        <i class="fas fa-file-download" style="margin-right: 0.75rem;"></i> Buat & Unduh File
+                    </button>
+                    <div id="status-area" style="margin-top: 1.5rem; text-align: center; min-height: 24px;"></div>
+                </div>
+
             </div>
-            <div style="margin-top: 2rem;">
-                <button id="generate-btn" class="button primary" style="width: 100%; padding: 0.8rem;">Buat File & Unduh ZIP</button>
-            </div>
-            <div id="status-area" style="margin-top: 1.5rem; text-align: center; min-height: 24px;"></div>
         </div>
     `;
 
@@ -50,225 +71,180 @@ function initDummyImageGenerator() {
     const customSizeWrapper = page.querySelector('#custom-size-wrapper');
     const customSizeInput = page.querySelector('#custom-size-input');
     const statusArea = page.querySelector('#status-area');
+    const corruptCheckbox = page.querySelector('#format-corrupt');
+    const corruptOptionsWrapper = page.querySelector('#corrupt-options-wrapper');
     const { jsPDF } = window.jspdf;
 
     sizeSelect.addEventListener('change', () => {
         customSizeWrapper.classList.toggle('is-hidden', sizeSelect.value !== 'custom');
     });
+    
+    corruptCheckbox.addEventListener('change', () => {
+        corruptOptionsWrapper.classList.toggle('is-hidden', !corruptCheckbox.checked);
+    });
 
     generateBtn.addEventListener('click', handleGeneration);
 
+    function downloadBlob(blob, filename) {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(a.href);
+    }
+
     async function handleGeneration() {
         const prompts = textInput.value.split('\n').map(p => p.trim()).filter(p => p !== '');
-        const selectedFormats = Array.from(page.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
-
+        let selectedFormats = Array.from(page.querySelectorAll('#format-options input[type="checkbox"]:checked')).map(cb => cb.value);
         if (prompts.length === 0) { showStatus('Harap masukkan setidaknya satu deskripsi.', 'error'); return; }
         if (selectedFormats.length === 0) { showStatus('Harap centang setidaknya satu format.', 'error'); return; }
-
         let selectedSize = sizeSelect.value;
         let customSizeMB = (selectedSize === 'custom') ? parseFloat(customSizeInput.value) || 0 : 0;
         if (selectedSize === 'custom' && customSizeMB <= 0) { showStatus('Ukuran custom harus lebih besar dari 0.', 'error'); return; }
         if (customSizeMB > 100) { showStatus('Ukuran custom tidak boleh melebihi 100 MB.', 'error'); return; }
-        
-        const totalFiles = prompts.length;
-        let processedFiles = 0;
         generateBtn.disabled = true;
-        showStatus(`Mempersiapkan ${totalFiles} file...`, 'loading');
-
-        const zip = new JSZip();
+        showStatus(`Mempersiapkan ${prompts.length} file...`, 'loading');
+        if (selectedFormats.length > 1) { selectedFormats = selectedFormats.filter(f => f !== 'corrupt'); }
         let successCount = 0;
-
-        for (const prompt of prompts) {
-            const randomFormat = selectedFormats[Math.floor(Math.random() * selectedFormats.length)];
-            processedFiles++;
-            showStatus(`Memproses ${processedFiles}/${totalFiles}: "${prompt.substring(0, 20)}..."`, 'loading');
-            
+        for (let i = 0; i < prompts.length; i++) {
+            const prompt = prompts[i];
+            const format = selectedFormats.length === 1 ? selectedFormats[0] : selectedFormats[Math.floor(Math.random() * selectedFormats.length)];
+            showStatus(`Memproses ${i + 1}/${prompts.length}: "${prompt.substring(0, 20)}..."`, 'loading');
             try {
-                await addFileToZip(zip, prompt, randomFormat, selectedSize, customSizeMB);
+                const { blob, filename } = await createFile(prompt, format, selectedSize, customSizeMB);
+                downloadBlob(blob, filename);
                 successCount++;
-            } catch (error) {
-                console.error(`Gagal memproses: "${prompt}"`, error);
-            }
+                await new Promise(resolve => setTimeout(resolve, 300));
+            } catch (error) { console.error(`Gagal memproses: "${prompt}"`, error); }
         }
-
-        if (successCount === 0) {
-            showStatus('Gagal memproses semua file.', 'error');
-            generateBtn.disabled = false;
-            return;
-        }
-
-        showStatus('Mengemas file ZIP...', 'loading');
-        try {
-            const content = await zip.generateAsync({ type: "blob" });
-            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(content);
-            a.download = `dummy-files-${timestamp}.zip`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(a.href);
-            showStatus(`Berhasil! ${successCount} file telah diunduh.`, 'success');
-        } catch (error) {
-            showStatus('Gagal membuat file ZIP.', 'error');
-        } finally {
-            generateBtn.disabled = false;
-        }
+        if (successCount > 0) { showStatus(`Berhasil! ${successCount} file telah diunduh.`, 'success'); }
+        else { showStatus('Gagal memproses semua file.', 'error'); }
+        generateBtn.disabled = false;
     }
 
-    function wrapText(context, text, x, y, maxWidth, lineHeight) {
-        const words = text.split(' ');
-        let line = '';
-        let lines = [];
-        for (let n = 0; n < words.length; n++) {
-            const testLine = line + words[n] + ' ';
-            if (context.measureText(testLine).width > maxWidth && n > 0) {
-                lines.push(line);
-                line = words[n] + ' ';
-            } else { line = testLine; }
-        }
-        lines.push(line);
-        let startY = y - ((lines.length - 1) * lineHeight) / 2;
-        for(let i = 0; i < lines.length; i++) {
-            context.fillText(lines[i].trim(), x, startY + (i * lineHeight));
-        }
-        return lines.length;
-    }
-
-    function createStandardTextImage(prompt) {
-        const canvas = document.createElement('canvas');
-        const [width, height] = [1200, 630];
-        canvas.width = width; canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        const bgGradient = ctx.createRadialGradient(width / 2, height / 2, 0, width / 2, height / 2, width / 1.5);
-        bgGradient.addColorStop(0, '#2c3e50'); bgGradient.addColorStop(1, '#1a202c');
-        ctx.fillStyle = bgGradient; ctx.fillRect(0, 0, width, height);
-        
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.1)'; ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)'; ctx.lineWidth = 1.5;
-        ctx.beginPath(); ctx.roundRect(100, 100, width - 200, height - 200, [30]); ctx.fill(); ctx.stroke();
-        
-        const icon = (() => {
-            const p = prompt.toLowerCase();
-            if (p.includes('kopi')) return '☕️'; if (p.includes('dokumen') || p.includes('surat')) return '📄';
-            if (p.includes('ktp') || p.includes('id')) return '💳'; if (p.includes('cinta') || p.includes('love')) return '❤️';
-            if (p.includes('ide')) return '💡'; if (p.includes('musik')) return '🎵';
-            if (p.includes('selamat')) return '🎉'; if (p.includes('uang') || p.includes('bayar')) return '💰';
-            return '✨';
-        })();
-        
-        ctx.fillStyle = 'white'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.font = '150px Inter'; ctx.globalAlpha = 0.9; ctx.fillText(icon, width / 2, height / 2 - 80); ctx.globalAlpha = 1.0;
-        ctx.fillStyle = 'white'; ctx.font = 'bold 80px Inter';
-        ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowOffsetX = 4; ctx.shadowOffsetY = 4; ctx.shadowBlur = 10;
-        wrapText(ctx, prompt, width / 2, height / 2 + 120, width - 300, 90);
-        ctx.shadowColor = 'transparent';
-        return canvas.toDataURL('image/png').split(',')[1];
-    }
-
-    function createHardcodedDocumentImage(prompt) {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        const p = prompt.toLowerCase();
-
-        if (p.includes('ktp') || p.includes('sim')) {
-            const isKTP = !p.includes('sim');
-            canvas.width = 1011; canvas.height = 638;
-            ctx.fillStyle = isKTP ? '#e6f0ff' : '#ffe6e6'; ctx.fillRect(0, 0, 1011, 638);
-            ctx.strokeStyle = isKTP ? '#b3d1ff' : '#ffb3b3'; ctx.lineWidth = 20; ctx.strokeRect(0, 0, 1011, 638);
-            ctx.fillStyle = isKTP ? '#003a8c' : '#a80000'; ctx.textAlign = 'center'; ctx.font = 'bold 50px Inter';
-            ctx.fillText(isKTP ? 'KARTU TANDA PENDUDUK' : 'SURAT IZIN MENGEMUDI', 505, 80);
-            const fields = isKTP ? ['NIK', 'Nama', 'Tempat/Tgl Lahir', 'Alamat', 'Agama'] : ['No. SIM', 'Nama', 'Alamat', 'Pekerjaan'];
-            ctx.textAlign = 'left'; ctx.font = '28px Inter';
-            fields.forEach((field, i) => ctx.fillText(`${field.padEnd(18, ' ')}: [DUMMY DATA]`, 320, 200 + (i * 45)));
-        } else {
-            canvas.width = 800; canvas.height = 1131;
-            ctx.fillStyle = 'white'; ctx.fillRect(0, 0, 800, 1131);
-            ctx.fillStyle = '#333'; ctx.textAlign = 'center'; ctx.font = 'bold 28px Inter';
-            wrapText(ctx, prompt.replace(/\*/g, '').trim().toUpperCase(), 400, 200, 600, 35);
-        }
-        return canvas.toDataURL('image/png').split(',')[1];
-    }
-
-    async function createLargeDummyBlob(targetMB, format, prompt) {
-        const targetBytes = targetMB * 1024 * 1024;
-        const fileInfo = `Deskripsi: ${prompt}\\nTarget Ukuran: ~${targetMB.toFixed(2)} MB`;
-        if (format === 'pdf') {
-            const doc = new jsPDF(); doc.text(fileInfo, 10, 10);
-            const text = 'Dummy text. '.repeat(50); const numPages = Math.ceil(targetBytes / 2500);
-            for (let i = 1; i < numPages; i++) { doc.addPage(); doc.text(`Page ${i + 1}`, 10, 10); doc.text(text, 10, 20); }
-            return doc.output('blob');
-        } else if (['png', 'jpg'].includes(format)) {
-            const canvas = document.createElement('canvas'); const dim = Math.ceil(Math.sqrt(targetBytes / 1.5));
-            canvas.width = dim; canvas.height = dim;
-            const ctx = canvas.getContext('2d');
-            ctx.fillStyle = `rgb(${Math.random()*255}, ${Math.random()*255}, ${Math.random()*255})`;
-            ctx.fillRect(0,0, dim, dim);
-            ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(0, dim/2 - 50, dim, 100);
-            ctx.fillStyle = 'white'; ctx.textAlign = 'center'; ctx.font = `bold ${dim/25}px Inter`;
-            ctx.fillText(prompt, dim / 2, dim / 2);
-            return new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
-        } else {
-            const textData = 'Dummy data. '.repeat(Math.ceil(targetBytes / 12));
-            return new Blob([fileInfo + '\\n\\n' + textData.substring(0, targetBytes)], { type: 'text/plain' });
-        }
-    }
-
-    // --- FUNGSI UTAMA DENGAN LOGIKA YANG DIPERBARUI ---
-    async function addFileToZip(zip, prompt, format, size, customSize) {
+    async function createFile(prompt, format, size, customSize) {
         const cleanPrompt = prompt.replace(/\*/g, '').trim();
-        const safeFilename = cleanPrompt.replace(/[^a-z0-9]/gi, '_').toLowerCase().substring(0, 50) || `file_${Date.now()}`;
-        
+        let safeFilename = cleanPrompt.replace(/[^a-z0-9]/gi, '_').toLowerCase().substring(0, 50) || `file_${Date.now()}`;
+        let blob;
         if (format === 'corrupt') {
-            zip.file(`${safeFilename}_corrupted.txt`, `Corrupted file for: ${prompt}`);
-            return;
+            const corruptExtension = page.querySelector('#corrupt-extension-select').value;
+            safeFilename += `_corrupted.${corruptExtension}`;
+            const corruptSize = 1024; const corruptData = new Uint8Array(corruptSize);
+            crypto.getRandomValues(corruptData);
+            blob = new Blob([corruptData]);
+            return { blob, filename: safeFilename };
         }
-
         const requiresLargeFile = size !== 'default';
-
         if (requiresLargeFile) {
-            // --- JALUR KHUSUS UNTUK FILE UKURAN BESAR ---
             let targetMB;
-            if (size === '<2mb') targetMB = Math.random() * 1.8 + 0.1;   // 0.1MB to 1.9MB
-            else if (size === '<5mb') targetMB = Math.random() * 2.8 + 2.0; // 2.0MB to 4.8MB
-            else if (size === '>2mb') targetMB = Math.random() * 3 + 2.2;   // 2.2MB to 5.2MB
-            else if (size === '>5mb') targetMB = Math.random() * 5 + 5.2;   // 5.2MB to 10.2MB
+            if (size === '<2mb') targetMB = Math.random() * 1.8 + 0.1;
+            else if (size === '<5mb') targetMB = Math.random() * 2.8 + 2.0;
+            else if (size === '>2mb') targetMB = Math.random() * 3 + 2.2;
+            else if (size === '>5mb') targetMB = Math.random() * 5 + 5.2;
             else if (size === 'custom') targetMB = customSize;
-            
-            const blobData = await createLargeDummyBlob(targetMB, format, prompt);
-            zip.file(`${safeFilename}.${format}`, blobData);
-
+            blob = await createLargeDummyBlob(targetMB, format, prompt); // <-- PERBAIKAN PENTING
+            safeFilename += `_(${targetMB.toFixed(2)}MB).${format}`;
         } else {
-            // --- JALUR KHUSUS UNTUK FILE UKURAN DEFAULT (KECIL & PINTAR) ---
-            let base64Data;
-            const docKeywords = ['ktp', 'sim', 'surat', 'laporan', 'faktur', 'invoice', 'dokumen'];
-            if (docKeywords.some(k => cleanPrompt.toLowerCase().includes(k))) {
-                base64Data = createHardcodedDocumentImage(cleanPrompt);
-            } else {
-                base64Data = createStandardTextImage(cleanPrompt);
-            }
-
+            const base64Data = createIntelligentImage(cleanPrompt);
+            safeFilename += `.${format}`;
             if (format === 'pdf') {
                 const img = new Image();
                 await new Promise(r => { img.onload = r; img.src = 'data:image/png;base64,' + base64Data; });
                 const doc = new jsPDF({ orientation: img.width > img.height ? 'l' : 'p', unit: 'px', format: [img.width, img.height] });
                 doc.addImage(img, 'PNG', 0, 0, img.width, img.height);
-                zip.file(`${safeFilename}.pdf`, doc.output('blob'));
+                blob = doc.output('blob');
             } else if (['png', 'jpg'].includes(format)) {
-                zip.file(`${safeFilename}.${format}`, base64Data, { base64: true });
-            } else {
-                zip.file(`${safeFilename}.${format}`, `Dummy file for: ${prompt}`);
-            }
+                blob = await (await fetch('data:image/png;base64,' + base64Data)).blob();
+            } else { blob = new Blob([`Dummy file for: ${prompt}`], {type: "text/plain"}); }
         }
+        return { blob, filename: safeFilename };
     }
 
-    function showStatus(message, type = 'idle') {
-        let content = '';
-        let color = (type === 'success') ? 'var(--success-color)' : (type === 'error') ? 'var(--danger-color)' : 'var(--text-secondary)';
-        if (type === 'loading') {
-            content = `<div class="flex items-center justify-center"><div class="loader-spinner" style="margin-right: 0.75rem;"></div><span style="color:${color};">${message}</span></div>`;
+    // --- FUNGSI PENGHASIL BLOB BESAR YANG DIPERBAIKI ---
+    async function createLargeDummyBlob(targetMB, format, prompt) {
+        const targetBytes = targetMB * 1024 * 1024;
+        if (format === 'pdf') {
+            const doc = new jsPDF();
+            doc.text(`Dummy PDF for "${prompt}"`, 10, 10);
+            const text = 'Dummy text for padding file size. '.repeat(100);
+            const numPages = Math.max(1, Math.ceil(targetBytes / 2500));
+            for (let i = 1; i < numPages; i++) {
+                doc.addPage();
+                doc.text(`Page ${i + 1}`, 10, 10);
+                doc.text(text, 10, 20);
+            }
+            return doc.output('blob');
+        } else if (['png', 'jpg'].includes(format)) {
+            const canvas = document.createElement('canvas');
+            const estimatedPixels = targetBytes / 3;
+            const dim = Math.ceil(Math.sqrt(estimatedPixels));
+            canvas.width = dim; canvas.height = dim;
+            const ctx = canvas.getContext('2d');
+            const imageData = ctx.createImageData(dim, dim);
+            const data = imageData.data;
+            for (let i = 0; i < data.length; i += 4) {
+                data[i] = Math.random() * 255;
+                data[i + 1] = Math.random() * 255;
+                data[i + 2] = Math.random() * 255;
+                data[i + 3] = 255;
+            }
+            ctx.putImageData(imageData, 0, 0);
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+            ctx.fillRect(0, dim / 2 - 50, dim, 100);
+            ctx.fillStyle = 'white';
+            ctx.textAlign = 'center';
+            ctx.font = `bold ${Math.max(20, dim / 25)}px Inter`;
+            ctx.fillText(prompt, dim / 2, dim / 2);
+            return new Promise(resolve => canvas.toBlob(resolve, `image/${format}`, 0.9));
         } else {
-            content = `<span style="font-weight: 500; color:${color};">${message}</span>`;
+            const textData = 'Dummy data for file size padding. '.repeat(Math.ceil(targetBytes / 35));
+            return new Blob([textData.substring(0, targetBytes)], { type: 'text/plain' });
         }
+    }
+    
+    // --- (Fungsi-fungsi lain di bawah ini tidak ada perubahan) ---
+    function createIntelligentImage(prompt) {
+        const canvas = document.createElement('canvas');
+        const p_lower = prompt.toLowerCase();
+        let config = { width: 1200, height: 800, bgColor: '#f0f4f8', textColor: '#334e68', title: prompt.toUpperCase(), type: 'GENERIC', icon: '📄' };
+        if (p_lower.includes('ktp') || p_lower.includes('sim')) { config = {...config, width: 1011, height: 638, bgColor: '#e6f0ff', type: 'KTP/SIM', icon: '💳' }; } 
+        else if (p_lower.includes('faktur') || p_lower.includes('invoice')) { config = {...config, type: 'FAKTUR', icon: '🧾'}; } 
+        else if (p_lower.includes('laporan keuangan')) { config = {...config, type: 'LAPORAN', icon: '📊'}; } 
+        else if (p_lower.includes('surat kuasa')) { config = {...config, type: 'SURAT', icon: '✍️'}; }
+        canvas.width = config.width; canvas.height = config.height;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = config.bgColor; ctx.fillRect(0, 0, config.width, config.height);
+        ctx.strokeStyle = '#dbe9f5'; ctx.strokeRect(20, 20, config.width - 40, config.height - 40);
+        ctx.fillStyle = config.textColor; ctx.font = `bold ${config.width / 25}px Inter`;
+        ctx.textAlign = 'center'; ctx.fillText(config.title, config.width / 2, config.height * 0.15);
+        ctx.textAlign = 'left'; ctx.font = `${config.width / 50}px Inter`;
+        if (config.type === 'KTP/SIM') {
+            const isKTP = !p_lower.includes('sim');
+            const fields = isKTP ? ['NIK', 'Nama', 'Tempat/Tgl Lahir', 'Alamat', 'Agama'] : ['No. SIM', 'Nama', 'Alamat', 'Pekerjaan'];
+            fields.forEach((field, i) => { ctx.fillText(`${field.padEnd(18, ' ')}: [DUMMY DATA GENERATED]`, config.width * 0.1, config.height * 0.35 + (i * 50)); });
+            const photoBoxSize = config.width * 0.2;
+            ctx.strokeRect(config.width * 0.7, config.height * 0.3, photoBoxSize, photoBoxSize * 1.25);
+            ctx.fillText("Pas Foto", config.width * 0.7 + photoBoxSize / 2, config.height * 0.3 + (photoBoxSize*1.25)/2);
+        } else if (config.type === 'FAKTUR') {
+            const items = [['Barang A', 2, 150000], ['Barang B', 1, 350000], ['Barang C', 5, 50000]]; let yPos = config.height * 0.35;
+            ctx.font = `bold ${config.width / 50}px Inter`; ctx.fillText("Deskripsi", config.width * 0.1, yPos); ctx.fillText("Jumlah", config.width * 0.6, yPos); ctx.fillText("Harga", config.width * 0.8, yPos);
+            yPos += 50; ctx.font = `${config.width / 50}px Inter`;
+            items.forEach(([item, qty, price]) => { ctx.fillText(item, config.width * 0.1, yPos); ctx.fillText(qty.toString(), config.width * 0.6, yPos); ctx.fillText(price.toLocaleString('id-ID'), config.width * 0.8, yPos); yPos += 40; });
+            ctx.font = `bold ${config.width / 45}px Inter`; ctx.fillText("TOTAL: Rp 900.000", config.width*0.6, yPos + 50);
+        } else { const dummyText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent laoreet, nunc ut faucibus sodales, enim magna placerat enim, a pulvinar est nunc vel lorem. Quisque hendrerit, quam et sodales molestie, velit purus fringilla sem, ac faucibus eros odio et augue."; wrapText(ctx, dummyText, config.width/2, config.height/2 + 20, config.width*0.8, 40); }
+        return canvas.toDataURL('image/png').split(',')[1];
+    }
+    function wrapText(context, text, x, y, maxWidth, lineHeight) {
+        const words = text.split(' '); let line = ''; context.textAlign = 'left'; let currentY = y - (Math.ceil(context.measureText(text).width / maxWidth) * lineHeight / 2);
+        for (let n = 0; n < words.length; n++) { const testLine = line + words[n] + ' '; if (context.measureText(testLine).width > maxWidth && n > 0) { context.fillText(line, x - maxWidth/2, currentY); line = words[n] + ' '; currentY += lineHeight; } else { line = testLine; } }
+        context.fillText(line, x-maxWidth/2, currentY);
+    }
+    function showStatus(message, type = 'idle') {
+        let content = ''; let color = (type === 'success') ? 'var(--success-color)' : (type === 'error') ? 'var(--danger-color)' : 'var(--text-secondary)';
+        if (type === 'loading') { content = `<div class="flex items-center justify-center"><div class="loader-spinner" style="margin-right: 0.75rem;"></div><span style="color:${color};">${message}</span></div>`; } 
+        else { content = `<span style="font-weight: 500; color:${color};">${message}</span>`; }
         statusArea.innerHTML = content;
     }
 }

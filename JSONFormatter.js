@@ -45,67 +45,71 @@ function initJsonFormatter() {
 
     if (!inputArea) return;
 
-    const updateLineNumbers = (textArea, lineNumbersContainer) => {
-        // --- PERUBAHAN 1: Menangani kasus saat textarea mungkin tidak ada ---
-        const text = (textArea.value || textArea.innerHTML);
+    const updateLineNumbers = (element, lineNumbersContainer) => {
+        const text = element.tagName === 'TEXTAREA' ? element.value : element.textContent;
         const lineCount = text.split('\n').length;
         lineNumbersContainer.innerHTML = Array.from({ length: lineCount }, (_, i) => `<span>${i + 1}</span>`).join('');
     };
     
     const syncScroll = (source, target) => { target.scrollTop = source.scrollTop; };
     
-    // --- PERUBAHAN 2: Memanggil processJson() saat input berubah ---
     inputArea.addEventListener('input', () => {
         updateLineNumbers(inputArea, inputLineNumbers);
-        processJson('format'); // Format secara real-time
+        processJson('format');
     });
     inputArea.addEventListener('scroll', () => syncScroll(inputArea, inputLineNumbers));
     outputArea.addEventListener('scroll', () => syncScroll(outputArea, outputLineNumbers));
 
-
+    // --- FUNGSI PEWARNAAN SINTAKS YANG DIAKTIFKAN KEMBALI ---
     function highlightJsonSyntax(jsonString) {
         if (!jsonString) return '';
+        // Escape HTML entities untuk keamanan
         jsonString = jsonString.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        // Regex untuk menemukan token JSON dan membungkusnya dengan span
         return jsonString.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, (match) => {
             let cls = 'json-number';
-            if (/^"/.test(match)) { cls = /:$/.test(match) ? 'json-key' : 'json-string'; }
-            else if (/true|false/.test(match)) { cls = 'json-boolean'; }
-            else if (/null/.test(match)) { cls = 'json-null'; }
+            if (/^"/.test(match)) {
+                cls = /:$/.test(match) ? 'json-key' : 'json-string';
+            } else if (/true|false/.test(match)) {
+                cls = 'json-boolean';
+            } else if (/null/.test(match)) {
+                cls = 'json-null';
+            }
             return `<span class="${cls}">${match}</span>`;
         });
     }
 
     const processJson = (action) => {
         const jsonString = inputArea.value.trim();
-        // --- PERUBAHAN 3: Mengosongkan output jika input kosong ---
         if (!jsonString) { 
             outputArea.innerHTML = '';
-            outputLineNumbers.innerHTML = '<span>1</span>';
+            updateLineNumbers(outputArea, outputLineNumbers);
             return; 
         }
         try {
             const jsonObj = JSON.parse(jsonString);
-            let formattedJson;
             if (action === 'format' || action === 'minify') {
                 const indentValue = (action === 'minify') ? '' : (indentSelect.value === 'tab' ? '\t' : parseInt(indentSelect.value, 10));
-                formattedJson = JSON.stringify(jsonObj, null, indentValue);
+                const formattedJson = JSON.stringify(jsonObj, null, indentValue);
+                // Menggunakan fungsi pewarnaan sintaks
                 outputArea.innerHTML = highlightJsonSyntax(formattedJson);
-                updateLineNumbers(outputArea, outputLineNumbers); // Menggunakan fungsi updateLineNumbers yang sudah ada
+
             } else if (action === 'validate') {
-                outputArea.innerHTML = '<span style="color: green; font-weight: bold;">JSON valid!</span>';
-                outputLineNumbers.innerHTML = '<span>1</span>';
+                outputArea.innerHTML = '<span style="color: #48bb78; font-weight: bold;">JSON valid!</span>';
             }
         } catch (e) {
             outputArea.innerHTML = `<span class="json-error">Error: JSON tidak valid.\n${e.message}</span>`;
-            outputLineNumbers.innerHTML = '<span>1</span>';
         }
-        updateLineNumbers(inputArea, inputLineNumbers);
+        updateLineNumbers(outputArea, outputLineNumbers);
     };
 
     formatBtn.addEventListener('click', () => processJson('format'));
     minifyBtn.addEventListener('click', () => processJson('minify'));
     validateBtn.addEventListener('click', () => processJson('validate'));
-    copyBtn.addEventListener('click', () => navigator.clipboard.writeText(outputArea.textContent).then(() => alert('Hasil disalin!'), () => alert('Gagal menyalin.')));
+    copyBtn.addEventListener('click', () => {
+        if(!outputArea.textContent) return;
+        navigator.clipboard.writeText(outputArea.textContent).then(() => alert('Hasil disalin!'), () => alert('Gagal menyalin.'))
+    });
     uploadBtn.addEventListener('click', () => fileInput.click());
     fileInput.addEventListener('change', (event) => {
         const file = event.target.files[0];
@@ -113,7 +117,8 @@ function initJsonFormatter() {
             const reader = new FileReader();
             reader.onload = (e) => { 
                 inputArea.value = e.target.result; 
-                processJson('format'); // Langsung format setelah upload
+                updateLineNumbers(inputArea, inputLineNumbers);
+                processJson('format');
             };
             reader.readAsText(file);
         }
@@ -131,5 +136,6 @@ function initJsonFormatter() {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
     });
+    
     updateLineNumbers(inputArea, inputLineNumbers);
 }

@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof initSqlInjector === 'function') initSqlInjector();
     if (typeof initAdvancedCompare === 'function') initAdvancedCompare();
     if (typeof initDummyImageGenerator === 'function') initDummyImageGenerator();
-    // Fungsi initApiTester() dihapus karena filenya tidak ada
+ 
 
     // Activate the first tool by default
     if (document.querySelector('.sidebar-nav .nav-item')) {
