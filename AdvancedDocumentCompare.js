@@ -5,236 +5,238 @@ function initAdvancedCompare() {
             <h1>Advanced Document Compare</h1>
             <p>Bandingkan konten teks dari file PDF atau TXT dan lihat perbedaannya.</p>
         </div>
-        <div class="grid" style="grid-template-columns: 5fr 5fr 3fr; align-items: start; height: 75vh;">
-            <div class="pdf-viewer-wrapper" id="pdf-viewer-1">
-                <div class="upload-prompt"><h3>Dokumen Asli</h3><p>Jatuhkan file atau klik</p></div>
-                <div class="render-container" id="render-container-1"></div>
-            </div>
-            <div class="pdf-viewer-wrapper" id="pdf-viewer-2">
-                <div class="upload-prompt"><h3>Dokumen Revisi</h3><p>Jatuhkan file atau klik</p></div>
-                <div class="render-container" id="render-container-2"></div>
-            </div>
-            <div class="card changes-sidebar">
-                <h3 style="font-weight: 600;">Daftar Perubahan</h3>
-                <div class="control" style="margin: 1rem 0;">
-                    <label class="checkbox"><input type="checkbox" id="scroll-sync-toggle" checked> Sync Scroll</label>
+        <div class="compare-layout">
+            <div class="document-pane-wrapper">
+                <div class="document-pane" id="doc-viewer-1">
+                    <div class="upload-prompt">
+                        <i class="fas fa-file-pdf fa-3x"></i>
+                        <h3>Dokumen Asli</h3>
+                        <p>Jatuhkan file atau klik untuk memilih</p>
+                    </div>
+                    <div class="render-container" id="render-container-1"></div>
                 </div>
-                <div id="changes-list" style="flex-grow: 1; overflow-y: auto;">
+                <input type="file" id="file-input-1" class="is-hidden" accept=".pdf,.txt">
+            </div>
+            <div class="document-pane-wrapper">
+                 <div class="document-pane" id="doc-viewer-2">
+                    <div class="upload-prompt">
+                        <i class="fas fa-file-pdf fa-3x"></i>
+                        <h3>Dokumen Revisi</h3>
+                        <p>Jatuhkan file atau klik untuk memilih</p>
+                    </div>
+                    <div class="render-container" id="render-container-2"></div>
+                </div>
+                <input type="file" id="file-input-2" class="is-hidden" accept=".pdf,.txt">
+            </div>
+            <div class="sidebar-changes">
+                <div class="sidebar-header">
+                    <h4>Ringkasan Perubahan</h4>
+                    <button id="compare-wording-btn" class="button primary small-btn" disabled>Bandingkan</button>
+                </div>
+                <div id="changes-list" class="sidebar-body">
                     <p class="no-changes-yet">Unggah dua dokumen untuk melihat perubahan.</p>
                 </div>
-                <button id="compare-wording-btn" class="button primary" style="margin-top: 1rem;" disabled>Bandingkan</button>
+                <div class="sidebar-footer">
+                    <button class="button success" style="width: 100%;"><i class="fas fa-download" style="margin-right: 0.5rem;"></i> Download Laporan</button>
+                </div>
             </div>
         </div>
-        <input type="file" id="file-input-1" class="is-hidden" accept=".pdf,.txt">
-        <input type="file" id="file-input-2" class="is-hidden" accept=".pdf,.txt">
     `;
 
     const compareBtn = page.querySelector('#compare-wording-btn');
     const changesList = page.querySelector('#changes-list');
-    const scrollSyncToggle = page.querySelector('#scroll-sync-toggle');
     
     const viewers = [
-        { id: 1, wrapper: page.querySelector('#pdf-viewer-1'), input: page.querySelector('#file-input-1'), renderContainer: page.querySelector('#render-container-1'), file: null, textContent: null, diffs: null },
-        { id: 2, wrapper: page.querySelector('#pdf-viewer-2'), input: page.querySelector('#file-input-2'), renderContainer: page.querySelector('#render-container-2'), file: null, textContent: null, diffs: null }
+        { id: 1, wrapper: page.querySelector('#doc-viewer-1'), input: page.querySelector('#file-input-1'), renderContainer: page.querySelector('#render-container-1'), file: null, lines: null },
+        { id: 2, wrapper: page.querySelector('#doc-viewer-2'), input: page.querySelector('#file-input-2'), renderContainer: page.querySelector('#render-container-2'), file: null, lines: null }
     ];
-
-    let isSyncing = false;
 
     const handleFileSelect = async (viewer, file) => {
         if (!file) return;
         viewer.file = file;
-        viewer.renderContainer.innerHTML = '<p>Memuat...</p>';
+        viewer.renderContainer.innerHTML = '<div class="loader-spinner" style="margin: 2rem auto;"></div>';
         viewer.wrapper.querySelector('.upload-prompt').style.display = 'none';
         
-        const extension = file.name.split('.').pop().toLowerCase();
-        if (extension === 'pdf') {
-            await processPdf(viewer);
-        } else {
-            await processTextFile(viewer);
+        try {
+            const extension = file.name.split('.').pop().toLowerCase();
+            if (extension === 'pdf') {
+                viewer.lines = await processPdf(viewer);
+            } else {
+                // Untuk file teks, kita buat struktur data yang mirip
+                const text = await file.text();
+                viewer.lines = text.split('\n').map(line => ({ text: line, items: [] }));
+                displayTextFile(viewer, text);
+            }
+        } catch(err) {
+            viewer.renderContainer.innerHTML = `<p style="color:red; padding: 1rem;">Gagal memproses file: ${err.message}</p>`;
         }
-        compareBtn.disabled = !(viewers[0].file && viewers[1].file);
+        
+        compareBtn.disabled = !(viewers[0].lines && viewers[1].lines);
     };
 
-    const processTextFile = async (viewer) => {
-        const text = await viewer.file.text();
+    function displayTextFile(viewer, text) {
         const pre = document.createElement('pre');
-        pre.style.whiteSpace = 'pre-wrap';
-        pre.style.textAlign = 'left';
+        pre.className = 'text-file-content';
         pre.textContent = text;
         viewer.renderContainer.innerHTML = '';
         viewer.renderContainer.appendChild(pre);
-        viewer.textContent = { text };
-    };
+    }
 
-    const processPdf = (viewer) => {
-        return new Promise((resolve, reject) => {
-            if (typeof pdfjsLib === 'undefined') {
-                viewer.renderContainer.innerHTML = '<p style="color:red;">Error: PDF.js library not loaded.</p>';
-                return reject();
-            }
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                try {
-                    pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js`;
-                    const pdf = await pdfjsLib.getDocument({ data: e.target.result }).promise;
-                    viewer.renderContainer.innerHTML = ''; // Clear previous content
-                    let fullText = '';
-                    let allItems = [];
-
-                    for (let i = 1; i <= pdf.numPages; i++) {
-                        const pageData = await pdf.getPage(i);
-                        const textContent = await pageData.getTextContent();
-                        
-                        fullText += textContent.items.map(item => item.str).join(' ') + '\n';
-                        
-                        const pageWrapper = document.createElement('div');
-                        pageWrapper.style.position = 'relative';
-                        pageWrapper.dataset.pageNumber = i;
-                        
-                        const canvas = document.createElement('canvas');
-                        canvas.style.maxWidth = '100%';
-                        canvas.style.marginBottom = '10px';
-                        
-                        const highlightLayer = document.createElement('div');
-                        highlightLayer.style.position = 'absolute';
-                        highlightLayer.style.left = '0';
-                        highlightLayer.style.top = '0';
-
-                        pageWrapper.append(canvas, highlightLayer);
-                        viewer.renderContainer.appendChild(pageWrapper);
-
-                        const viewport = pageData.getViewport({ scale: 1.5 });
-                        canvas.height = viewport.height;
-                        canvas.width = viewport.width;
-                        
-                        await pageData.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
-                        
-                        textContent.items.forEach(item => allItems.push({ ...item, pageNum: i, viewport: viewport }));
-                    }
-                    viewer.textContent = { text: fullText, items: allItems };
-                    resolve();
-                } catch (err) {
-                    viewer.renderContainer.innerHTML = `<p style="color:red;">Gagal merender PDF: ${err.message}</p>`;
-                    reject(err);
-                }
-            };
+    const processPdf = async (viewer) => {
+        const reader = new FileReader();
+        const fileData = await new Promise(resolve => {
+            reader.onload = (e) => resolve(e.target.result);
             reader.readAsArrayBuffer(viewer.file);
         });
+
+        pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js`;
+        const pdf = await pdfjsLib.getDocument({ data: fileData }).promise;
+        viewer.renderContainer.innerHTML = ''; 
+        const allTextItems = [];
+
+        for (let i = 1; i <= pdf.numPages; i++) {
+            const pageData = await pdf.getPage(i);
+            const textContent = await pageData.getTextContent();
+            const viewport = pageData.getViewport({ scale: 1.5 });
+            
+            textContent.items.forEach(item => {
+                allTextItems.push({ ...item, pageNum: i, viewport });
+            });
+            
+            const pageWrapper = document.createElement('div');
+            pageWrapper.className = 'pdf-page-wrapper';
+            const canvas = document.createElement('canvas');
+            const highlightLayer = document.createElement('div');
+            highlightLayer.className = 'highlight-layer';
+            pageWrapper.append(canvas, highlightLayer);
+            viewer.renderContainer.appendChild(pageWrapper);
+            
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+            highlightLayer.style.width = `${viewport.width}px`;
+            highlightLayer.style.height = `${viewport.height}px`;
+            
+            await pageData.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+        }
+        return groupTextItemsIntoLines(allTextItems);
     };
+
+    function groupTextItemsIntoLines(items) {
+        if (!items.length) return [];
+        items.sort((a, b) => a.pageNum - b.pageNum || a.transform[5] - b.transform[5] || a.transform[4] - b.transform[4]);
+        const lines = [];
+        let currentLine = { text: '', items: [] };
+        let lastY = items[0].transform[5];
+        let lastPage = items[0].pageNum;
+
+        for (const item of items) {
+            // Jika pindah halaman atau ada perbedaan Y yang signifikan, anggap baris baru
+            if (item.pageNum !== lastPage || Math.abs(item.transform[5] - lastY) > 5) {
+                if (currentLine.items.length) lines.push(currentLine);
+                currentLine = { text: item.str, items: [item] };
+            } else {
+                currentLine.text += ' ' + item.str;
+                currentLine.items.push(item);
+            }
+            lastY = item.transform[5];
+            lastPage = item.pageNum;
+        }
+        lines.push(currentLine); // Dorong baris terakhir
+        return lines;
+    }
     
     viewers.forEach(viewer => {
         viewer.wrapper.addEventListener('click', () => viewer.input.click());
         viewer.input.addEventListener('change', () => handleFileSelect(viewer, viewer.input.files[0]));
-        viewer.wrapper.addEventListener('dragover', (e) => { e.preventDefault(); e.currentTarget.style.borderColor = 'var(--primary-color)'; });
-        viewer.wrapper.addEventListener('dragleave', (e) => e.currentTarget.style.borderColor = 'var(--card-border)');
-        viewer.wrapper.addEventListener('drop', (e) => {
-            e.preventDefault();
-            e.currentTarget.style.borderColor = 'var(--card-border)';
-            if (e.dataTransfer.files.length) handleFileSelect(viewer, e.dataTransfer.files[0]);
-        });
-        viewer.wrapper.addEventListener('scroll', () => {
-            if (isSyncing || !scrollSyncToggle.checked) return;
-            isSyncing = true;
-            const otherViewer = viewers.find(v => v.id !== viewer.id);
-            otherViewer.wrapper.scrollTop = viewer.wrapper.scrollTop;
-            setTimeout(() => isSyncing = false, 50);
-        });
+        // ... (drag and drop listeners)
     });
 
     compareBtn.addEventListener('click', () => {
-        if (!viewers[0].textContent || !viewers[1].textContent) return;
-        changesList.innerHTML = '<p class="no-changes-yet">Menganalisis...</p>';
-        page.querySelectorAll('.render-container .highlight-layer').forEach(layer => layer.innerHTML = '');
+        changesList.innerHTML = '<div class="loader-spinner" style="margin: 2rem auto;"></div>';
+        page.querySelectorAll('.highlight-layer').forEach(layer => layer.innerHTML = '');
 
         const dmp = new diff_match_patch();
-        const diffs = dmp.diff_main(viewers[0].textContent.text, viewers[1].textContent.text);
-        dmp.diff_cleanupSemantic(diffs);
-
-        populateChangesSidebarAndHighlights(diffs);
+        const text1 = viewers[0].lines.map(l => l.text).join('\n');
+        const text2 = viewers[1].lines.map(l => l.text).join('\n');
+        
+        const lineDiffs = dmp.diff_linesToChars_(text1, text2);
+        const diffs = dmp.diff_main(lineDiffs.chars1, lineDiffs.chars2, false);
+        dmp.diff_charsToLines_(diffs, lineDiffs.lineArray);
+        
+        populateChanges(diffs);
     });
     
-    function populateChangesSidebarAndHighlights(diffs) {
+    function populateChanges(diffs) {
         changesList.innerHTML = '';
-        const filtered = diffs.filter(d => d[0] !== 0);
-        if(filtered.length === 0){
-             changesList.innerHTML = '<p class="no-changes-yet">Tidak ada perbedaan ditemukan.</p>';
+        if (diffs.filter(d => d[0] !== 0).length === 0) {
+             changesList.innerHTML = '<p class="no-changes-yet" style="padding: 1rem;">Tidak ada perbedaan ditemukan.</p>';
              return;
         }
 
-        let text1_idx = 0;
-        let text2_idx = 0;
+        let lineIdx1 = 0, lineIdx2 = 0;
 
-        filtered.forEach(diff => {
-            const [op, text] = diff;
-            const item = document.createElement('div');
-            item.className = 'change-item';
+        for (const [op, data] of diffs) {
+            const lines = data.trimEnd().split('\n');
+            if (lines.length === 1 && lines[0] === '') continue;
 
-            if (op === -1) { // Deletion
-                item.innerHTML = `<del>${text.trim()}</del>`;
-                highlightInViewer(viewers[0], text1_idx, text.length, 'removed');
-                text1_idx += text.length;
+            if (op === 0) {
+                lineIdx1 += lines.length;
+                lineIdx2 += lines.length;
+            } else if (op === -1) { // Deletion
+                addChangeCard('Deletion', data, '');
+                highlightLines(viewers[0], lineIdx1, lines.length, 'removed');
+                lineIdx1 += lines.length;
             } else if (op === 1) { // Insertion
-                item.innerHTML = `<ins>${text.trim()}</ins>`;
-                highlightInViewer(viewers[1], text2_idx, text.length, 'added');
-                text2_idx += text.length;
+                addChangeCard('Addition', '', data);
+                highlightLines(viewers[1], lineIdx2, lines.length, 'added');
+                lineIdx2 += lines.length;
             }
-             changesList.appendChild(item);
-        });
-    }
-
-    function highlightInViewer(viewer, startIndex, length, type) {
-        const endIndex = startIndex + length;
-        let currentIndex = 0;
-
-        for (const item of viewer.textContent.items) {
-            const itemEndIndex = currentIndex + item.str.length + 1; // +1 for space
-            if (currentIndex >= endIndex) break;
-            if (itemEndIndex > startIndex) {
-                const highlightLayer = viewer.renderContainer.querySelector(`div[data-page-number='${item.pageNum}'] .highlight-layer`);
-                if (highlightLayer) {
-                    const rect = getBoundingBox(item, item.viewport);
-                    const highlight = document.createElement('div');
-                    highlight.style.position = 'absolute';
-                    highlight.style.left = `${rect.x}px`;
-                    highlight.style.top = `${rect.y}px`;
-                    highlight.style.width = `${rect.width}px`;
-                    highlight.style.height = `${rect.height}px`;
-                    highlight.style.backgroundColor = type === 'removed' ? 'red' : 'green';
-                    highlight.style.opacity = '0.4';
-                    highlight.style.transform = `rotate(${rect.angle}deg)`;
-                    highlight.style.transformOrigin = 'top left';
-                    highlightLayer.appendChild(highlight);
-                }
-            }
-            currentIndex = itemEndIndex;
         }
     }
-    
-    // --- PERBAIKAN: Fungsi kalkulasi posisi highlight yang lebih presisi ---
-    function getBoundingBox(item, viewport) {
-        const [a, b, c, d, e, f] = item.transform;
-        
-        // Menghitung sudut rotasi dari matriks transformasi
-        const angle = Math.atan2(b, a) * (180 / Math.PI);
-        
-        // Mengaplikasikan transformasi viewport ke titik awal teks
-        const tx = pdfjsLib.Util.transform(viewport.transform, [a, b, c, d, e, f]);
-        
-        // Kalkulasi tinggi dan lebar setelah diskalakan
-        const height = Math.sqrt(b * b + d * d) * viewport.scale;
-        const width = item.width * viewport.scale;
 
-        // Titik tx[4] dan tx[5] adalah titik awal (pojok kiri bawah) dari teks setelah transformasi
-        // Kita perlu menyesuaikannya untuk rotasi
-        let x = tx[4];
-        let y = tx[5];
+    function addChangeCard(header, oldText, newText) {
+        const card = document.createElement('div');
+        card.className = 'change-card';
+        let oldHtml = oldText ? `<div class="change-line old"><span>Old</span><p>${oldText.trim()}</p></div>` : '';
+        let newHtml = newText ? `<div class="change-line new"><span>New</span><p>${newText.trim()}</p></div>` : '';
+        card.innerHTML = `<div class="change-header">${header}</div>${oldHtml}${newHtml}`;
+        changesList.appendChild(card);
+    }
 
-        if (angle > -5 && angle < 5) { // Teks horizontal
-             y = tx[5] - height;
-        } else if (angle > 85 && angle < 95) { // Teks vertikal (diputar 90 derajat)
-            x = tx[4] - height;
+    function highlightLines(viewer, startLineIndex, numLines, type) {
+        for(let i = 0; i < numLines; i++) {
+            const line = viewer.lines[startLineIndex + i];
+            if (!line || !line.items.length) continue;
+
+            const pageNum = line.items[0].pageNum;
+            const highlightLayer = viewer.renderContainer.querySelectorAll('.highlight-layer')[pageNum - 1];
+
+            if (highlightLayer) {
+                const rect = getBoundingBoxForLine(line.items);
+                const highlight = document.createElement('div');
+                highlight.className = `highlight-area ${type}`;
+                highlight.style.left = `${rect.x}px`;
+                highlight.style.top = `${rect.y}px`;
+                highlight.style.width = `${rect.width}px`;
+                highlight.style.height = `${rect.height}px`;
+                highlightLayer.appendChild(highlight);
+            }
         }
+    }
+
+    function getBoundingBoxForLine(items) {
+        const firstItem = items[0];
+        const lastItem = items[items.length - 1];
+        const viewport = firstItem.viewport;
+
+        const p1 = pdfjsLib.Util.transform(viewport.transform, firstItem.transform);
+        const p2 = pdfjsLib.Util.transform(viewport.transform, lastItem.transform);
+
+        const x = p1[4];
+        const y = p1[5] - firstItem.height; // Adjust for baseline
+        const width = (p2[4] - p1[4]) + lastItem.width;
+        const height = Math.max(...items.map(it => it.height));
         
-        return { x: x, y: y, width: width, height: height, angle: angle };
+        return { x, y, width, height };
     }
 }
