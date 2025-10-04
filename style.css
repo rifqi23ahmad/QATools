@@ -1,4 +1,11 @@
-/* --- CSS Reset & Global Styles --- */
+/*
+================================================================
+*
+* 1. GLOBAL & RESET STYLES
+* (Definisi Root, Reset CSS, Body, Font)
+*
+================================================================
+*/
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
     --sidebar-bg: #1a202c;
@@ -27,7 +34,14 @@ body {
 }
 .is-hidden { display: none !important; }
 
-/* --- App Layout --- */
+/*
+================================================================
+*
+* 2. APP LAYOUT & NAVIGATION
+* (Sidebar, Main Content, Halaman Tool)
+*
+================================================================
+*/
 .app-layout { display: flex; min-height: 100vh; }
 .sidebar { width: 260px; background-color: var(--sidebar-bg); color: var(--sidebar-text); display: flex; flex-direction: column; transition: width 0.3s ease; flex-shrink: 0; height: 100vh; position: sticky; top: 0; }
 .sidebar-header { padding: 1.5rem; display: flex; align-items: center; gap: 0.75rem; font-size: 1.5rem; font-weight: 700; color: var(--sidebar-active-text); border-bottom: 1px solid #2d3748; }
@@ -42,7 +56,14 @@ body {
 .tool-page.active { display: block; animation: fadeIn 0.5s ease; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-/* --- General Components --- */
+/*
+================================================================
+*
+* 3. GENERAL COMPONENTS
+* (Card, Header, Button, Input, Label, Grid, Flex)
+*
+================================================================
+*/
 .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); padding: 2rem; }
 .tool-header { margin-bottom: 2rem; }
 .tool-header h1 { font-size: 2rem; font-weight: 700; color: var(--text-primary); }
@@ -68,15 +89,28 @@ body {
 .label { font-weight: 600; margin-bottom: 0.5rem; display: block;}
 .textarea-editor { font-family: var(--monospace-font); }
 
-/* --- Gaya SPESIFIK untuk JSON Formatter --- */
+/*
+================================================================
+*
+* 4. TOOL-SPECIFIC STYLES
+*
+================================================================
+*/
+
+/* --- 4.1. JSON Formatter --- */
 #JsonFormatter .editor-wrapper { display: flex; border: 1px solid #444; border-radius: 6px; background-color: #2d3748; height: 70vh; overflow: hidden; }
 #JsonFormatter .line-numbers { width: 50px; padding: 12px 10px 12px 0; font-size: 0.9em; text-align: right; color: #a0aec0; background-color: #1a202c; user-select: none; border-right: 1px solid #444; }
 #JsonFormatter .line-numbers span { display: block; }
 #JsonFormatter .textarea-editor, #JsonFormatter .pre-editor { width: 100%; border: none !important; box-shadow: none !important; resize: none; padding: 12px; background: transparent; color: #e2e8f0; overflow-y: scroll; }
 #JsonFormatter .textarea-editor::placeholder { color: #718096; }
-#JsonFormatter .json-key { color: #63b3ed; } #JsonFormatter .json-string { color: #f6ad55; } #JsonFormatter .json-number { color: #d53f8c; } #JsonFormatter .json-boolean { color: #f56565; } #JsonFormatter .json-null { color: #f56565; } #JsonFormatter .json-error { color: #fbd38d; font-weight: bold;}
+#JsonFormatter .json-key { color: #63b3ed; } 
+#JsonFormatter .json-string { color: #f6ad55; } 
+#JsonFormatter .json-number { color: #d53f8c; } 
+#JsonFormatter .json-boolean { color: #f56565; } 
+#JsonFormatter .json-null { color: #b794f4; }
+#JsonFormatter .json-error { color: #fbd38d; font-weight: bold;}
 
-/* --- Gaya SPESIFIK untuk JSON Compare --- */
+/* --- 4.2. JSON Compare --- */
 #JsonCompare .textarea-editor { background-color: #fdfdfd; border: 1px solid var(--card-border); color: var(--text-primary); }
 #JsonCompare .diff-layout { display: grid; grid-template-columns: 3fr 1fr; gap: 1.5rem; align-items: start; }
 #JsonCompare .diff-view { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--card-border); border-radius: 8px; overflow: hidden; }
@@ -106,8 +140,7 @@ body {
 #JsonCompare .summary-list code { font-size: 0.8rem; color: var(--text-secondary); display: block; margin-top: 0.25rem; }
 #JsonCompare .line-highlighted { transition: background-color 0.5s ease-in-out; background-color: #ebf8ff !important; }
 
-/* --- Gaya untuk Alat Lain (Kembali Normal) --- */
-.textarea-editor { background-color: #fdfdfd; color: var(--text-primary); border: 1px solid var(--card-border); }
+/* --- 4.3. Universal Tool Styles (Table, Image Upload, etc.) --- */
 .results-table-wrapper { overflow-x: auto; }
 .results-table { width: 100%; border-collapse: collapse; }
 .results-table th, .results-table td { padding: 0.75rem 1rem; border: 1px solid var(--card-border); text-align: left; font-size: 0.9rem;}
@@ -121,7 +154,14 @@ body {
 .pdf-viewer-wrapper { height: 75vh; overflow: auto; background-color: #edf2f7; border-radius: 8px; padding: 1rem; cursor: pointer; border: 1px solid var(--card-border); }
 .upload-prompt { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; color: var(--text-secondary); }
 
-/* --- PERBAIKAN: Aturan untuk Tombol Checkbox di Dummy File Generator --- */
+/*
+================================================================
+*
+* 5. HELPER & MISCELLANEOUS STYLES
+* (Checkbox, Spinner, Toast Notifications)
+*
+================================================================
+*/
 .checkbox-label {
     width: 100%;
     transition: all 0.2s ease-in-out;

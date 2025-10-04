@@ -51,21 +51,21 @@ function initJsonFormatter() {
         lineNumbersContainer.innerHTML = Array.from({ length: lineCount }, (_, i) => `<span>${i + 1}</span>`).join('');
     };
     
-    const syncScroll = (source, target) => { target.scrollTop = source.scrollTop; };
+    // --- PERBAIKAN: Menggunakan CSS Transform untuk sinkronisasi scroll yang lebih baik ---
+    const syncScroll = (source, target) => { 
+        target.style.transform = `translateY(-${source.scrollTop}px)`;
+    };
     
     inputArea.addEventListener('input', () => {
         updateLineNumbers(inputArea, inputLineNumbers);
-        processJson('format');
+        // Menghapus auto-format yang tidak efisien, biarkan tombol yang bekerja
     });
     inputArea.addEventListener('scroll', () => syncScroll(inputArea, inputLineNumbers));
     outputArea.addEventListener('scroll', () => syncScroll(outputArea, outputLineNumbers));
 
-    // --- FUNGSI PEWARNAAN SINTAKS YANG DIAKTIFKAN KEMBALI ---
     function highlightJsonSyntax(jsonString) {
         if (!jsonString) return '';
-        // Escape HTML entities untuk keamanan
         jsonString = jsonString.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        // Regex untuk menemukan token JSON dan membungkusnya dengan span
         return jsonString.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, (match) => {
             let cls = 'json-number';
             if (/^"/.test(match)) {
@@ -91,7 +91,6 @@ function initJsonFormatter() {
             if (action === 'format' || action === 'minify') {
                 const indentValue = (action === 'minify') ? '' : (indentSelect.value === 'tab' ? '\t' : parseInt(indentSelect.value, 10));
                 const formattedJson = JSON.stringify(jsonObj, null, indentValue);
-                // Menggunakan fungsi pewarnaan sintaks
                 outputArea.innerHTML = highlightJsonSyntax(formattedJson);
 
             } else if (action === 'validate') {
