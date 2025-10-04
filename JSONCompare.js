@@ -52,7 +52,6 @@ function initJsonCompare() {
 
     const escapeHtml = (text) => text ? text.replace(/</g, '&lt;').replace(/>/g, '&gt;') : '';
 
-    // --- FUNGSI BARU: Menambahkan ID unik untuk target scroll ---
     const createLineHtml = (pane, lineNumber, content, type, isPreformatted = false) => {
         const finalContent = isPreformatted ? content : escapeHtml(content);
         return `<div class="diff-line ${type}" id="diff-${pane}-line-${lineNumber}">` +
@@ -92,10 +91,11 @@ function initJsonCompare() {
                     const leftContent = wordDiffs.map(([op, text]) => op !== 1 ? `<span class="${op === -1 ? 'highlight' : ''}">${escapeHtml(text)}</span>` : '').join('');
                     const rightContent = wordDiffs.map(([op, text]) => op !== -1 ? `<span class="${op === 1 ? 'highlight' : ''}">${escapeHtml(text)}</span>` : '').join('');
                     
+                    changes.push({ type: 'changed', lineLeft: lineNumLeft, lineRight: lineNumRight, text: lines[0] });
                     htmlLeft += createLineHtml('left', lineNumLeft++, leftContent, 'changed', true);
                     htmlRight += createLineHtml('right', lineNumRight++, rightContent, 'changed', true);
-                    changes.push({ type: 'changed', line: lineNumLeft-1, pane: 'left', text: lines[0] });
-                    i++; continue;
+                    i++; 
+                    continue;
                 }
             }
             
@@ -106,16 +106,16 @@ function initJsonCompare() {
                 });
             } else if (op === -1) {
                 lines.forEach(line => {
+                    changes.push({ type: 'removed', lineLeft: lineNumLeft, lineRight: lineNumRight, text: line });
                     htmlLeft += createLineHtml('left', lineNumLeft++, line, 'removed');
                     htmlRight += createLineHtml('right', lineNumRight++, '&nbsp;', 'placeholder');
                 });
-                changes.push({ type: 'removed', line: lineNumLeft-1, pane: 'left', text: lines[0] });
             } else if (op === 1) {
-                lines.forEach(line => {
+                 lines.forEach(line => {
+                    changes.push({ type: 'added', lineLeft: lineNumLeft, lineRight: lineNumRight, text: line });
                     htmlRight += createLineHtml('right', lineNumRight++, line, 'added');
                     htmlLeft += createLineHtml('left', lineNumLeft++, '&nbsp;', 'placeholder');
                 });
-                changes.push({ type: 'added', line: lineNumRight-1, pane: 'right', text: lines[0] });
             }
         }
         
@@ -125,8 +125,9 @@ function initJsonCompare() {
         summaryHeader.textContent = `Ditemukan ${changes.length} perbedaan`;
         summaryList.innerHTML = changes.map(c => {
             const cleanText = escapeHtml(c.text.trim().substring(0, 50));
-            return `<div class="summary-list-item item-${c.type} clickable-summary" data-line="${c.line}" data-pane="${c.pane}">
-                        <strong>${c.type.charAt(0).toUpperCase() + c.type.slice(1)}</strong> on line ${c.line}
+            const lineDisplay = c.type === 'added' ? c.lineRight : c.lineLeft;
+            return `<div class="summary-list-item item-${c.type} clickable-summary" data-line-left="${c.lineLeft}" data-line-right="${c.lineRight}">
+                        <strong>${c.type.charAt(0).toUpperCase() + c.type.slice(1)}</strong> on line ${lineDisplay}
                         <code>...${cleanText}...</code>
                     </div>`;
         }).join('');
@@ -134,21 +135,27 @@ function initJsonCompare() {
         resultsSection.classList.remove('is-hidden');
     });
 
-    // --- FUNGSI BARU: Event listener untuk klik pada ringkasan ---
     summaryList.addEventListener('click', (e) => {
         const summaryItem = e.target.closest('.clickable-summary');
         if (!summaryItem) return;
 
-        const line = summaryItem.dataset.line;
-        const pane = summaryItem.dataset.pane;
-        const targetElement = page.querySelector(`#diff-${pane}-line-${line}`);
+        const lineLeft = summaryItem.dataset.lineLeft;
+        const lineRight = summaryItem.dataset.lineRight;
 
-        if (targetElement) {
-            targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            targetElement.classList.add('line-highlighted');
-            setTimeout(() => {
-                targetElement.classList.remove('line-highlighted');
-            }, 2500);
-        }
+        const targetLeft = page.querySelector(`#diff-left-line-${lineLeft}`);
+        const targetRight = page.querySelector(`#diff-right-line-${lineRight}`);
+
+        const highlightElement = (element) => {
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                element.classList.add('line-highlighted');
+                setTimeout(() => {
+                    element.classList.remove('line-highlighted');
+                }, 2500);
+            }
+        };
+
+        highlightElement(targetLeft);
+        highlightElement(targetRight);
     });
 }
