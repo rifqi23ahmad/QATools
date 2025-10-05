@@ -43,12 +43,33 @@ body {
 ================================================================
 */
 .app-layout { display: flex; min-height: 100vh; }
-.sidebar { width: 260px; background-color: var(--sidebar-bg); color: var(--sidebar-text); display: flex; flex-direction: column; transition: width 0.3s ease; flex-shrink: 0; height: 100vh; position: sticky; top: 0; }
-.sidebar-header { padding: 1.5rem; display: flex; align-items: center; gap: 0.75rem; font-size: 1.5rem; font-weight: 700; color: var(--sidebar-active-text); border-bottom: 1px solid #2d3748; }
+.sidebar { 
+    width: 260px; 
+    background-color: var(--sidebar-bg); 
+    color: var(--sidebar-text); 
+    display: flex; 
+    flex-direction: column; 
+    transition: width 0.3s ease; 
+    flex-shrink: 0; 
+    height: 100vh; 
+    position: sticky; 
+    top: 0; 
+}
+.sidebar-header { 
+    padding: 1.5rem; 
+    display: flex; 
+    align-items: center; 
+    gap: 0.75rem; 
+    font-size: 1.5rem; 
+    font-weight: 700; 
+    color: var(--sidebar-active-text); 
+    border-bottom: 1px solid #2d3748; 
+    flex-shrink: 0;
+}
 .sidebar-nav { overflow-y: auto; flex-grow: 1; }
 .sidebar-nav ul { list-style: none; }
-.sidebar-nav .nav-item a { display: flex; align-items: center; gap: 1rem; padding: 1rem 1.5rem; text-decoration: none; color: var(--sidebar-text); font-weight: 500; transition: all 0.2s ease; }
-.sidebar-nav .nav-item a i { font-size: 1.1rem; }
+.sidebar-nav .nav-item a { display: flex; align-items: center; gap: 1rem; padding: 1rem 1.5rem; text-decoration: none; color: var(--sidebar-text); font-weight: 500; transition: all 0.2s ease; white-space: nowrap; }
+.sidebar-nav .nav-item a i { font-size: 1.1rem; flex-shrink: 0; }
 .sidebar-nav .nav-item a:hover { background-color: var(--sidebar-hover-bg); color: var(--sidebar-active-text); }
 .sidebar-nav .nav-item.active a { background-color: var(--sidebar-active-bg); color: var(--sidebar-active-text); border-left: 3px solid var(--primary-color); padding-left: calc(1.5rem - 3px); }
 .main-content { flex-grow: 1; padding: 2.5rem; overflow-y: auto; }
@@ -403,4 +424,69 @@ body {
     border-top: 1px solid #2d3748;
     margin-top: 0.5rem;
     padding-top: 1.5rem;
+}
+
+/* --- Sidebar Footer & Toggle --- */
+.sidebar-footer {
+    padding: 1rem;
+    border-top: 1px solid #2d3748;
+    flex-shrink: 0;
+    display: flex;
+    justify-content: flex-end;
+}
+#sidebar-toggle {
+    background-color: var(--sidebar-active-bg);
+    color: var(--sidebar-text);
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s, transform 0.3s ease;
+}
+#sidebar-toggle:hover {
+    background-color: var(--sidebar-hover-bg);
+    color: var(--sidebar-active-text);
+}
+
+/* --- Minimized Sidebar Styles --- */
+.sidebar.minimized {
+    width: 80px;
+}
+.sidebar.minimized .sidebar-header h2,
+.sidebar.minimized .sidebar-nav .nav-item span,
+.sidebar.minimized .nav-group-header span {
+    opacity: 0;
+    width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+}
+.sidebar.minimized .sidebar-header {
+    justify-content: center;
+}
+.sidebar.minimized .nav-item a {
+    justify-content: center;
+    padding: 1rem;
+}
+.sidebar.minimized .nav-item.active a {
+    padding-left: calc(1rem - 3px);
+}
+.sidebar.minimized .nav-group-header {
+    padding: 1rem 0;
+    text-align: center;
+    border-top: 1px solid #2d3748;
+}
+.sidebar.minimized .nav-group-header::before {
+    content: "...";
+    font-weight: bold;
+    color: var(--sidebar-text);
+}
+.sidebar.minimized .sidebar-footer {
+    justify-content: center;
+}
+.sidebar.minimized #sidebar-toggle i {
+    transform: rotate(180deg);
 }

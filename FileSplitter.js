@@ -5,7 +5,7 @@ function initFileSplitter() {
             <h1>Pemecah File Handal</h1>
             <p>Unggah file .csv atau .txt, tentukan jumlah bagian, dan unduh hasilnya.</p>
         </div>
-        <div class="card" style="max-width: 600px; margin: 0 auto;">
+        <div class="card">
             <div class="flex flex-col" style="gap: 1.5rem;">
                 <div>
                     <label class="label">1. Pilih File Anda</label>

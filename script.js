@@ -1,6 +1,23 @@
 document.addEventListener('DOMContentLoaded', () => {
     const navItems = document.querySelectorAll('.sidebar-nav .nav-item');
     const toolPages = document.querySelectorAll('.tool-page');
+    const sidebar = document.querySelector('.sidebar');
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+
+    // --- Sidebar Toggle Logic ---
+    if (sidebarToggle && sidebar) {
+        // Check localStorage for saved state
+        if (localStorage.getItem('sidebarMinimized') === 'true') {
+            sidebar.classList.add('minimized');
+        }
+
+        sidebarToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('minimized');
+            // Save state to localStorage
+            const isMinimized = sidebar.classList.contains('minimized');
+            localStorage.setItem('sidebarMinimized', isMinimized);
+        });
+    }
 
     // --- Navigation Logic ---
     navItems.forEach(item => {
@@ -18,7 +35,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- Initialize All Tool Modules ---
-    // Pastikan hanya fungsi yang file-nya ada yang dipanggil
     if (typeof initJsonFormatter === 'function') initJsonFormatter();
     if (typeof initJsonCompare === 'function') initJsonCompare();
     if (typeof initJsonValueExtractor === 'function') initJsonValueExtractor();

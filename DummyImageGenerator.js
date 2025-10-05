@@ -5,7 +5,7 @@ function initDummyImageGenerator() {
             <h1>Advanced Dummy File Generator</h1>
             <p>Buat file dummy (termasuk file korup) dan unduh secara individual.</p>
         </div>
-        <div class="card" style="max-width: 800px; margin: 0 auto;">
+        <div class="card">
             <div class="flex flex-col" style="gap: 2rem;">
 
                 <div>
@@ -104,23 +104,37 @@ function initDummyImageGenerator() {
         let customSizeMB = (selectedSize === 'custom') ? parseFloat(customSizeInput.value) || 0 : 0;
         if (selectedSize === 'custom' && customSizeMB <= 0) { showStatus('Ukuran custom harus lebih besar dari 0.', 'error'); return; }
         if (customSizeMB > 100) { showStatus('Ukuran custom tidak boleh melebihi 100 MB.', 'error'); return; }
+        
         generateBtn.disabled = true;
         showStatus(`Mempersiapkan ${prompts.length} file...`, 'loading');
-        if (selectedFormats.length > 1) { selectedFormats = selectedFormats.filter(f => f !== 'corrupt'); }
+        
+        if (selectedFormats.length > 1) { 
+            selectedFormats = selectedFormats.filter(f => f !== 'corrupt'); 
+        }
+
         let successCount = 0;
         for (let i = 0; i < prompts.length; i++) {
             const prompt = prompts[i];
             const format = selectedFormats.length === 1 ? selectedFormats[0] : selectedFormats[Math.floor(Math.random() * selectedFormats.length)];
+            
             showStatus(`Memproses ${i + 1}/${prompts.length}: "${prompt.substring(0, 20)}..."`, 'loading');
+            
             try {
                 const { blob, filename } = await createFile(prompt, format, selectedSize, customSizeMB);
                 downloadBlob(blob, filename);
                 successCount++;
-                await new Promise(resolve => setTimeout(resolve, 300));
-            } catch (error) { console.error(`Gagal memproses: "${prompt}"`, error); }
+                await new Promise(resolve => setTimeout(resolve, 300)); // Delay for smoother download experience
+            } catch (error) { 
+                console.error(`Gagal memproses: "${prompt}"`, error); 
+            }
         }
-        if (successCount > 0) { showStatus(`Berhasil! ${successCount} file telah diunduh.`, 'success'); }
-        else { showStatus('Gagal memproses semua file.', 'error'); }
+
+        if (successCount > 0) { 
+            showStatus(`Berhasil! ${successCount} file telah diunduh.`, 'success'); 
+        } else { 
+            showStatus('Gagal memproses semua file.', 'error'); 
+        }
+        
         generateBtn.disabled = false;
     }
 
@@ -128,14 +142,17 @@ function initDummyImageGenerator() {
         const cleanPrompt = prompt.replace(/\*/g, '').trim();
         let safeFilename = cleanPrompt.replace(/[^a-z0-9]/gi, '_').toLowerCase().substring(0, 50) || `file_${Date.now()}`;
         let blob;
+
         if (format === 'corrupt') {
             const corruptExtension = page.querySelector('#corrupt-extension-select').value;
             safeFilename += `_corrupted.${corruptExtension}`;
-            const corruptSize = 1024; const corruptData = new Uint8Array(corruptSize);
-            crypto.getRandomValues(corruptData);
+            const corruptSize = 1024; 
+            const corruptData = new Uint8Array(corruptSize);
+            crypto.getRandomValues(corruptData); // Fill with random bytes
             blob = new Blob([corruptData]);
             return { blob, filename: safeFilename };
         }
+
         const requiresLargeFile = size !== 'default';
         if (requiresLargeFile) {
             let targetMB;
@@ -144,7 +161,8 @@ function initDummyImageGenerator() {
             else if (size === '>2mb') targetMB = Math.random() * 3 + 2.2;
             else if (size === '>5mb') targetMB = Math.random() * 5 + 5.2;
             else if (size === 'custom') targetMB = customSize;
-            blob = await createLargeDummyBlob(targetMB, format, prompt); // <-- PERBAIKAN PENTING
+            
+            blob = await createLargeDummyBlob(targetMB, format, prompt);
             safeFilename += `_(${targetMB.toFixed(2)}MB).${format}`;
         } else {
             const base64Data = createIntelligentImage(cleanPrompt);
@@ -157,19 +175,21 @@ function initDummyImageGenerator() {
                 blob = doc.output('blob');
             } else if (['png', 'jpg'].includes(format)) {
                 blob = await (await fetch('data:image/png;base64,' + base64Data)).blob();
-            } else { blob = new Blob([`Dummy file for: ${prompt}`], {type: "text/plain"}); }
+            } else { 
+                // For DOCX and XLSX, create a simple text blob as a placeholder
+                blob = new Blob([`Dummy file for: ${prompt}`], {type: "application/octet-stream"}); 
+            }
         }
         return { blob, filename: safeFilename };
     }
 
-    // --- FUNGSI PENGHASIL BLOB BESAR YANG DIPERBAIKI ---
     async function createLargeDummyBlob(targetMB, format, prompt) {
         const targetBytes = targetMB * 1024 * 1024;
         if (format === 'pdf') {
             const doc = new jsPDF();
             doc.text(`Dummy PDF for "${prompt}"`, 10, 10);
             const text = 'Dummy text for padding file size. '.repeat(100);
-            const numPages = Math.max(1, Math.ceil(targetBytes / 2500));
+            const numPages = Math.max(1, Math.ceil(targetBytes / 2500)); // Rough estimation
             for (let i = 1; i < numPages; i++) {
                 doc.addPage();
                 doc.text(`Page ${i + 1}`, 10, 10);
@@ -178,41 +198,48 @@ function initDummyImageGenerator() {
             return doc.output('blob');
         } else if (['png', 'jpg'].includes(format)) {
             const canvas = document.createElement('canvas');
-            const estimatedPixels = targetBytes / 3;
+            // Estimate dimensions based on 3 bytes per pixel (RGB)
+            const estimatedPixels = targetBytes / 3; 
             const dim = Math.ceil(Math.sqrt(estimatedPixels));
             canvas.width = dim; canvas.height = dim;
             const ctx = canvas.getContext('2d');
             const imageData = ctx.createImageData(dim, dim);
             const data = imageData.data;
+            // Fill with random noise for size
             for (let i = 0; i < data.length; i += 4) {
-                data[i] = Math.random() * 255;
-                data[i + 1] = Math.random() * 255;
-                data[i + 2] = Math.random() * 255;
-                data[i + 3] = 255;
+                data[i] = Math.random() * 255;     // R
+                data[i + 1] = Math.random() * 255; // G
+                data[i + 2] = Math.random() * 255; // B
+                data[i + 3] = 255;                 // A
             }
             ctx.putImageData(imageData, 0, 0);
+
+            // Add text on top of the noise
             ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
             ctx.fillRect(0, dim / 2 - 50, dim, 100);
             ctx.fillStyle = 'white';
             ctx.textAlign = 'center';
             ctx.font = `bold ${Math.max(20, dim / 25)}px Inter`;
             ctx.fillText(prompt, dim / 2, dim / 2);
+
             return new Promise(resolve => canvas.toBlob(resolve, `image/${format}`, 0.9));
         } else {
+            // Generic text-based large file for doc, xlsx, etc.
             const textData = 'Dummy data for file size padding. '.repeat(Math.ceil(targetBytes / 35));
-            return new Blob([textData.substring(0, targetBytes)], { type: 'text/plain' });
+            return new Blob([textData.substring(0, targetBytes)], { type: 'application/octet-stream' });
         }
     }
     
-    // --- (Fungsi-fungsi lain di bawah ini tidak ada perubahan) ---
     function createIntelligentImage(prompt) {
         const canvas = document.createElement('canvas');
         const p_lower = prompt.toLowerCase();
-        let config = { width: 1200, height: 800, bgColor: '#f0f4f8', textColor: '#334e68', title: prompt.toUpperCase(), type: 'GENERIC', icon: '📄' };
-        if (p_lower.includes('ktp') || p_lower.includes('sim')) { config = {...config, width: 1011, height: 638, bgColor: '#e6f0ff', type: 'KTP/SIM', icon: '💳' }; } 
-        else if (p_lower.includes('faktur') || p_lower.includes('invoice')) { config = {...config, type: 'FAKTUR', icon: '🧾'}; } 
-        else if (p_lower.includes('laporan keuangan')) { config = {...config, type: 'LAPORAN', icon: '📊'}; } 
-        else if (p_lower.includes('surat kuasa')) { config = {...config, type: 'SURAT', icon: '✍️'}; }
+        let config = { width: 1200, height: 800, bgColor: '#f0f4f8', textColor: '#334e68', title: prompt.toUpperCase(), type: 'GENERIC' };
+        
+        if (p_lower.includes('ktp') || p_lower.includes('sim')) { config = {...config, width: 1011, height: 638, bgColor: '#e6f0ff', type: 'KTP/SIM' }; } 
+        else if (p_lower.includes('faktur') || p_lower.includes('invoice')) { config = {...config, type: 'FAKTUR'}; } 
+        else if (p_lower.includes('laporan keuangan')) { config = {...config, type: 'LAPORAN'}; } 
+        else if (p_lower.includes('surat kuasa')) { config = {...config, type: 'SURAT'}; }
+
         canvas.width = config.width; canvas.height = config.height;
         const ctx = canvas.getContext('2d');
         ctx.fillStyle = config.bgColor; ctx.fillRect(0, 0, config.width, config.height);
@@ -220,31 +247,72 @@ function initDummyImageGenerator() {
         ctx.fillStyle = config.textColor; ctx.font = `bold ${config.width / 25}px Inter`;
         ctx.textAlign = 'center'; ctx.fillText(config.title, config.width / 2, config.height * 0.15);
         ctx.textAlign = 'left'; ctx.font = `${config.width / 50}px Inter`;
+        
         if (config.type === 'KTP/SIM') {
             const isKTP = !p_lower.includes('sim');
             const fields = isKTP ? ['NIK', 'Nama', 'Tempat/Tgl Lahir', 'Alamat', 'Agama'] : ['No. SIM', 'Nama', 'Alamat', 'Pekerjaan'];
             fields.forEach((field, i) => { ctx.fillText(`${field.padEnd(18, ' ')}: [DUMMY DATA GENERATED]`, config.width * 0.1, config.height * 0.35 + (i * 50)); });
             const photoBoxSize = config.width * 0.2;
             ctx.strokeRect(config.width * 0.7, config.height * 0.3, photoBoxSize, photoBoxSize * 1.25);
-            ctx.fillText("Pas Foto", config.width * 0.7 + photoBoxSize / 2, config.height * 0.3 + (photoBoxSize*1.25)/2);
+            ctx.textAlign = 'center';
+            ctx.fillText("Pas Foto", config.width * 0.7 + photoBoxSize / 2, config.height * 0.3 + (photoBoxSize * 1.25) / 2);
         } else if (config.type === 'FAKTUR') {
             const items = [['Barang A', 2, 150000], ['Barang B', 1, 350000], ['Barang C', 5, 50000]]; let yPos = config.height * 0.35;
-            ctx.font = `bold ${config.width / 50}px Inter`; ctx.fillText("Deskripsi", config.width * 0.1, yPos); ctx.fillText("Jumlah", config.width * 0.6, yPos); ctx.fillText("Harga", config.width * 0.8, yPos);
-            yPos += 50; ctx.font = `${config.width / 50}px Inter`;
-            items.forEach(([item, qty, price]) => { ctx.fillText(item, config.width * 0.1, yPos); ctx.fillText(qty.toString(), config.width * 0.6, yPos); ctx.fillText(price.toLocaleString('id-ID'), config.width * 0.8, yPos); yPos += 40; });
-            ctx.font = `bold ${config.width / 45}px Inter`; ctx.fillText("TOTAL: Rp 900.000", config.width*0.6, yPos + 50);
-        } else { const dummyText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent laoreet, nunc ut faucibus sodales, enim magna placerat enim, a pulvinar est nunc vel lorem. Quisque hendrerit, quam et sodales molestie, velit purus fringilla sem, ac faucibus eros odio et augue."; wrapText(ctx, dummyText, config.width/2, config.height/2 + 20, config.width*0.8, 40); }
+            ctx.font = `bold ${config.width / 50}px Inter`; 
+            ctx.fillText("Deskripsi", config.width * 0.1, yPos); 
+            ctx.textAlign = 'center';
+            ctx.fillText("Jumlah", config.width * 0.6, yPos); 
+            ctx.textAlign = 'right';
+            ctx.fillText("Harga", config.width * 0.9, yPos);
+            
+            yPos += 50; 
+            ctx.font = `${config.width / 50}px Inter`;
+            items.forEach(([item, qty, price]) => { 
+                ctx.textAlign = 'left';
+                ctx.fillText(item, config.width * 0.1, yPos); 
+                ctx.textAlign = 'center';
+                ctx.fillText(qty.toString(), config.width * 0.6, yPos); 
+                ctx.textAlign = 'right';
+                ctx.fillText(price.toLocaleString('id-ID'), config.width * 0.9, yPos); 
+                yPos += 40; 
+            });
+            ctx.font = `bold ${config.width / 45}px Inter`; 
+            ctx.fillText("TOTAL: Rp 900.000", config.width * 0.9, yPos + 50);
+        } else { 
+            const dummyText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent laoreet, nunc ut faucibus sodales, enim magna placerat enim, a pulvinar est nunc vel lorem. Quisque hendrerit, quam et sodales molestie, velit purus fringilla sem, ac faucibus eros odio et augue."; 
+            wrapText(ctx, dummyText, config.width / 2, config.height / 2, config.width * 0.8, 40); 
+        }
         return canvas.toDataURL('image/png').split(',')[1];
     }
+
     function wrapText(context, text, x, y, maxWidth, lineHeight) {
-        const words = text.split(' '); let line = ''; context.textAlign = 'left'; let currentY = y - (Math.ceil(context.measureText(text).width / maxWidth) * lineHeight / 2);
-        for (let n = 0; n < words.length; n++) { const testLine = line + words[n] + ' '; if (context.measureText(testLine).width > maxWidth && n > 0) { context.fillText(line, x - maxWidth/2, currentY); line = words[n] + ' '; currentY += lineHeight; } else { line = testLine; } }
-        context.fillText(line, x-maxWidth/2, currentY);
+        const words = text.split(' '); 
+        let line = ''; 
+        context.textAlign = 'center'; 
+        let currentY = y;
+        
+        for (let n = 0; n < words.length; n++) { 
+            const testLine = line + words[n] + ' '; 
+            if (context.measureText(testLine).width > maxWidth && n > 0) { 
+                context.fillText(line, x, currentY); 
+                line = words[n] + ' '; 
+                currentY += lineHeight; 
+            } else { 
+                line = testLine; 
+            } 
+        }
+        context.fillText(line, x, currentY);
     }
+
     function showStatus(message, type = 'idle') {
-        let content = ''; let color = (type === 'success') ? 'var(--success-color)' : (type === 'error') ? 'var(--danger-color)' : 'var(--text-secondary)';
-        if (type === 'loading') { content = `<div class="flex items-center justify-center"><div class="loader-spinner" style="margin-right: 0.75rem;"></div><span style="color:${color};">${message}</span></div>`; } 
-        else { content = `<span style="font-weight: 500; color:${color};">${message}</span>`; }
+        let content = ''; 
+        let color = (type === 'success') ? 'var(--success-color)' : (type === 'error') ? 'var(--danger-color)' : 'var(--text-secondary)';
+        
+        if (type === 'loading') { 
+            content = `<div class="flex items-center justify-center"><div class="loader-spinner" style="margin-right: 0.75rem;"></div><span style="color:${color};">${message}</span></div>`; 
+        } else { 
+            content = `<span style="font-weight: 500; color:${color};">${message}</span>`; 
+        }
         statusArea.innerHTML = content;
     }
 }
