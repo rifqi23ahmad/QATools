@@ -314,3 +314,21 @@ function initAdvancedCompare() {
         });
     });
 }
+
+/* Add this at the end of your style.css file or within a relevant section */
+
+/* --- 2.1. Sidebar Navigation Groups --- */
+.sidebar-nav .nav-group-header {
+    padding: 1.5rem 1.5rem 0.5rem 1.5rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #a0aec0; /* --sidebar-text color */
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.sidebar-nav .nav-group-header:not(:first-child) {
+    border-top: 1px solid #2d3748;
+    margin-top: 0.5rem;
+    padding-top: 1.5rem;
+}

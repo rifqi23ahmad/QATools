@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Pastikan hanya fungsi yang file-nya ada yang dipanggil
     if (typeof initJsonFormatter === 'function') initJsonFormatter();
     if (typeof initJsonCompare === 'function') initJsonCompare();
+    if (typeof initJsonValueExtractor === 'function') initJsonValueExtractor();
     if (typeof initDataCompare === 'function') initDataCompare();
     if (typeof initFileSplitter === 'function') initFileSplitter();
     if (typeof initImageCompare === 'function') initImageCompare();

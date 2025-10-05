@@ -24,20 +24,20 @@
             </div>
             <nav class="sidebar-nav">
                 <ul>
+                    <li class="nav-group-header"><span>JSON Tools</span></li>
                     <li class="nav-item active" data-tool="JsonFormatter">
                         <a href="#"><i class="fas fa-code fa-fw"></i><span>JSON Formatter</span></a>
                     </li>
                     <li class="nav-item" data-tool="JsonCompare">
                         <a href="#"><i class="fas fa-exchange-alt fa-fw"></i><span>JSON Compare</span></a>
                     </li>
+                    <li class="nav-item" data-tool="JsonValueExtractor">
+                        <a href="#"><i class="fas fa-search-dollar fa-fw"></i><span>JSON Value Extractor</span></a>
+                    </li>
+
+                    <li class="nav-group-header"><span>SQL & Data Tools</span></li>
                     <li class="nav-item" data-tool="DataCompare">
                         <a href="#"><i class="fas fa-table-list fa-fw"></i><span>Data Compare</span></a>
-                    </li>
-                     <li class="nav-item" data-tool="FileSplitter">
-                        <a href="#"><i class="fas fa-file-zipper fa-fw"></i><span>File Splitter</span></a>
-                    </li>
-                    <li class="nav-item" data-tool="ImageCompare">
-                        <a href="#"><i class="fas fa-images fa-fw"></i><span>Image Compare</span></a>
                     </li>
                     <li class="nav-item" data-tool="SqlFormatter">
                         <a href="#"><i class="fas fa-database fa-fw"></i><span>SQL Formatter</span></a>
@@ -45,10 +45,17 @@
                      <li class="nav-item" data-tool="SqlInjector">
                         <a href="#"><i class="fas fa-syringe fa-fw"></i><span>SQL Injector</span></a>
                     </li>
+
+                    <li class="nav-group-header"><span>File & Document Tools</span></li>
+                     <li class="nav-item" data-tool="FileSplitter">
+                        <a href="#"><i class="fas fa-file-zipper fa-fw"></i><span>File Splitter</span></a>
+                    </li>
                     <li class="nav-item" data-tool="WordingCompare">
                         <a href="#"><i class="fas fa-file-alt fa-fw"></i><span>Doc Compare</span></a>
                     </li>
-                
+                    <li class="nav-item" data-tool="ImageCompare">
+                        <a href="#"><i class="fas fa-images fa-fw"></i><span>Image Compare</span></a>
+                    </li>
                     <li class="nav-item" data-tool="DummyImageGenerator">
                         <a href="#"><i class="fas fa-file-image fa-fw"></i><span>Dummy File Gen</span></a>
                     </li>
@@ -59,6 +66,7 @@
         <main class="main-content">
             <div class="tool-page active" id="JsonFormatter"></div>
             <div class="tool-page" id="JsonCompare"></div>
+            <div class="tool-page" id="JsonValueExtractor"></div>
             <div class="tool-page" id="DataCompare"></div>
             <div class="tool-page" id="FileSplitter"></div>
             <div class="tool-page" id="ImageCompare"></div>
@@ -71,6 +79,7 @@
 
     <script src="JSONFormatter.js"></script>
     <script src="JSONCompare.js"></script>
+    <script src="JSONValueExtractor.js"></script>
     <script src="DataCompare.js"></script>
     <script src="FileSplitter.js"></script>
     <script src="ImageCompare.js"></script>

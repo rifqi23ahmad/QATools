@@ -42,7 +42,7 @@ function initJsonValueExtractor() {
         </div>
     `;
 
-    // --- JavaScript Logic from User ---
+    // --- JavaScript Logic ---
     const jsonInput = page.querySelector('#json-input');
     const keyInput = page.querySelector('#key-input');
     const filterKeyInput = page.querySelector('#filter-key-input');
@@ -51,6 +51,26 @@ function initJsonValueExtractor() {
     const resultOutput = page.querySelector('#result-output');
     const copyBtn = page.querySelector('#copy-btn');
     const statusMessage = page.querySelector('#status-message');
+
+    // --- PERBAIKAN: Fungsi untuk mencari array data utama ---
+    function findDataArray(data) {
+        if (Array.isArray(data)) {
+            return data;
+        }
+        if (typeof data === 'object' && data !== null) {
+            const commonKeys = ['data', 'payload', 'items', 'results', 'records', 'value'];
+            for (const key of commonKeys) {
+                if (data[key] && Array.isArray(data[key])) {
+                    return data[key];
+                }
+            }
+            if (data.payload && typeof data.payload === 'object') {
+                const nestedData = findDataArray(data.payload);
+                if (nestedData) return nestedData;
+            }
+        }
+        return [data];
+    }
 
     extractBtn.addEventListener('click', () => {
         const jsonString = jsonInput.value.trim();
@@ -87,7 +107,8 @@ function initJsonValueExtractor() {
              }
         }
 
-        const records = Array.isArray(jsonData) ? jsonData : [jsonData];
+        // --- PERBAIKAN: Gunakan fungsi findDataArray untuk mendapatkan records ---
+        const records = findDataArray(jsonData);
         const values = new Set();
 
         function findAllValuesForKey(data, key, resultSet) {
@@ -134,7 +155,7 @@ function initJsonValueExtractor() {
         const formattedValues = uniqueValues.map(value => {
             const escapedValue = String(value).replace(/'/g, "''");
             return `'${escapedValue}'`;
-        }).join(',\n'); // <-- PERBAIKAN DI SINI
+        }).join(',\n');
         
         resultOutput.value = formattedValues;
         showSuccess(`Berhasil menemukan ${uniqueValues.length} nilai unik.`);
