@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- Initialize All Tool Modules ---
-    if (typeof initJsonFormatter === 'function') initJsonFormatter();
+if (typeof initJsonFormatter === 'function') initJsonFormatter();
     if (typeof initJsonCompare === 'function') initJsonCompare();
     if (typeof initJsonValueExtractor === 'function') initJsonValueExtractor();
     if (typeof initDataCompare === 'function') initDataCompare();
@@ -43,6 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof initImageCompare === 'function') initImageCompare();
     if (typeof initSqlFormatter === 'function') initSqlFormatter();
     if (typeof initSqlInjector === 'function') initSqlInjector();
+    if (typeof initBranchDataProcessor === 'function') initBranchDataProcessor(); // New tool initialized
     if (typeof initAdvancedCompare === 'function') initAdvancedCompare();
     if (typeof initDummyImageGenerator === 'function') initDummyImageGenerator();
  
