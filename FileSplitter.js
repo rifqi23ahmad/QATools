@@ -1,106 +1,86 @@
 function initFileSplitter() {
     const page = document.getElementById('FileSplitter');
+    // The new HTML from the prompt, adapted to fit the existing structure.
     page.innerHTML = `
         <div class="tool-header">
-            <h1>Pemecah File Handal</h1>
-            <p>Unggah file .csv atau .txt, tentukan jumlah bagian, dan unduh hasilnya.</p>
+            <h1>🚀 Alat Pemecah File</h1>
+            <p>Unggah file Anda, tentukan jumlah bagian, dan file akan terunduh secara otomatis.</p>
         </div>
         <div class="card">
-            <div class="flex flex-col" style="gap: 1.5rem;">
-                <div>
-                    <label class="label">1. Pilih File Anda</label>
-                    <label for="fileSplitterInput" class="file-input-label">
-                        <div id="file-splitter-info">
-                            <i class="fas fa-file-arrow-up fa-3x" style="color: #cbd5e0;"></i>
-                            <span style="margin-top: 1rem; display: block; font-weight: 500;">Klik untuk memilih file</span>
-                            <span style="font-size: 0.8rem; color: var(--text-secondary);">CSV atau TXT</span>
-                        </div>
-                    </label>
-                    <input type="file" id="fileSplitterInput" accept=".csv,.txt" class="is-hidden">
-                </div>
-                <div>
-                    <label for="numParts" class="label">2. Bagi Menjadi Berapa File?</label>
-                    <input type="number" id="numParts" value="3" min="2" class="input">
-                </div>
-                <button id="splitButton" class="button primary" style="padding: 0.8rem 1.5rem; font-size: 1.1rem;">
-                    <i class="fas fa-bolt" style="margin-right: 0.5rem;"></i> Pecah & Unduh File
-                </button>
+            <div class="input-group">
+                <label for="fileInput">1. Pilih File (.csv, .txt, .sql)</label>
+                <input type="file" id="fileInput" accept=".csv,.txt,.sql" class="input">
             </div>
-            <div id="splitter-status" class="text-center" style="margin-top: 1.5rem; min-height: 24px;"></div>
+            <div class="input-group" style="margin-top: 1.5rem;">
+                <label for="numParts">2. Ingin Dibagi Menjadi Berapa Bagian?</label>
+                <input type="number" id="numParts" value="3" min="2" class="input">
+            </div>
+            <button id="splitButton" class="button primary" style="width: 100%; margin-top: 1.5rem; padding: 0.8rem;">Pecah & Unduh File</button>
+            <div id="status" class="text-center" style="margin-top: 1.5rem; min-height: 24px;"></div>
         </div>
     `;
 
-    const fileInput = page.querySelector('#fileSplitterInput');
-    const numPartsInput = page.querySelector('#numParts');
-    const splitButton = page.querySelector('#splitButton');
-    const statusDiv = page.querySelector('#splitter-status');
-    const fileInfoDiv = page.querySelector('#file-splitter-info');
-
-    fileInput.addEventListener('change', () => {
-        if (fileInput.files.length > 0) {
-            const fileName = fileInput.files[0].name;
-            fileInfoDiv.innerHTML = `
-                <i class="fas fa-check-circle fa-3x" style="color: var(--success-color);"></i>
-                <span style="margin-top: 1rem; display: block; font-weight: 600;">${fileName}</span>
-                <span style="font-size: 0.8rem; color: var(--text-secondary);">File siap diproses!</span>
-            `;
-            statusDiv.textContent = '';
-        }
-    });
-
-    splitButton.addEventListener('click', () => {
+    // The new Javascript logic from the prompt.
+    document.getElementById('splitButton').addEventListener('click', () => {
+        const fileInput = document.getElementById('fileInput');
+        const numPartsInput = document.getElementById('numParts');
+        const statusDiv = document.getElementById('status');
         const file = fileInput.files[0];
         const numParts = parseInt(numPartsInput.value, 10);
-
         statusDiv.textContent = '';
-
+        statusDiv.className = 'text-center';
         if (!file) {
             statusDiv.textContent = '❌ Harap pilih file terlebih dahulu!';
+            statusDiv.className = 'text-center status-error';
             statusDiv.style.color = 'var(--danger-color)';
             return;
         }
         if (isNaN(numParts) || numParts < 2) {
             statusDiv.textContent = '❌ Jumlah bagian harus 2 atau lebih!';
+            statusDiv.className = 'text-center status-error';
             statusDiv.style.color = 'var(--danger-color)';
             return;
         }
-
         const reader = new FileReader();
         reader.onload = (event) => {
             const content = event.target.result;
-            const lines = content.split(/\r?\n/).filter(line => line.trim() !== '');
-            const totalLines = lines.length;
-
-            if (totalLines === 0) {
-                statusDiv.textContent = `⚠️ File kosong atau tidak berisi data yang valid.`;
-                statusDiv.style.color = 'var(--warning-color)';
-                return;
-            }
-            if (totalLines < numParts) {
-                statusDiv.textContent = `❌ Gagal: File hanya memiliki ${totalLines} baris, tidak bisa dibagi menjadi ${numParts} bagian.`;
+            const records = content.split(';').filter(record => record.trim() !== '');
+            const totalRecords = records.length;
+            if (totalRecords === 0) {
+                statusDiv.textContent = '❌ Gagal: Tidak ada data yang bisa dibaca di dalam file.';
+                statusDiv.className = 'text-center status-error';
                 statusDiv.style.color = 'var(--danger-color)';
                 return;
             }
-
-            const linesPerFile = Math.ceil(totalLines / numParts);
+            if (totalRecords < numParts) {
+                statusDiv.textContent = `❌ Gagal: File hanya memiliki ${totalRecords} data, tidak bisa dibagi menjadi ${numParts} bagian.`;
+                statusDiv.className = 'text-center status-error';
+                statusDiv.style.color = 'var(--danger-color)';
+                return;
+            }
+            const recordsPerFile = Math.ceil(totalRecords / numParts);
+            let filesToDownload = 0;
             for (let i = 0; i < numParts; i++) {
-                const start = i * linesPerFile;
-                const end = start + linesPerFile;
-                const chunkLines = lines.slice(start, end);
-
-                if (chunkLines.length > 0) {
-                    downloadFile(chunkLines.join('\n'), file.name, i + 1);
+                const start = i * recordsPerFile;
+                const end = start + recordsPerFile;
+                const chunkRecords = records.slice(start, end);
+                if (chunkRecords.length > 0) {
+                    filesToDownload++;
+                    const chunkContent = chunkRecords.join(';') + ';';
+                    setTimeout(() => {
+                        downloadFile(chunkContent, file.name, i + 1);
+                    }, i * 150);
                 }
             }
-            statusDiv.textContent = `✅ Berhasil! ${numParts} file sedang diunduh.`;
+            statusDiv.textContent = `✅ Berhasil! File sedang dipecah menjadi ${filesToDownload} bagian dan akan diunduh.`;
+            statusDiv.className = 'text-center status-success';
             statusDiv.style.color = 'var(--success-color)';
         };
-        
         reader.onerror = () => {
             statusDiv.textContent = '❌ Terjadi kesalahan saat membaca file.';
+            statusDiv.className = 'text-center status-error';
             statusDiv.style.color = 'var(--danger-color)';
         };
-
         reader.readAsText(file);
     });
 
