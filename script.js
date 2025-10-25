@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- Initialize All Tool Modules ---
-if (typeof initJsonFormatter === 'function') initJsonFormatter();
+    if (typeof initJsonFormatter === 'function') initJsonFormatter();
     if (typeof initJsonCompare === 'function') initJsonCompare();
     if (typeof initJsonValueExtractor === 'function') initJsonValueExtractor();
     if (typeof initDataCompare === 'function') initDataCompare();
@@ -46,6 +46,7 @@ if (typeof initJsonFormatter === 'function') initJsonFormatter();
     if (typeof initBranchDataProcessor === 'function') initBranchDataProcessor(); // New tool initialized
     if (typeof initAdvancedCompare === 'function') initAdvancedCompare();
     if (typeof initDummyImageGenerator === 'function') initDummyImageGenerator();
+    if (typeof initSqlScriptGeneratorOtomatis === 'function') initSqlScriptGeneratorOtomatis();
  
 
     // Activate the first tool by default
