@@ -6,13 +6,12 @@ function initSqlScriptGeneratorOtomatis() {
         <div class="max-w-6xl mx-auto bg-white p-6 md:p-8 rounded-xl shadow-lg">
             <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">SQL Script Generator (Otomatis)</h1>
             <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-md mb-6">
-                <h3 class="font-bold text-blue-800">Cara Penggunaan (v6):</h3>
+                <h3 class="font-bold text-blue-800">Cara Penggunaan (v8):</h3>
                 <ol class="list-decimal list-inside text-sm text-blue-700 mt-2 space-y-1">
-                    <li>Paste script \`INSERT INTO nama_tabel (kolom1, kolom2, ...) VALUES (nilai1, nilai2, ...);\`</li>
-                    <li>Klik <strong>"Deteksi Kolom & Nilai"</strong>. Aplikasi akan otomatis mencocokkan kolom dan nilainya.</li>
-                    <li>Jika ada kolom JSON, aplikasi akan otomatis **menampilkan sub-kolom (key) JSON** di bawahnya.</li>
-                    <li><strong>Unggah file Excel</strong> Anda.</li>
-                    <li>Tabel pemetaan akan muncul. Petakan setiap kolom (dan sub-kolom JSON) ke Header Excel, Fungsi SQL, atau "Tidak Ada Perubahan".</li>
+                    <li>Paste script \`INSERT INTO ... VALUES (...);\` Anda.</li>
+                    <li>Klik <strong>"Deteksi Kolom & Nilai"</strong>.</li>
+                    <li>Unggah file Excel Anda.</li>
+                    <li>Tabel pemetaan akan muncul. Klik pada setiap dropdown untuk <strong>mencari dan memilih</strong> Header Excel, Fungsi SQL, atau "Tidak Ada Perubahan".</li>
                     <li>Klik <strong>"Generate Script"</strong> untuk melihat hasilnya.</li>
                 </ol>
             </div>
@@ -38,7 +37,7 @@ function initSqlScriptGeneratorOtomatis() {
                                 <thead class="bg-gray-100 sticky top-0 z-10">
                                     <tr>
                                         <th class="p-3 text-left text-sm font-semibold text-gray-600">Kolom Script</th>
-                                        <th class="p-3 text-left text-sm font-semibold text-gray-600">Nilai Asli (Acuan)</th>
+                                        <th class="p-3 text-left text-sm font-semibold text-gray-600">Nilai Acuan</th>
                                         <th class="p-3 text-left text-sm font-semibold text-gray-600">Ganti Dengan</th>
                                     </tr>
                                 </thead>
@@ -62,118 +61,118 @@ function initSqlScriptGeneratorOtomatis() {
         </div>
     `;
 
-    // Variabel global untuk menyimpan state
+    // --- State & DOM Elements ---
     let excelHeaders = [];
     let excelData = [];
-    let detectedMapping = []; // Menyimpan {col, val, isJson, originalJson, jsonKeys}
+    let detectedMapping = [];
+    const $ = (selector) => page.querySelector(selector);
+    const sqlTemplateEl = $('#sql-template'), detectButton = $('#detect-values-button'), detectInfo = $('#detect-info');
+    const excelUpload = $('#excel-upload'), excelInfo = $('#excel-info');
+    const mappingSection = $('#mapping-section'), mappingTableBody = $('#mapping-table-body');
+    const generateButton = $('#generate-button'), outputSection = $('#output-section'), outputSql = $('#output-sql');
+    const copyButton = $('#copy-button'), copySuccess = $('#copy-success');
 
-    // Ambil elemen DOM dari dalam 'page'
-    const sqlTemplateEl = page.querySelector('#sql-template');
-    const detectButton = page.querySelector('#detect-values-button');
-    const detectInfo = page.querySelector('#detect-info');
-    const excelUpload = page.querySelector('#excel-upload');
-    const excelInfo = page.querySelector('#excel-info');
-    const mappingSection = page.querySelector('#mapping-section');
-    const mappingTableBody = page.querySelector('#mapping-table-body');
-    const generateButton = page.querySelector('#generate-button');
-    const outputSection = page.querySelector('#output-section');
-    const outputSql = page.querySelector('#output-sql');
-    const copyButton = page.querySelector('#copy-button');
-    const copySuccess = page.querySelector('#copy-success');
-
-    // Event Listener
+    // --- Event Listeners ---
     detectButton.addEventListener('click', handleDetectValues);
     excelUpload.addEventListener('change', handleExcelUpload);
     generateButton.addEventListener('click', handleGenerateScript);
     copyButton.addEventListener('click', copyToClipboard);
 
-    function parseValues(content) {
-        let values = [];
-        let currentToken = "";
-        let inString = false;
-        let parenLevel = 0;
+    // --- Custom Dropdown Logic ---
+    page.addEventListener('click', (e) => {
+        const trigger = e.target.closest('.custom-select-trigger');
+        if (trigger) {
+            const container = trigger.closest('.custom-select-container');
+            const panel = container.querySelector('.custom-select-panel');
+            const wasOpen = !panel.classList.contains('is-hidden');
+            
+            // Close all other dropdowns first
+            page.querySelectorAll('.custom-select-panel').forEach(p => p.classList.add('is-hidden'));
+
+            // If it wasn't open, open it
+            if (!wasOpen) {
+                 panel.classList.remove('is-hidden');
+                 panel.querySelector('.custom-select-search').focus();
+            }
+        } else if (!e.target.closest('.custom-select-panel')) {
+            // Clicked outside, close all dropdowns
+            page.querySelectorAll('.custom-select-panel').forEach(p => p.classList.add('is-hidden'));
+        }
+    });
+
+    page.addEventListener('input', (e) => {
+        if (e.target.classList.contains('custom-select-search')) {
+            const searchTerm = e.target.value.toLowerCase();
+            const panel = e.target.closest('.custom-select-panel');
+            panel.querySelectorAll('li').forEach(option => {
+                const text = option.textContent.toLowerCase();
+                option.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        }
+    });
+
+    mappingTableBody.addEventListener('click', (e) => {
+        const option = e.target.closest('.custom-select-option');
+        if (option) {
+            const container = option.closest('.custom-select-container');
+            const trigger = container.querySelector('.custom-select-trigger');
+            trigger.textContent = option.textContent;
+            trigger.dataset.value = option.dataset.value;
+            container.querySelector('.custom-select-panel').classList.add('is-hidden');
+        }
+    });
+
+    // --- Helper Functions ---
+    const excelSerialDateToJSDate = (serial) => {
+        if (typeof serial !== 'number' || isNaN(serial)) return null;
+        const utc_days = Math.floor(serial - 25569);
+        const date_info = new Date(utc_days * 86400 * 1000);
+        return date_info;
+    };
+
+    const formatDateToYYYYMMDD = (date) => {
+        if (!date || !(date instanceof Date)) return null;
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+    
+    // --- Core Logic Functions ---
+    const parseValues = (content) => {
+        let values = []; let currentToken = ""; let inString = false; let parenLevel = 0;
         content = content.trim();
         for (let i = 0; i < content.length; i++) {
             const char = content[i];
-            if (char === "'") {
-                inString = !inString;
-                currentToken += char;
-            } else if (!inString) {
-                if (char === '(') {
-                    parenLevel++;
-                    currentToken += char;
-                } else if (char === ')') {
-                    parenLevel--;
-                    currentToken += char;
-                } else if (char === ',' && parenLevel === 0) {
-                    values.push(currentToken.trim());
-                    currentToken = "";
-                } else {
-                    currentToken += char;
-                }
-            } else {
-                currentToken += char;
-            }
+            if (char === "'") { inString = !inString; currentToken += char; }
+            else if (!inString) {
+                if (char === '(') { parenLevel++; currentToken += char; }
+                else if (char === ')') { parenLevel--; currentToken += char; }
+                else if (char === ',' && parenLevel === 0) { values.push(currentToken.trim()); currentToken = ""; }
+                else { currentToken += char; }
+            } else { currentToken += char; }
         }
-        values.push(currentToken.trim());
-        return values.filter(v => v.length > 0);
-    }
+        values.push(currentToken.trim()); return values.filter(v => v.length > 0);
+    };
 
-    function parseColumns(content) {
-        let columns = [];
-        let currentToken = "";
-        let parenLevel = 0;
-        content = content.trim();
-        for (let i = 0; i < content.length; i++) {
-            const char = content[i];
-            if (char === '(') {
-                parenLevel++;
-                currentToken += char;
-            } else if (char === ')') {
-                parenLevel--;
-                currentToken += char;
-            } else if (char === ',' && parenLevel === 0) {
-                columns.push(currentToken.trim().replace(/"/g, ''));
-                currentToken = "";
-            } else {
-                currentToken += char;
-            }
-        }
-        columns.push(currentToken.trim().replace(/"/g, ''));
-        return columns.filter(c => c.length > 0);
-    }
-
-    function parseJsonValue(sqlValue) {
-        let jsonString = sqlValue.trim();
-        if (jsonString.endsWith('::jsonb')) {
-            jsonString = jsonString.slice(0, -'::jsonb'.length).trim();
-        }
-        if (jsonString.endsWith('::json')) {
-            jsonString = jsonString.slice(0, -'::json'.length).trim();
-        }
-        if (jsonString.startsWith('jsonb ')) {
-            jsonString = jsonString.slice('jsonb '.length).trim();
-        }
+    const parseColumns = (content) => {
+        return content.trim().split(',').map(c => c.trim().replace(/"/g, ''));
+    };
+    
+    const parseJsonValue = (sqlValue) => {
+        let jsonString = sqlValue.trim().replace(/::jsonb$|::json$/, '').trim();
         if (jsonString.startsWith("'") && jsonString.endsWith("'")) {
-            jsonString = jsonString.slice(1, -1);
-            jsonString = jsonString.replace(/''/g, "'");
-            jsonString = jsonString.replace(/(\r\n|\n|\r)/gm, " ");
-            jsonString = jsonString.replace(/\u00A0/g, " ");
+            jsonString = jsonString.slice(1, -1).replace(/''/g, "'");
         }
         try {
-            const jsonObject = JSON.parse(jsonString);
-            if (jsonObject && typeof jsonObject === 'object' && !Array.isArray(jsonObject)) {
-                const jsonKeys = Object.keys(jsonObject);
-                return { jsonObject, jsonKeys };
-            }
-            return null;
-        } catch (e) {
-            console.warn(`Gagal parse JSON (ini wajar jika nilai bukan JSON): ${e.message}`, {sqlValue, jsonString});
-            return null;
-        }
-    }
+            const jsonObj = JSON.parse(jsonString);
+            if (jsonObj && typeof jsonObj === 'object') return { jsonObj, jsonKeys: Object.keys(jsonObj) };
+        } catch (e) { /* ignore */ }
+        return null;
+    };
 
     function handleDetectValues() {
+        // ... (fungsi ini tidak berubah dari versi sebelumnya)
         const template = sqlTemplateEl.value;
         const valMatch = template.match(/\bVALUES\b\s*\(([\s\S]+?)\)\s*;/i);
         if (!valMatch || !valMatch[1]) {
@@ -214,33 +213,22 @@ function initSqlScriptGeneratorOtomatis() {
                 const val = values[i];
                 const jsonInfo = parseJsonValue(val);
                 if (jsonInfo) {
-                    detectedMapping.push({
-                        col: col,
-                        val: val,
-                        isJson: true,
-                        originalJson: jsonInfo.jsonObject,
-                        jsonKeys: jsonInfo.jsonKeys
-                    });
+                    detectedMapping.push({ col, val, isJson: true, originalJson: jsonInfo.jsonObj, jsonKeys: jsonInfo.jsonKeys });
                 } else {
-                    detectedMapping.push({ col: col, val: val, isJson: false });
+                    detectedMapping.push({ col, val, isJson: false });
                 }
             }
             detectInfo.textContent = `Berhasil! Terdeteksi ${columns.length} kolom & nilai. Silakan unggah Excel.`;
         } else {
+             // Fallback if no columns are defined
             for (let i = 0; i < values.length; i++) {
                 const col = `Nilai #${i + 1}`;
                 const val = values[i];
                 const jsonInfo = parseJsonValue(val);
                 if (jsonInfo) {
-                    detectedMapping.push({
-                        col: col,
-                        val: val,
-                        isJson: true,
-                        originalJson: jsonInfo.jsonObject,
-                        jsonKeys: jsonInfo.jsonKeys
-                    });
+                    detectedMapping.push({ col, val, isJson: true, originalJson: jsonInfo.jsonObj, jsonKeys: jsonInfo.jsonKeys });
                 } else {
-                    detectedMapping.push({ col: col, val: val, isJson: false });
+                    detectedMapping.push({ col, val, isJson: false });
                 }
             }
             detectInfo.textContent = `Berhasil! Terdeteksi ${values.length} nilai (tanpa nama kolom). Silakan unggah Excel.`;
@@ -248,8 +236,9 @@ function initSqlScriptGeneratorOtomatis() {
         detectInfo.className = 'text-sm text-green-600 mt-2';
         updateMappingUI();
     }
-
+    
     function handleExcelUpload(event) {
+        // ... (fungsi ini tidak berubah dari versi sebelumnya)
         const file = event.target.files[0];
         if (!file) return;
         excelInfo.textContent = 'Memproses file...';
@@ -279,82 +268,43 @@ function initSqlScriptGeneratorOtomatis() {
         };
         reader.readAsArrayBuffer(file);
     }
+    
+    function createCustomDropdownHtml(isJson = false) {
+        let optionsHtml = `
+            <li class="custom-select-option" data-value="__NO_CHANGE__">-- Tidak Ada Perubahan (Acuan) --</li>
+            <li class="custom-select-group">Fungsi SQL</li>
+            <li class="custom-select-option" data-value="__UUID_V4__">uuid_generate_v4()</li>
+            <li class="custom-select-option" data-value="__DATE_YYYY_MM_DD__">Format Tanggal (YYYY-MM-DD)</li>
+            <li class="custom-select-group">${isJson ? 'Header dari Excel (JSON Utuh)' : 'Header dari Excel'}</li>
+        `;
+        excelHeaders.forEach(header => {
+            optionsHtml += `<li class="custom-select-option" data-value="${header}">${header}</li>`;
+        });
+
+        return `
+            <div class="custom-select-container">
+                <button class="custom-select-trigger" data-value="__NO_CHANGE__">-- Tidak Ada Perubahan (Acuan) --</button>
+                <div class="custom-select-panel is-hidden">
+                    <input type="text" class="custom-select-search" placeholder="Cari opsi...">
+                    <ul class="custom-select-options">${optionsHtml}</ul>
+                </div>
+            </div>`;
+    }
 
     function updateMappingUI() {
-        if (detectedMapping.length === 0 || excelHeaders.length === 0) {
-            return;
-        }
+        if (detectedMapping.length === 0 || excelHeaders.length === 0) return;
         mappingTableBody.innerHTML = '';
         detectedMapping.forEach((item, index) => {
             const tr = document.createElement('tr');
-            tr.className = 'border-b border-gray-200';
+            tr.className = 'border-b border-gray-200' + (item.isJson ? ' json-main-row' : '');
             tr.dataset.mappingIndex = index;
-            if (item.isJson) {
-                tr.classList.add('json-main-row');
-            }
-            const tdCol = document.createElement('td');
-            tdCol.className = 'p-2';
-            tdCol.innerHTML = `<code class="bg-gray-100 text-gray-800 px-2 py-1 rounded">${item.col}</code>`;
-            const tdVal = document.createElement('td');
-            tdVal.className = 'p-2 tooltip-cell';
-            tdVal.setAttribute('data-full-value', item.val.replace(/"/g, '&quot;'));
-            tdVal.innerHTML = `<code class="bg-gray-100 text-gray-500 px-2 py-1 rounded detected-value" title="Nilai acuan">${item.val}</code>`;
-            const tdSelect = document.createElement('td');
-            tdSelect.className = 'p-2';
-            const select = document.createElement('select');
-            select.className = 'w-full p-2 border border-gray-300 rounded-md excel-header';
-            const defaultOption = document.createElement('option');
-            defaultOption.value = "";
-            defaultOption.textContent = "-- Pilih Opsi --";
-            const noChangeOption = document.createElement('option');
-            noChangeOption.value = "__NO_CHANGE__";
-            noChangeOption.textContent = "-- Tidak Ada Perubahan (Acuan) --";
-            noChangeOption.selected = true;
-            if (item.isJson) {
-                tr.classList.add('json-main-row');
-                select.appendChild(defaultOption);
-                select.appendChild(noChangeOption);
-                const sqlGroup = document.createElement('optgroup');
-                sqlGroup.label = "Fungsi SQL";
-                const uuidOption = document.createElement('option');
-                uuidOption.value = "__UUID_V4__";
-                uuidOption.textContent = "uuid_generate_v4()";
-                sqlGroup.appendChild(uuidOption);
-                select.appendChild(sqlGroup);
-                const excelGroup = document.createElement('optgroup');
-                excelGroup.label = "Header dari Excel (JSON Utuh)";
-                excelHeaders.forEach(header => {
-                    const option = document.createElement('option');
-                    option.value = header;
-                    option.textContent = header;
-                    excelGroup.appendChild(option);
-                });
-                select.appendChild(excelGroup);
-            } else {
-                select.appendChild(defaultOption);
-                select.appendChild(noChangeOption);
-                const sqlGroup = document.createElement('optgroup');
-                sqlGroup.label = "Fungsi SQL";
-                const uuidOption = document.createElement('option');
-                uuidOption.value = "__UUID_V4__";
-                uuidOption.textContent = "uuid_generate_v4()";
-                sqlGroup.appendChild(uuidOption);
-                select.appendChild(sqlGroup);
-                const excelGroup = document.createElement('optgroup');
-                excelGroup.label = "Header dari Excel";
-                excelHeaders.forEach(header => {
-                    const option = document.createElement('option');
-                    option.value = header;
-                    option.textContent = header;
-                    excelGroup.appendChild(option);
-                });
-                select.appendChild(excelGroup);
-            }
-            tdSelect.appendChild(select);
-            tr.appendChild(tdCol);
-            tr.appendChild(tdVal);
-            tr.appendChild(tdSelect);
+            
+            const tdCol = `<td class="p-2"><code class="bg-gray-100 text-gray-800 px-2 py-1 rounded">${item.col}</code></td>`;
+            const tdVal = `<td class="p-2 tooltip-cell" data-full-value="${item.val.replace(/"/g, '&quot;')}"><code class="bg-gray-100 text-gray-500 px-2 py-1 rounded detected-value" title="Nilai acuan">${item.val}</code></td>`;
+            const tdSelect = `<td class="p-2">${createCustomDropdownHtml(item.isJson)}</td>`;
+            tr.innerHTML = tdCol + tdVal + tdSelect;
             mappingTableBody.appendChild(tr);
+
             if (item.isJson && item.jsonKeys) {
                 item.jsonKeys.forEach(key => {
                     const subTr = document.createElement('tr');
@@ -362,20 +312,13 @@ function initSqlScriptGeneratorOtomatis() {
                     subTr.dataset.isSubkey = 'true';
                     subTr.dataset.parentIndex = index;
                     subTr.dataset.subkeyName = key;
-                    const tdKey = document.createElement('td');
-                    tdKey.className = 'p-2';
-                    tdKey.innerHTML = `<code class="json-key-code px-2 py-1 rounded ml-4">${key}</code>`;
-                    const tdSubVal = document.createElement('td');
-                    tdSubVal.className = 'p-2 tooltip-cell';
                     const originalSubValue = item.originalJson[key];
-                    tdSubVal.setAttribute('data-full-value', String(originalSubValue));
-                    tdSubVal.innerHTML = `<code class="bg-gray-100 text-gray-500 px-2 py-1 rounded detected-value" title="Nilai acuan key">${String(originalSubValue)}</code>`;
-                    const tdSubSelect = document.createElement('td');
-                    tdSubSelect.className = 'p-2';
-                    tdSubSelect.innerHTML = createDropdownHtml();
-                    subTr.appendChild(tdKey);
-                    subTr.appendChild(tdSubVal);
-                    subTr.appendChild(tdSubSelect);
+                    
+                    const tdKey = `<td class="p-2"><code class="json-key-code px-2 py-1 rounded ml-4">${key}</code></td>`;
+                    const tdSubVal = `<td class="p-2 tooltip-cell" data-full-value="${String(originalSubValue)}"><code class="bg-gray-100 text-gray-500 px-2 py-1 rounded detected-value" title="Nilai acuan key">${String(originalSubValue)}</code></td>`;
+                    const tdSubSelect = `<td class="p-2">${createCustomDropdownHtml(false)}</td>`;
+                    
+                    subTr.innerHTML = tdKey + tdSubVal + tdSubSelect;
                     mappingTableBody.appendChild(subTr);
                 });
             }
@@ -384,91 +327,72 @@ function initSqlScriptGeneratorOtomatis() {
         generateButton.classList.remove('hidden');
     }
 
-    function createDropdownHtml() {
-        let html = `<select class="w-full p-2 border border-gray-300 rounded-md excel-header">
-                <option value="">-- Pilih Opsi --</option>
-                <option value="__NO_CHANGE__" selected>-- Tidak Ada Perubahan (Acuan) --</option>
-                <optgroup label="Header dari Excel">`;
-        excelHeaders.forEach(header => {
-            html += `<option value="${header}">${header}</option>`;
-        });
-        html += `</optgroup></select>`;
-        return html;
-    }
-
-    function escapeRegExp(string) {
-        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    }
-
     function handleGenerateScript() {
         const template = sqlTemplateEl.value;
         const valuesRegex = /(\bVALUES\b\s*\()([\s\S]+?)(\)\s*;)/i;
         const match = template.match(valuesRegex);
-        if (!match) {
-            alert('Error: Tidak dapat menemukan klausa "VALUES (...) ;" dalam template. Pastikan formatnya benar.');
-            return;
-        }
+        if (!match) { alert('Error: Tidak dapat menemukan klausa "VALUES (...) ;".'); return; }
+        
         const scriptPrefix = template.substring(0, match.index) + match[1] + '\n  ';
         const scriptSuffix = '\n' + match[3] + '\n\n';
-        const mappingRows = mappingTableBody.querySelectorAll('tr');
         let finalScript = "";
+
         excelData.forEach(row => {
             let newValues = [];
             let jsonBuilders = {};
-            mappingRows.forEach(tr => {
-                if (tr.dataset.isSubkey === 'true') {
-                    const select = tr.querySelector('.excel-header');
-                    const parentIndex = parseInt(tr.dataset.parentIndex, 10);
-                    const subkeyName = tr.dataset.subkeyName;
-                    const mappedTarget = select.value;
-                    if (!jsonBuilders[parentIndex]) {
-                        jsonBuilders[parentIndex] = {};
-                    }
-                    let subValue;
-                    if (mappedTarget && mappedTarget !== "" && mappedTarget !== "__NO_CHANGE__") {
-                        subValue = row[mappedTarget];
-                    } else {
-                        subValue = detectedMapping[parentIndex].originalJson[subkeyName];
-                    }
-                    jsonBuilders[parentIndex][subkeyName] = subValue;
+
+            // Pre-process all rows to build JSON objects first
+            mappingTableBody.querySelectorAll('tr[data-is-subkey="true"]').forEach(tr => {
+                const trigger = tr.querySelector('.custom-select-trigger');
+                const parentIndex = parseInt(tr.dataset.parentIndex, 10);
+                const subkeyName = tr.dataset.subkeyName;
+                const mappedTarget = trigger.dataset.value;
+
+                if (!jsonBuilders[parentIndex]) {
+                    jsonBuilders[parentIndex] = { ...detectedMapping[parentIndex].originalJson }; // Clone
                 }
-            });
-            let mappingIndex = 0;
-            mappingRows.forEach(tr => {
-                if (tr.dataset.isSubkey === 'true') {
-                    return;
-                }
-                const item = detectedMapping[mappingIndex];
-                const select = tr.querySelector('.excel-header');
-                const mappedTarget = select.value;
-                let formattedValue;
-                if (item.isJson) {
-                    if (mappedTarget && mappedTarget !== "" && mappedTarget !== "__NO_CHANGE__") {
-                        if (mappedTarget === "__UUID_V4__") {
-                            formattedValue = "uuid_generate_v4()";
-                        } else {
-                            let value = row[mappedTarget];
-                            if (value === null || typeof value === 'undefined') {
-                                formattedValue = 'NULL';
-                            } else {
-                                const jsonString = (typeof value === 'object') ? JSON.stringify(value) : String(value);
-                                formattedValue = `'${jsonString.replace(/'/g, "''")}'::jsonb`;
-                            }
-                        }
-                    } else {
-                        const newJsonObject = jsonBuilders[mappingIndex] || {};
-                        const newJsonString = JSON.stringify(newJsonObject);
-                        formattedValue = `'${newJsonString.replace(/'/g, "''")}'::jsonb`;
-                    }
+
+                let subValue;
+                if (mappedTarget === "__NO_CHANGE__") {
+                    subValue = detectedMapping[parentIndex].originalJson[subkeyName];
+                } else if (mappedTarget === "__DATE_YYYY_MM_DD__") {
+                    const dateVal = excelSerialDateToJSDate(row[subkeyName]);
+                    subValue = formatDateToYYYYMMDD(dateVal) || row[subkeyName];
                 } else {
-                    if (!mappedTarget || mappedTarget === "" || mappedTarget === "__NO_CHANGE__") {
+                   subValue = row[mappedTarget];
+                }
+                jsonBuilders[parentIndex][subkeyName] = subValue;
+            });
+
+            // Process main rows to construct final values list
+            mappingTableBody.querySelectorAll('tr[data-mapping-index]').forEach(tr => {
+                const mappingIndex = parseInt(tr.dataset.mappingIndex, 10);
+                const item = detectedMapping[mappingIndex];
+                const trigger = tr.querySelector('.custom-select-trigger');
+                const mappedTarget = trigger.dataset.value;
+                let formattedValue;
+
+                if (item.isJson) {
+                    const newJsonObject = jsonBuilders[mappingIndex] || item.originalJson;
+                    const newJsonString = JSON.stringify(newJsonObject);
+                    formattedValue = `'${newJsonString.replace(/'/g, "''")}'::jsonb`;
+                } else {
+                    if (mappedTarget === "__NO_CHANGE__") {
                         formattedValue = item.val;
                     } else if (mappedTarget === "__UUID_V4__") {
-                        formattedValue = "uuid_generate_v4()";
+                        formattedValue = "public.uuid_generate_v4()";
+                    } else if (mappedTarget === "__DATE_YYYY_MM_DD__") {
+                        const headerToUse = Object.keys(row).find(k => k.toLowerCase() === item.col.toLowerCase().replace(/["`]/g, ''));
+                        const rawValue = row[headerToUse];
+                        const date = excelSerialDateToJSDate(rawValue);
+                        formattedValue = date ? `'${formatDateToYYYYMMDD(date)}'` : 'NULL';
                     } else {
                         let value = row[mappedTarget];
                         if (value === null || typeof value === 'undefined') {
                             formattedValue = 'NULL';
+                        } else if (typeof value === 'number' && String(value).match(/^\d{5}\.\d+$/)) {
+                             const date = excelSerialDateToJSDate(value);
+                             formattedValue = date ? `'${formatDateToYYYYMMDD(date)}'` : String(value);
                         } else if (typeof value === 'number') {
                             formattedValue = value;
                         } else {
@@ -477,7 +401,6 @@ function initSqlScriptGeneratorOtomatis() {
                     }
                 }
                 newValues.push(formattedValue);
-                mappingIndex++;
             });
             finalScript += scriptPrefix + newValues.join(',\n  ') + scriptSuffix;
         });
@@ -486,6 +409,7 @@ function initSqlScriptGeneratorOtomatis() {
     }
 
     function copyToClipboard() {
+        // ... (fungsi ini tidak berubah dari versi sebelumnya)
         outputSql.select();
         try {
             document.execCommand('copy');
