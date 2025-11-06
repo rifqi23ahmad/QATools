@@ -43,6 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof initImageCompare === 'function') initImageCompare();
     if (typeof initSqlFormatter === 'function') initSqlFormatter();
     if (typeof initSqlInjector === 'function') initSqlInjector();
+    if (typeof initArchiveFileFinder === 'function') initArchiveFileFinder();
     if (typeof initBranchDataProcessor === 'function') initBranchDataProcessor(); // New tool initialized
     if (typeof initAdvancedCompare === 'function') initAdvancedCompare();
     if (typeof initDummyImageGenerator === 'function') initDummyImageGenerator();

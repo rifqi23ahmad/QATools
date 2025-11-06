@@ -726,3 +726,93 @@ SQL SCRIPT GENERATOR (OTOMATIS) STYLES
     border-top: 1px solid #e5e7eb;
     border-bottom: 1px solid #e5e7eb;
 }
+
+/*
+================================================================
+*
+* 9. ARCHIVE FILE FINDER STYLES (v2 Update)
+*
+================================================================
+*/
+.file-input-wrapper {
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+    cursor: pointer;
+}
+.file-input-wrapper input[type=file] {
+    font-size: 100px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+.file-input-label {
+    cursor: pointer;
+}
+
+/* --- Style untuk Tampilan Daftar (Mode ZIP) --- */
+#ArchiveFileFinder .result-item {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--card-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+#ArchiveFileFinder .result-item:last-child {
+    border-bottom: none;
+}
+#ArchiveFileFinder .result-item:hover {
+    background-color: #f7fafc;
+}
+#ArchiveFileFinder .result-item-label {
+    display: flex;
+    align-items: center;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    cursor: pointer;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+#ArchiveFileFinder .result-item-label span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* --- Style untuk Tampilan Tabel (Mode CSV) --- */
+/* Kita target #results-container table agar tidak bentrok 
+    dengan tabel lain di aplikasi (seperti DataCompare).
+*/
+#ArchiveFileFinder #results-container .results-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+#ArchiveFileFinder #results-container .results-table th,
+#ArchiveFileFinder #results-container .results-table td {
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--card-border);
+    text-align: left;
+    font-size: 0.9rem;
+    white-space: nowrap; /* Penting untuk tabel data */
+}
+#ArchiveFileFinder #results-container .results-table thead {
+    background-color: #edf2f7;
+    position: sticky; /* Membuat header tabel menempel */
+    top: 0;
+}
+#ArchiveFileFinder #results-container .results-table tbody tr:hover {
+    background-color: #f7fafc;
+}
+#ArchiveFileFinder #results-container .results-table td:first-child {
+    text-align: center;
+}
+#ArchiveFileFinder .result-checkbox {
+    height: 1.1rem;
+    width: 1.1rem;
+}
