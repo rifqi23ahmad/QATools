@@ -816,3 +816,70 @@ SQL SCRIPT GENERATOR (OTOMATIS) STYLES
     height: 1.1rem;
     width: 1.1rem;
 }
+
+/*
+================================================================
+*
+* 10. API REQUESTOR STYLES (BARU DITAMBAHKAN)
+*
+================================================================
+*/
+.api-request-grid {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 0.75rem;
+    align-items: center;
+}
+.api-tabs-nav {
+    display: flex;
+    border-bottom: 1px solid var(--card-border);
+    margin-bottom: 1rem;
+}
+.api-tab-btn {
+    padding: 0.75rem 1.25rem;
+    cursor: pointer;
+    background-color: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: -1px; /* Agar border bawah tumpang tindih */
+}
+.api-tab-btn.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+    font-weight: 600;
+}
+.api-tab-content {
+    display: none;
+}
+.api-tab-content.active {
+    display: block;
+}
+.api-header-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 0.75rem;
+    align-items: center;
+}
+.api-header-row .remove-header-btn {
+    padding: 0.5rem 0.8rem;
+    background-color: #fff5f5;
+    color: var(--danger-color);
+    border-color: #fed7d7;
+}
+.api-header-row .remove-header-btn:hover {
+    background-color: #fed7d7;
+}
+#api-response-body-output .json-key { color: #63b3ed; } 
+#api-response-body-output .json-string { color: #f6ad55; } 
+#api-response-body-output .json-number { color: #d53f8c; } 
+#api-response-body-output .json-boolean { color: #f56565; } 
+#api-response-body-output .json-null { color: #b794f4; }
+#api-response-body-output .json-error { color: #fbd38d; font-weight: bold;}
+
+/* [BARU] Style untuk cURL Importer */
+#api-curl-importer #api-curl-input {
+    background-color: #ffffff;
+    color: var(--text-primary);
+}

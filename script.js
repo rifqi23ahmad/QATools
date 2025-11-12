@@ -48,6 +48,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof initAdvancedCompare === 'function') initAdvancedCompare();
     if (typeof initDummyImageGenerator === 'function') initDummyImageGenerator();
     if (typeof initSqlScriptGeneratorOtomatis === 'function') initSqlScriptGeneratorOtomatis();
+    // BARIS BARU DITAMBAHKAN DI BAWAH
+    if (typeof initApiRequestor === 'function') initApiRequestor();
  
 
     // Activate the first tool by default
