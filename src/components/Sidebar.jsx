@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 // Daftar semua tool Anda, diambil dari index.html
 const toolGroups = [
@@ -19,8 +19,7 @@ const toolGroups = [
       { id: 'SqlScriptGeneratorOtomatis', name: 'SQL Gen (Otomatis)', icon: 'fa-magic' },
       { id: 'ArchiveFileFinder', name: 'Archive Finder', icon: 'fa-file-archive' },
       { id: 'ApiRequestor', name: 'API Requestor', icon: 'fa-paper-plane' },
-      // Catatan: Menambahkan SQLScriptGenerator manual yang juga ada di file Anda
-      { id: 'SqlScriptGenerator', name: 'SQL Gen (Manual)', icon: 'fa-file-code' }, 
+      { id: 'SqlScriptGenerator', name: 'SQL Gen (Manual)', icon: 'fa-file-code' },
     ]
   },
   {
@@ -39,10 +38,82 @@ function Sidebar({ activeTool, setActiveTool }) {
   const [isMinimized, setIsMinimized] = useState(
     localStorage.getItem('sidebarMinimized') === 'true'
   );
+  const counterContainerRef = useRef(null);
 
+  // Persist isMinimized ke localStorage
   useEffect(() => {
     localStorage.setItem('sidebarMinimized', isMinimized);
   }, [isMinimized]);
+
+  // Inject GNRCounter using an iframe for robustness
+  useEffect(() => {
+    const container = counterContainerRef.current;
+    const counterUrl = 'https://gnrcounter.com/counter.php?accId=f4cdd2f47d0878be22ec2c9252b1ea67';
+
+    if (!container) {
+      console.warn('[Sidebar] counter container not found');
+      return;
+    }
+
+    // Clear any previous content
+    container.innerHTML = '';
+
+    // Create iframe
+    const iframe = document.createElement('iframe');
+    iframe.style.width = '100%';
+    iframe.style.height = '48px'; // atur sesuai kebutuhan: 48-80px
+    iframe.style.border = '0';
+    iframe.style.overflow = 'hidden';
+    iframe.setAttribute('aria-hidden', 'true');
+    // srcdoc memuat HTML kecil yang memanggil script counter
+    iframe.srcdoc = `
+      <!doctype html>
+      <html>
+        <head>
+          <meta charset="utf-8"/>
+          <meta name="viewport" content="width=device-width,initial-scale=1"/>
+          <style>body{margin:0;padding:0;display:flex;align-items:center;justify-content:center;}</style>
+        </head>
+        <body>
+          <div id="counter-root"></div>
+          <script src="${counterUrl}"></script>
+          <noscript>
+            <div style="font-size:12px;padding:6px;text-align:center;">Enable JavaScript to see the counter.</div>
+          </noscript>
+        </body>
+      </html>
+    `;
+
+    // Append iframe
+    container.appendChild(iframe);
+
+    // Fallback jika iframe tidak memunculkan apa-apa (mis. diblok)
+    const fallbackTimeout = setTimeout(() => {
+      // karena cross-origin kita tidak bisa baca isi iframe, jadi deteksi sederhana:
+      // jika container masih berisi iframe namun tinggi konten kecil, tampilkan pesan fallback
+      if (container && container.childElementCount === 0) {
+        container.innerHTML = '<div style="font-size:12px;text-align:center;">Counter gagal dimuat — cek adblock / CSP.</div>';
+      }
+    }, 2500);
+
+    // error handler
+    iframe.addEventListener('error', () => {
+      clearTimeout(fallbackTimeout);
+      container.innerHTML = '<div style="font-size:12px;text-align:center;">Counter gagal dimuat (blocked).</div>';
+    });
+
+    // Cleanup
+    return () => {
+      clearTimeout(fallbackTimeout);
+      if (container) container.innerHTML = '';
+    };
+  }, []); // jalankan sekali saat mount
+
+  // Prevent default on anchor clicks to avoid page jump/refresh
+  const handleNavClick = (e, toolId) => {
+    e.preventDefault();
+    setActiveTool(toolId);
+  };
 
   return (
     <aside className={`sidebar ${isMinimized ? 'minimized' : ''}`}>
@@ -50,6 +121,7 @@ function Sidebar({ activeTool, setActiveTool }) {
         <img src="/qalogo.png" alt="QaTools Logo" className="sidebar-logo-open" />
         <img src="/qasidebar.png" alt="QaTools Icon" className="sidebar-logo-minimized" />
       </div>
+
       <nav className="sidebar-nav">
         <ul>
           {toolGroups.map(group => (
@@ -60,10 +132,10 @@ function Sidebar({ activeTool, setActiveTool }) {
                   key={tool.id}
                   className={`nav-item ${activeTool === tool.id ? 'active' : ''}`}
                   onClick={() => setActiveTool(tool.id)}
-                  title={tool.name} // Tooltip untuk mode minimized
+                  title={tool.name}
                 >
-                  <a href="#">
-                    <i className={`fas ${tool.icon} fa-fw`}></i>
+                  <a href="#" onClick={(e) => handleNavClick(e, tool.id)}>
+                    <i className={`fas ${tool.icon} fa-fw`} />
                     <span>{tool.name}</span>
                   </a>
                 </li>
@@ -72,10 +144,29 @@ function Sidebar({ activeTool, setActiveTool }) {
           ))}
         </ul>
       </nav>
+
       <div className="sidebar-footer">
-        {/* Anda bisa menambahkan counter di sini jika mau */}
-        <button id="sidebar-toggle" title="Minimize Sidebar" onClick={() => setIsMinimized(!isMinimized)}>
-          <i className="fas fa-chevron-left"></i>
+        {/* Counter container untuk GNRCounter */}
+        <div
+          ref={counterContainerRef}
+          style={{
+            width: "100%",
+            textAlign: "center",
+            marginBottom: "10px",
+            pointerEvents: "none" // uncomment jika mau non-interactive
+          }}
+        />
+
+        <button
+          id="sidebar-toggle"
+          title={isMinimized ? "Expand Sidebar" : "Minimize Sidebar"}
+          onClick={() => setIsMinimized(!isMinimized)}
+          style={{
+            transform: isMinimized ? 'rotate(180deg)' : 'none',
+            transition: 'transform 0.15s ease'
+          }}
+        >
+          <i className="fas fa-chevron-left" />
         </button>
       </div>
     </aside>

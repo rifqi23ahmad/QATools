@@ -65,11 +65,16 @@ function SqlScriptGeneratorOtomatis() {
   const [excelInfo, setExcelInfo] = useState('');
   const [copySuccess, setCopySuccess] = useState(false);
   
+  // State baru untuk output, menggantikan showOutputSection
+  const [showOutput, setShowOutput] = useState(false);
+
   const showMappingTable = detectedMapping.length > 0 && excelHeaders.length > 0;
   const showGenerateButton = showMappingTable;
-  const showOutputSection = outputSql.length > 0;
+  const showOutputSection = outputSql.length > 0 && showOutput; // Tambahkan pengecekan showOutput
 
   const handleDetectValues = () => {
+    setShowOutput(false); // Sembunyikan output lama saat deteksi baru
+    setOutputSql('');     // Hapus SQL lama
     const template = sqlTemplate;
     const valMatch = template.match(/\bVALUES\b\s*\(([\s\S]+?)\)\s*;/i);
     if (!valMatch || !valMatch[1]) {
@@ -102,7 +107,6 @@ function SqlScriptGeneratorOtomatis() {
             return;
         }
     } else {
-        // Fallback jika tidak ada kolom
         columns = values.map((v, i) => `Nilai #${i + 1}`);
     }
 
@@ -118,22 +122,24 @@ function SqlScriptGeneratorOtomatis() {
             mappingItem.originalJson = jsonInfo.jsonObj;
             mappingItem.jsonKeys = jsonInfo.jsonKeys;
             
-            newMappingState[col] = '__NO_CHANGE__'; // Mapping untuk objek JSON utama
+            newMappingState[col] = '__NO_CHANGE__';
             jsonInfo.jsonKeys.forEach(key => {
-                newMappingState[`${col}.${key}`] = '__NO_CHANGE__'; // Mapping untuk setiap sub-key
+                newMappingState[`${col}.${key}`] = '__NO_CHANGE__';
             });
         } else {
-            newMappingState[col] = '__NO_CHANGE__'; // Mapping untuk nilai non-JSON
+            newMappingState[col] = '__NO_CHANGE__';
         }
         newDetectedMapping.push(mappingItem);
     }
 
     setDetectedMapping(newDetectedMapping);
-    setMappingState(newMappingState); // Simpan state mapping
+    setMappingState(newMappingState);
     setDetectInfo(`Berhasil! Terdeteksi ${columns.length} kolom & nilai. Silakan unggah Excel.`);
   };
 
   const handleExcelUpload = (event) => {
+    setShowOutput(false); // Sembunyikan output lama saat unggah baru
+    setOutputSql('');     // Hapus SQL lama
     const file = event.target.files[0];
     if (!file) return;
     setExcelInfo('Memproses file...');
@@ -141,6 +147,10 @@ function SqlScriptGeneratorOtomatis() {
     reader.onload = (e) => {
         try {
             const data = new Uint8Array(e.target.result);
+            // Pastikan XLSX sudah dimuat di index.html
+            if (typeof window.XLSX === 'undefined') {
+              throw new Error('Library XLSX tidak ditemukan.');
+            }
             const workbook = window.XLSX.read(data, { type: 'array' });
             const sheetName = workbook.SheetNames[0];
             const worksheet = workbook.Sheets[sheetName];
@@ -148,18 +158,21 @@ function SqlScriptGeneratorOtomatis() {
             
             if (dataAsArray.length === 0) throw new Error('Excel kosong.');
             
-            setExcelHeaders(dataAsArray[0].map(String));
-            setExcelData(window.XLSX.utils.sheet_to_json(worksheet));
-            setExcelInfo(`File "${file.name}" dimuat. ${dataAsArray[0].length} header dan ${excelData.length} baris data.`);
+            const headers = dataAsArray[0].map(String);
+            const jsonData = window.XLSX.utils.sheet_to_json(worksheet);
+
+            setExcelHeaders(headers);
+            setExcelData(jsonData);
+            setExcelInfo(`File "${file.name}" dimuat. ${headers.length} header dan ${jsonData.length} baris data.`);
         } catch (error) {
-            setExcelInfo('Gagal memproses file Excel. Pastikan formatnya benar.');
+            console.error(error);
+            setExcelInfo(`Gagal memproses file Excel. ${error.message}`);
         }
     };
     reader.readAsArrayBuffer(file);
-    event.target.value = ''; // Reset input file
+    event.target.value = '';
   };
   
-  // Buat opsi dropdown menggunakan useMemo
   const dropdownOptions = useMemo(() => {
     let opts = [
       { label: '-- Tidak Ada Perubahan (Acuan) --', value: '__NO_CHANGE__' },
@@ -192,18 +205,20 @@ function SqlScriptGeneratorOtomatis() {
         let newValues = [];
         let jsonBuilders = {};
 
-        // Pre-process all rows to build JSON objects first
         detectedMapping.forEach((item, parentIndex) => {
           if (item.isJson) {
-            jsonBuilders[parentIndex] = { ...item.originalJson }; // Clone
+            jsonBuilders[parentIndex] = { ...item.originalJson };
             item.jsonKeys.forEach(subkeyName => {
               const mappedTarget = mappingState[`${item.col}.${subkeyName}`];
               let subValue;
               if (mappedTarget === "__NO_CHANGE__") {
                   subValue = item.originalJson[subkeyName];
               } else if (mappedTarget === "__DATE_YYYY_MM_DD__") {
-                  const dateVal = excelSerialDateToJSDate(row[subkeyName]);
-                  subValue = formatDateToYYYYMMDD(dateVal) || row[subkeyName];
+                  // Coba cari header yang cocok (case-insensitive) di data baris
+                  const matchingHeader = Object.keys(row).find(h => h.toLowerCase() === subkeyName.toLowerCase());
+                  const rawValue = matchingHeader ? row[matchingHeader] : row[subkeyName];
+                  const dateVal = excelSerialDateToJSDate(rawValue);
+                  subValue = formatDateToYYYYMMDD(dateVal) || rawValue; // Fallback ke nilai asli jika gagal format
               } else {
                  subValue = row[mappedTarget];
               }
@@ -212,7 +227,6 @@ function SqlScriptGeneratorOtomatis() {
           }
         });
 
-        // Process main rows to construct final values list
         detectedMapping.forEach((item, mappingIndex) => {
             const mappedTarget = mappingState[item.col];
             let formattedValue;
@@ -227,6 +241,7 @@ function SqlScriptGeneratorOtomatis() {
                 } else if (mappedTarget === "__UUID_V4__") {
                     formattedValue = "public.uuid_generate_v4()";
                 } else if (mappedTarget === "__DATE_YYYY_MM_DD__") {
+                    // Coba cari header yang cocok (case-insensitive) di data baris
                     const headerToUse = Object.keys(row).find(k => k.toLowerCase() === item.col.toLowerCase().replace(/["`]/g, ''));
                     const rawValue = row[headerToUse];
                     const date = excelSerialDateToJSDate(rawValue);
@@ -261,39 +276,52 @@ function SqlScriptGeneratorOtomatis() {
     });
   };
 
+  // Menggunakan kelas dari style.css
   return (
-    <div className="max-w-6xl mx-auto bg-white p-6 md:p-8 rounded-xl shadow-lg">
-      <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">SQL Script Generator (Otomatis)</h1>
+    <div className="card" id="SqlScriptGeneratorOtomatis">
+      <div className="tool-header">
+        <h1 className="text-center">SQL Script Generator (Otomatis)</h1>
+      </div>
       
+      {/* Box instruksi ini menggunakan kelas-kelas yang didefinisikan di style.css */}
       <div className="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-md mb-6">
         <h3 className="font-bold text-blue-800">Cara Penggunaan (v8):</h3>
         <ol className="list-decimal list-inside text-sm text-blue-700 mt-2 space-y-1">
-            {/* ... (Instruksi) ... */}
+            <li>Paste satu script SQL (INSERT ... VALUES (...);) ke kotak "Template Script SQL".</li>
+            <li>Klik tombol "Deteksi Kolom & Nilai".</li>
+            <li>Jika berhasil, unggah file Excel yang berisi data Anda. Pastikan header Excel cocok.</li>
+            <li>Tabel "Pemetaan Nilai" akan muncul.</li>
+            <li>Untuk setiap "Kolom Script", pilih "Header dari Excel" yang sesuai di dropdown "Ganti Dengan".</li>
+            <li>Jika nilai acuan adalah JSON, Anda dapat memetakan setiap sub-key di dalamnya.</li>
+            <li>Gunakan opsi "Fungsi SQL" untuk hal seperti `uuid_generate_v4()` atau format tanggal.</li>
+            <li>Klik "Generate Script". Hasilnya akan muncul di bawah.</li>
         </ol>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-6">
+      {/* Menggunakan .grid .grid-cols-2 dari style.css */}
+      <div className="grid grid-cols-2" style={{ gap: '1.5rem' }}>
+        <div>
           <div>
-            <label htmlFor="sql-template" className="block text-lg font-semibold text-gray-700 mb-2">1. Template Script SQL</label>
+            <label htmlFor="sql-template" className="label">1. Template Script SQL</label>
             <textarea 
               id="sql-template" 
-              className="w-full h-48 p-3 border border-gray-300 rounded-md shadow-sm font-mono text-sm" 
+              className="textarea textarea-editor font-mono" // Menggunakan .textarea
+              style={{ height: '12rem', fontSize: '0.875rem' }} // Ganti h-48 dan text-sm
               placeholder="Paste script INSERT tunggal Anda di sini, diakhiri dengan );"
               value={sqlTemplate}
               onChange={(e) => setSqlTemplate(e.target.value)}
             />
-            <button id="detect-values-button" className="mt-3 w-full bg-blue-600 text-white px-4 py-2 rounded-md" onClick={handleDetectValues}>
+            <button id="detect-values-button" className="button primary" style={{ width: '100%', marginTop: '0.75rem' }} onClick={handleDetectValues}>
               2. Deteksi Kolom & Nilai
             </button>
             <div id="detect-info" className={`text-sm mt-2 ${detectInfo.startsWith('Error') ? 'text-red-600' : 'text-green-600'}`}>{detectInfo}</div>
           </div>
-          <div>
-            <label htmlFor="excel-upload" className="block text-lg font-semibold text-gray-700 mb-2">3. Unggah File Excel</label>
+          <div style={{ marginTop: '1.5rem' }}> {/* Ganti space-y-6 */}
+            <label htmlFor="excel-upload" className="label">3. Unggah File Excel</label>
             <input 
               type="file" 
               id="excel-upload" 
-              className="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer" 
+              className="input" // Menggunakan .input
               accept=".xlsx, .xls"
               onChange={handleExcelUpload}
             />
@@ -301,28 +329,30 @@ function SqlScriptGeneratorOtomatis() {
           </div>
         </div>
 
-        <div className="space-y-6">
+        <div>
           {showMappingTable && (
             <div id="mapping-section">
-              <label className="block text-lg font-semibold text-gray-700 mb-2">4. Pemetaan Nilai</label>
-              <div className="border border-gray-300 rounded-md shadow-sm max-h-96 overflow-y-auto">
-                <table className="w-full min-w-full">
-                  <thead className="bg-gray-100 sticky top-0 z-10">
+              <label className="label">4. Pemetaan Nilai</label>
+              {/* Ganti kelas layout dengan style inline atau wrapper dari style.css */}
+              <div style={{ border: '1px solid var(--card-border)', borderRadius: '6px', maxHeight: '24rem', overflowY: 'auto' }}>
+                <table className="results-table" style={{ minWidth: '100%' }}> {/* Ganti ke .results-table */}
+                  <thead style={{ backgroundColor: '#f7fafc', position: 'sticky', top: 0, zIndex: 10 }}>
                     <tr>
-                      <th className="p-3 text-left text-sm font-semibold text-gray-600">Kolom Script</th>
-                      <th className="p-3 text-left text-sm font-semibold text-gray-600">Nilai Acuan</th>
-                      <th className="p-3 text-left text-sm font-semibold text-gray-600">Ganti Dengan</th>
+                      <th style={{ padding: '0.75rem', textAlign: 'left' }}>Kolom Script</th>
+                      <th style={{ padding: '0.75rem', textAlign: 'left' }}>Nilai Acuan</th>
+                      <th style={{ padding: '0.75rem', textAlign: 'left' }}>Ganti Dengan</th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white">
+                  <tbody style={{ backgroundColor: '#ffffff' }}>
                     {detectedMapping.map((item, index) => (
                       <React.Fragment key={item.col}>
+                        {/* Kelas-kelas ini (json-main-row, detected-value, dll) didefinisikan di style.css */}
                         <tr className={`border-b border-gray-200 ${item.isJson ? 'json-main-row' : ''}`}>
-                          <td className="p-2"><code className="bg-gray-100 text-gray-800 px-2 py-1 rounded">{item.col}</code></td>
-                          <td className="p-2 tooltip-cell" title={item.val}>
+                          <td style={{ padding: '0.5rem' }}><code className="bg-gray-100 text-gray-800 px-2 py-1 rounded">{item.col}</code></td>
+                          <td className="tooltip-cell" style={{ padding: '0.5rem' }} title={item.val}>
                             <code className="bg-gray-100 text-gray-500 px-2 py-1 rounded detected-value">{item.val}</code>
                           </td>
-                          <td className="p-2">
+                          <td style={{ padding: '0.5rem' }}>
                             <CustomDropdown 
                               options={dropdownOptions}
                               value={mappingState[item.col]}
@@ -332,11 +362,11 @@ function SqlScriptGeneratorOtomatis() {
                         </tr>
                         {item.isJson && item.jsonKeys.map(key => (
                           <tr key={key} className="border-b border-gray-200 json-subkey-row">
-                            <td className="p-2"><code className="json-key-code px-2 py-1 rounded ml-4">{key}</code></td>
-                            <td className="p-2 tooltip-cell" title={String(item.originalJson[key])}>
+                            <td style={{ padding: '0.5rem' }}><code className="json-key-code px-2 py-1 rounded ml-4">{key}</code></td>
+                            <td className="tooltip-cell" style={{ padding: '0.5rem' }} title={String(item.originalJson[key])}>
                               <code className="bg-gray-100 text-gray-500 px-2 py-1 rounded detected-value">{String(item.originalJson[key])}</code>
                             </td>
-                            <td className="p-2">
+                            <td style={{ padding: '0.5rem' }}>
                               <CustomDropdown 
                                 options={dropdownOptions}
                                 value={mappingState[`${item.col}.${key}`]}
@@ -353,8 +383,8 @@ function SqlScriptGeneratorOtomatis() {
             </div>
           )}
           {showGenerateButton && (
-            <div>
-              <button id="generate-button" className="w-full bg-green-600 text-white px-4 py-3 rounded-md" onClick={handleGenerateScript}>
+            <div style={{ marginTop: '1.5rem' }}> {/* Ganti space-y-6 */}
+              <button id="generate-button" className="button success" style={{ width: '100%' }} onClick={handleGenerateScript}>
                 5. Generate Script
               </button>
             </div>
@@ -363,16 +393,16 @@ function SqlScriptGeneratorOtomatis() {
       </div>
       
       {showOutputSection && (
-        <div id="output-section" className="mt-8">
-          <div className="flex justify-between items-center mb-2">
-            <h2 className="text-2xl font-semibold text-gray-800">Hasil Script</h2>
-            <button id="copy-button" className="bg-gray-200 text-gray-800 px-4 py-2 rounded-md" onClick={copyToClipboard}>
+        <div id="output-section" style={{ marginTop: '2rem' }}>
+          <div className="flex justify-between items-center" style={{ marginBottom: '0.5rem' }}>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: 600, color: 'var(--text-primary)' }}>Hasil Script</h2>
+            <button id="copy-button" className="button secondary" onClick={copyToClipboard}>
               Copy
             </button>
           </div>
-          <textarea id="output-sql" className="w-full h-80 p-3 border border-gray-300 rounded-md shadow-sm font-mono text-sm bg-gray-50" readOnly value={outputSql} />
+          <textarea id="output-sql" className="textarea textarea-editor font-mono" style={{ height: '20rem', backgroundColor: '#f7fafc', fontSize: '0.875rem' }} readOnly value={outputSql} />
           {copySuccess && (
-            <div id="copy-success" className="text-green-600 font-semibold mt-2">Berhasil disalin ke clipboard!</div>
+            <div id="copy-success" className="text-green-600 font-semibold" style={{ marginTop: '0.5rem' }}>Berhasil disalin ke clipboard!</div>
           )}
         </div>
       )}
