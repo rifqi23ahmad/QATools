@@ -229,7 +229,6 @@ body {
   border-radius: 8px;
 }
 
-
 /* --- 4.2. JSON Compare --- */
 #JsonCompare .textarea-editor { background-color: #fdfdfd; border: 1px solid var(--card-border); color: var(--text-primary); }
 #JsonCompare .diff-layout { display: grid; grid-template-columns: 3fr 1fr; gap: 1.5rem; align-items: start; }
