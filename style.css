@@ -992,3 +992,33 @@ SQL SCRIPT GENERATOR (OTOMATIS) STYLES
     font-size: 0.875rem; /* 14px */
     line-height: 1.5;
 }
+
+/* 1. Ini adalah logo horizontal Anda (nama class diubah) */
+.sidebar-logo-open {
+    width: 90px; 
+    height: auto;
+    transform: rotate(90deg); 
+    margin: 0 auto;
+    display: block; /* Tampil secara default */
+}
+
+/* 2. Ini adalah logo icon (qasidebar.png) baru Anda */
+.sidebar-logo-minimized {
+    width: 40px; /* Atur ukuran icon Anda di sini */
+    height: auto;
+    transform: rotate(90deg);
+    margin: 0 auto; /* Otomatis ke tengah */
+    display: none;  /* Sembunyi secara default */
+}
+
+/* 3. Logika untuk "Menukar" Logo */
+
+/* Saat sidebar ditutup, sembunyikan logo horizontal */
+.sidebar.minimized .sidebar-logo-open {
+    display: none;
+}
+
+/* Saat sidebar ditutup, TAMPILKAN logo icon */
+.sidebar.minimized .sidebar-logo-minimized {
+    display: block;
+}
