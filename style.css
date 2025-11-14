@@ -120,17 +120,115 @@ body {
 */
 
 /* --- 4.1. JSON Formatter --- */
-#JsonFormatter .editor-wrapper { display: flex; border: 1px solid #444; border-radius: 6px; background-color: #2d3748; height: 70vh; overflow: hidden; }
-#JsonFormatter .line-numbers { width: 50px; padding: 12px 10px 12px 0; font-size: 0.9em; text-align: right; color: #a0aec0; background-color: #1a202c; user-select: none; border-right: 1px solid #444; }
-#JsonFormatter .line-numbers span { display: block; }
-#JsonFormatter .textarea-editor, #JsonFormatter .pre-editor { width: 100%; border: none !important; box-shadow: none !important; resize: none; padding: 12px; background: transparent; color: #e2e8f0; overflow-y: scroll; }
-#JsonFormatter .textarea-editor::placeholder { color: #718096; }
-#JsonFormatter .json-key { color: #63b3ed; } 
-#JsonFormatter .json-string { color: #f6ad55; } 
-#JsonFormatter .json-number { color: #d53f8c; } 
-#JsonFormatter .json-boolean { color: #f56565; } 
-#JsonFormatter .json-null { color: #b794f4; }
-#JsonFormatter .json-error { color: #fbd38d; font-weight: bold;}
+#JsonFormatter {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", "Courier New", monospace;
+  color: #1f2937;
+}
+
+/* wrapper editor */
+#JsonFormatter .editor-wrapper {
+  display: flex;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  height: 70vh;
+  overflow: hidden; /* Ini SANGAT PENTING agar wrapper memotong konten */
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(16,24,40,0.06);
+}
+
+/* gutter / line numbers */
+#JsonFormatter .line-numbers {
+  width: 60px;
+  padding: 12px 10px 12px 12px;
+  font-size: 0.85rem;
+  text-align: right;
+  color: #94a3b8;
+  background: linear-gradient(180deg,#f8fafc,#f1f5f9);
+  user-select: none;
+  border-right: 1px solid #e6eef7;
+  
+  /* [PERBAIKAN KUNCI] Buat agar bisa di-scroll tapi sembunyikan scrollbar-nya */
+  height: 100%;
+  overflow-y: auto;
+  -ms-overflow-style: none;  /* IE dan Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+/* Sembunyikan scrollbar untuk Chrome, Safari, dan Opera */
+#JsonFormatter .line-numbers::-webkit-scrollbar {
+    display: none;
+}
+#JsonFormatter .line-numbers span {
+  display: block;
+  line-height: 1.5rem;
+}
+
+
+/* editors (textarea input dan pre output) */
+#JsonFormatter .textarea-editor,
+#JsonFormatter .pre-editor {
+  /* [PERBAIKAN KUNCI] Gunakan flex: 1 agar mengisi sisa ruang, BUKAN width: 100% */
+  flex: 1;
+  border: none !important;
+  box-shadow: none !important;
+  resize: none;
+  padding: 12px;
+  background: transparent;
+  color: #0f172a;
+  overflow-y: auto; /* Editor harus bisa di-scroll */
+  font-size: 0.95rem;
+  line-height: 1.5;
+  tab-size: 4;
+  white-space: pre;
+  height: 100%; /* Pastikan tingginya 100% dari wrapper */
+}
+
+/* Input area specific */
+#JsonFormatter .textarea-editor {
+  background: #ffffff;
+  caret-color: #111827;
+  color: #0f172a;
+}
+
+/* Output area */
+#JsonFormatter .pre-editor {
+  background: #fbfdff;
+  padding: 12px 16px;
+  color: #0b1220;
+}
+
+/* placeholder */
+#JsonFormatter .textarea-editor::placeholder { color: #94a3b8; }
+
+/* syntax colors */
+#JsonFormatter .json-key { color: #1f6feb; }
+#JsonFormatter .json-string { color: #00875a; }
+#JsonFormatter .json-number { color: #a31515; }
+#JsonFormatter .json-boolean { color: #7950f2; }
+#JsonFormatter .json-null { color: #6b7280; }
+#JsonFormatter .json-error { color: #b91c1c; font-weight: 700; }
+
+/* selection highlight */
+#JsonFormatter .textarea-editor::selection,
+#JsonFormatter .pre-editor ::selection {
+  background: rgba(31,99,255,0.15);
+}
+
+/* buttons / controls */
+#JsonFormatter .card { background: transparent; border: none; padding: 0; }
+#JsonFormatter .button.primary { background: #1f6feb; color: white; border-radius: 6px; padding: 8px 12px; }
+#JsonFormatter .button.secondary { background: #f1f5f9; color: #0f172a; border-radius: 6px; padding: 8px 12px; }
+
+/* scrollbar (light and thin) */
+#JsonFormatter .textarea-editor::-webkit-scrollbar,
+#JsonFormatter .pre-editor::-webkit-scrollbar {
+  width: 8px;
+}
+#JsonFormatter .textarea-editor::-webkit-scrollbar-thumb,
+#JsonFormatter .pre-editor::-webkit-scrollbar-thumb {
+  background: rgba(15,23,42,0.08);
+  border-radius: 8px;
+}
+
 
 /* --- 4.2. JSON Compare --- */
 #JsonCompare .textarea-editor { background-color: #fdfdfd; border: 1px solid var(--card-border); color: var(--text-primary); }
@@ -487,6 +585,10 @@ body {
 }
 .sidebar.minimized .sidebar-footer {
     justify-content: center;
+}
+/* [PERUBAHAN] Aturan CSS baru ditambahkan di sini */
+.sidebar.minimized .sidebar-counter {
+    display: none;
 }
 .sidebar.minimized #sidebar-toggle i {
     transform: rotate(180deg);
@@ -878,8 +980,15 @@ SQL SCRIPT GENERATOR (OTOMATIS) STYLES
 #api-response-body-output .json-null { color: #b794f4; }
 #api-response-body-output .json-error { color: #fbd38d; font-weight: bold;}
 
-/* [BARU] Style untuk cURL Importer */
+/* Style untuk cURL Importer */
 #api-curl-importer #api-curl-input {
     background-color: #ffffff;
     color: var(--text-primary);
+}
+
+/* [PERBAIKAN] Perkecil font di area respons */
+#api-response-body-output,
+#api-response-headers-output {
+    font-size: 0.875rem; /* 14px */
+    line-height: 1.5;
 }
