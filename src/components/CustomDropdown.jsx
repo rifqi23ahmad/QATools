@@ -1,5 +1,3 @@
-// src/components/CustomDropdown.jsx
-
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 
 function CustomDropdown({ options, value, onChange }) {

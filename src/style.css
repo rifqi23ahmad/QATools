@@ -44,7 +44,7 @@ body {
 */
 .app-layout { display: flex; min-height: 100vh; }
 .sidebar { 
-    width: 260px; 
+    width: 230px; 
     background-color: var(--sidebar-bg); 
     color: var(--sidebar-text); 
     display: flex; 
@@ -56,7 +56,7 @@ body {
     top: 0; 
 }
 .sidebar-header { 
-    padding: 1rem; 
+    padding: 0.75rem 1rem;
     display: flex; 
     align-items: center; 
     gap: 0.75rem; 
@@ -525,12 +525,20 @@ body {
 }
 
 /* --- Sidebar Footer & Toggle --- */
+/* --- Sidebar Footer & Toggle (VERSI BENAR) --- */
+/* --- Sidebar Footer & Toggle (VERSI BENAR) --- */
 .sidebar-footer {
     padding: 1rem;
     border-top: 1px solid #2d3748;
     flex-shrink: 0;
     display: flex;
-    justify-content: flex-end;
+    align-items: center; /* Menjaga vertikal tetap di tengah */
+}
+
+/* TAMBAHKAN INI */
+.sidebar-counter {
+    flex-grow: 1; /* Biarkan counter mengisi sisa ruang */
+    /* text-align: center; sudah ada di inline style */
 }
 #sidebar-toggle {
     background-color: var(--sidebar-active-bg);
@@ -564,6 +572,7 @@ body {
 }
 .sidebar.minimized .sidebar-header {
     justify-content: center;
+    padding: 0.5rem;
 }
 .sidebar.minimized .nav-item a {
     justify-content: center;
@@ -585,10 +594,7 @@ body {
 .sidebar.minimized .sidebar-footer {
     justify-content: center;
 }
-/* [PERUBAHAN] Aturan CSS baru ditambahkan di sini */
-.sidebar.minimized .sidebar-counter {
-    display: none;
-}
+
 .sidebar.minimized #sidebar-toggle i {
     transform: rotate(180deg);
 }
@@ -991,33 +997,76 @@ SQL SCRIPT GENERATOR (OTOMATIS) STYLES
     font-size: 0.875rem; /* 14px */
     line-height: 1.5;
 }
-
 /* 1. Ini adalah logo horizontal Anda (nama class diubah) */
+.sidebar-header {
+  padding: 0;
+  margin: 0;
+  height: 90px;              /* atur tinggi header sesuai kebutuhan */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #161c27;
+  overflow: hidden;
+  position: relative;
+}
+
+.logo-wrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+  /* Tambahkan padding jika logo terlalu mepet ke tepi */
+  padding: 10px; 
+  box-sizing: border-box; /* Pastikan padding tidak menambah ukuran */
+}
+
+/* --- PERBAIKAN CSS UTAMA --- */
 .sidebar-logo-open {
-    width: 150px; 
-    height: auto;
-    transform: rotate(90deg); 
-    margin: 0 auto;
-    display: block; /* Tampil secara default */
+  width: 200px;               /* UBAH: dari 10% */
+  height: 130px;              /* UBAH: dari 10% */
+  object-fit: contain;       /* UBAH: 'contain' lebih aman untuk logo agar tidak terpotong */
+  display: block;
+  margin: 0;
+  padding: 0;
+  transform: rotate(90deg);
+
 }
 
-/* 2. Ini adalah logo icon (qasidebar.png) baru Anda */
+/* --- ATURAN CSS TAMBAHAN --- */
+/* Sembunyikan logo kecil (ikon) secara default */
 .sidebar-logo-minimized {
-    width: 40px; /* Atur ukuran icon Anda di sini */
-    height: auto;
-    transform: rotate(90deg);
-    margin: 0 auto; /* Otomatis ke tengah */
-    display: none;  /* Sembunyi secara default */
+  display: none;
+  width: 40px;
+  height: auto;
+  transform: rotate(90deg);
 }
 
-/* 3. Logika untuk "Menukar" Logo */
-
-/* Saat sidebar ditutup, sembunyikan logo horizontal */
+/* jika sidebar minimized — sembunyikan logo besar, tampilkan icon */
 .sidebar.minimized .sidebar-logo-open {
-    display: none;
+  display: none;
+   
+}
+.sidebar.minimized .logo-wrapper {
+  display: none !important;         /* sembunyikan wrapper besar */
 }
 
-/* Saat sidebar ditutup, TAMPILKAN logo icon */
-.sidebar.minimized .sidebar-logo-minimized {
-    display: block;
+.sidebar.minimized .sidebar-header {
+  height: 90px;                     /* sama dengan tinggi original */
+  display: flex;
+  align-items: center;
+  justify-content: center;          /* center icon secara horizontal */
 }
+
+/* tampilkan icon kecil dan center */
+.sidebar.minimized .sidebar-logo-minimized {
+  display: block !important;
+  width: 40px;                      /* ukurannya bebas */
+  height: auto;
+  margin: 0 auto;
+}
+
+

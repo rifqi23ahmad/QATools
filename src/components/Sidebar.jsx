@@ -61,7 +61,7 @@ function Sidebar({ activeTool, setActiveTool }) {
     // Create iframe
     const iframe = document.createElement('iframe');
     iframe.style.width = '100%';
-    iframe.style.height = '48px'; // atur sesuai kebutuhan: 48-80px
+    iframe.style.height = '180px'; // /* --- PERBAIKAN 1: Diberi tinggi lebih agar tidak terpotong --- */
     iframe.style.border = '0';
     iframe.style.overflow = 'hidden';
     iframe.setAttribute('aria-hidden', 'true');
@@ -87,16 +87,13 @@ function Sidebar({ activeTool, setActiveTool }) {
     // Append iframe
     container.appendChild(iframe);
 
-    // Fallback jika iframe tidak memunculkan apa-apa (mis. diblok)
+    // Fallback (tidak berubah)
     const fallbackTimeout = setTimeout(() => {
-      // karena cross-origin kita tidak bisa baca isi iframe, jadi deteksi sederhana:
-      // jika container masih berisi iframe namun tinggi konten kecil, tampilkan pesan fallback
       if (container && container.childElementCount === 0) {
         container.innerHTML = '<div style="font-size:12px;text-align:center;">Counter gagal dimuat — cek adblock / CSP.</div>';
       }
     }, 2500);
 
-    // error handler
     iframe.addEventListener('error', () => {
       clearTimeout(fallbackTimeout);
       container.innerHTML = '<div style="font-size:12px;text-align:center;">Counter gagal dimuat (blocked).</div>';
@@ -116,11 +113,23 @@ function Sidebar({ activeTool, setActiveTool }) {
   };
 
   return (
-    <aside className={`sidebar ${isMinimized ? 'minimized' : ''}`}>
-      <div className="sidebar-header">
-        <img src="/qalogo.png" alt="QaTools Logo" className="sidebar-logo-open" />
-        <img src="/qasidebar.png" alt="QaTools Icon" className="sidebar-logo-minimized" />
-      </div>
+      <aside className={`sidebar ${isMinimized ? 'minimized' : ''}`}>
+        <div className="sidebar-header">
+          <div className="logo-wrapper">
+            <img 
+              src="/qalogo.png" 
+              alt="QaTools Logo" 
+              className="sidebar-logo-open" 
+            />
+          </div>
+
+          <img 
+            src="/qasidebar.png" 
+            alt="QaTools Icon" 
+            className="sidebar-logo-minimized" 
+          />
+        </div>
+
 
       <nav className="sidebar-nav">
         <ul>
@@ -150,10 +159,10 @@ function Sidebar({ activeTool, setActiveTool }) {
         <div
           ref={counterContainerRef}
           style={{
-            width: "100%",
+            flex: 1, /* --- PERBAIKAN 2: Mengganti 'width: 100%' --- */
             textAlign: "center",
-            marginBottom: "10px",
-            pointerEvents: "none" // uncomment jika mau non-interactive
+            /* --- PERBAIKAN 3: Menghapus 'marginBottom: "10px"' --- */
+            pointerEvents: "none"
           }}
         />
 
