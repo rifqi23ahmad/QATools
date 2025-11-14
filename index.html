@@ -1,130 +1,22 @@
 <!DOCTYPE html>
 <html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QaTools</title>
-    <link rel="icon" type="image/png" href="qasidebar.png">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/qasidebar.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QaTools (React)</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <div id="root"></div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/diff_match_patch/20121119/diff_match_patch.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script> 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-</head>
-<body>
-    <div class="app-layout">
-        <aside class="sidebar">
-            <div class="sidebar-header">
-            <img src="qalogo.png" alt="QaTools Logo" class="sidebar-logo-open">
-            <img src="qasidebar.png" alt="QaTools Icon" class="sidebar-logo-minimized">
-            </div>
-            <nav class="sidebar-nav">
-                <ul>
-                    <li class="nav-group-header"><span>JSON Tools</span></li>
-                    <li class="nav-item active" data-tool="JsonFormatter">
-                        <a href="#"><i class="fas fa-code fa-fw"></i><span>JSON Formatter</span></a>
-                    </li>
-                    <li class="nav-item" data-tool="JsonCompare">
-                        <a href="#"><i class="fas fa-exchange-alt fa-fw"></i><span>JSON Compare</span></a>
-                    </li>
-                    <li class="nav-item" data-tool="JsonValueExtractor">
-                        <a href="#"><i class="fas fa-search-dollar fa-fw"></i><span>JSON Value Extractor</span></a>
-                    </li>
-
-                    <li class="nav-group-header"><span>SQL & Data Tools</span></li>
-                    <li class="nav-item" data-tool="DataCompare">
-                        <a href="#"><i class="fas fa-table-list fa-fw"></i><span>Data Compare</span></a>
-                    </li>
-                    <li class="nav-item" data-tool="SqlFormatter">
-                        <a href="#"><i class="fas fa-database fa-fw"></i><span>SQL Formatter</span></a>
-                    </li>
-                     <li class="nav-item" data-tool="SqlInjector">
-                        <a href="#"><i class="fas fa-syringe fa-fw"></i><span>SQL Injector</span></a>
-                    </li>
-                    <li class="nav-item" data-tool="SqlScriptGeneratorOtomatis">
-                        <a href="#"><i class="fas fa-magic fa-fw"></i><span>SQL Gen (Otomatis)</span></a>
-                    </li>
-                    <li class="nav-item" data-tool="ArchiveFileFinder">
-                        <a href="#"><i class="fas fa-file-archive fa-fw"></i><span>Archive Finder</span></a>
-                    </li>
-                    <li class="nav-item" data-tool="ApiRequestor">
-                        <a href="#"><i class="fas fa-paper-plane fa-fw"></i><span>API Requestor</span></a>
-                    </li>
-
-                    <li class="nav-group-header"><span>File & Document Tools</span></li>
-                     <li class="nav-item" data-tool="FileSplitter">
-                        <a href="#"><i class="fas fa-file-zipper fa-fw"></i><span>File Splitter</span></a>
-                    </li>
-                    <li class="nav-item" data-tool="WordingCompare">
-                        <a href="#"><i class="fas fa-file-alt fa-fw"></i><span>Doc Compare</span></a>
-                    </li>
-                    <li class="nav-item" data-tool="ImageCompare">
-                        <a href="#"><i class="fas fa-images fa-fw"></i><span>Image Compare</span></a>
-                    </li>
-                    <li class="nav-item" data-tool="DummyImageGenerator">
-                        <a href="#"><i class="fas fa-file-image fa-fw"></i><span>Dummy File Gen</span></a>
-                    </li>
-                     <li class="nav-item" data-tool="BranchDataProcessor">
-                        <a href="#"><i class="fas fa-file-excel fa-fw"></i><span>Branch Data Processor</span></a>
-                    </li>
-                </ul>
-            </nav>
-            <div class="sidebar-footer">
-                <div class="sidebar-counter" style="width: 100%; text-align: center; margin-bottom: 10px; pointer-events: none;">
-                    <script language="JavaScript" type="text/javascript" src="https://gnrcounter.com/counter.php?accId=f4cdd2f47d0878be22ec2c9252b1ea67"></script>
-                    <noscript>
-                    <a href="https://gnrcounter.com" title="Web Analytics">Web Analytics</a>
-                    </noscript>
-                    </div>
-                <button id="sidebar-toggle" title="Minimize Sidebar">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-            </div>
-        </aside>
-
-
-        <main class="main-content">
-            <div class="tool-page active" id="JsonFormatter"></div>
-            <div class="tool-page" id="JsonCompare"></div>
-            <div class="tool-page" id="JsonValueExtractor"></div>
-            <div class="tool-page" id="DataCompare"></div>
-            <div class="tool-page" id="FileSplitter"></div>
-            <div class="tool-page" id="ImageCompare"></div>
-            <div class="tool-page" id="SqlFormatter"></div>
-            <div class="tool-page" id="SqlInjector"></div>
-            <div class="tool-page" id="WordingCompare"></div>
-            <div class="tool-page" id="DummyImageGenerator"></div>
-            <div class="tool-page" id="BranchDataProcessor"></div>
-            <div class="tool-page" id="ArchiveFileFinder"></div>
-            <div class="tool-page" id="SqlScriptGeneratorOtomatis"></div>
-            <div class="tool-page" id="ApiRequestor"></div>
-        </main>
-    </div>
-
-    <script src="JSONFormatter.js"></script>
-    <script src="JSONCompare.js"></script>
-    <script src="JSONValueExtractor.js"></script>
-    <script src="DataCompare.js"></script>
-    <script src="FileSplitter.js"></script>
-    <script src="ImageCompare.js"></script>
-    <script src="SQLNumberFormatter.js"></script>
-    <script src="SQLInjector.js"></script>
-    <script src="AdvancedDocumentCompare.js"></script>
-    <script src="DummyImageGenerator.js"></script>
-    <script src="BranchDataProcessor.js"></script>
-    <script src="ArchiveFileFinder.js"></script>
-    <script src="SqlScriptGeneratorOtomatis.js"></script>
-    <script src="ApiRequestor.js"></script>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     
-    <script src="script.js"></script>
-</body>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
 </html>
