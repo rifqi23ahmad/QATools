@@ -111,7 +111,8 @@ function JsonCompare() {
   };
 
   return (
-    <div>
+    //  PERUBAHAN DI SINI: Tambahkan id="JsonCompare"
+    <div id="JsonCompare"> 
       <div className="tool-header">
         <h1>JSON Compare</h1>
         <p>Bandingkan dua objek JSON untuk menemukan perbedaan properti dan nilai secara visual.</p>
@@ -155,9 +156,6 @@ function JsonCompare() {
             <div className="diff-view">
               <div className="diff-pane">
                 <div className="diff-pane-header">JSON Asli</div>
-                {/* 'dangerouslySetInnerHTML' digunakan karena pustaka DMP
-                  membuat string HTML untuk highlighting.
-                */}
                 <pre 
                   id="json-compare-output-left" 
                   className="diff-output"

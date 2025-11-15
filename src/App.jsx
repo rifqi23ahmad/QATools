@@ -10,7 +10,8 @@ function App() {
       {/* Sidebar tidak lagi memerlukan props activeTool atau setActiveTool */}
       <Sidebar />
       
-      <main className="main-content">
+      {/* PERUBAHAN DI SINI */}
+      <main className="main-content" style={{ display: 'flex', flexDirection: 'column' }}>
         {/* Outlet adalah placeholder di mana React Router akan 
           merender komponen rute yang cocok (tool Anda).
         */}

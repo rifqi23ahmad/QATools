@@ -6,7 +6,12 @@ import JsonValueExtractor from './tools/JSONValueExtractor';
 import DataCompare from './tools/DataCompare';
 import JsonCompare from './tools/JSONCompare';
 import BranchDataProcessor from './tools/BranchDataProcessor';
-import ApiRequestor from './tools/ApiRequestor';
+
+// --- PERUBAHAN DI SINI ---
+// Impor 'manager' baru
+import ApiRequestorManager from './tools/ApiRequestorManager'; 
+// --- AKHIR PERUBAHAN ---
+
 import FileSplitter from './tools/FileSplitter';
 import SqlInjector from './tools/SqlInjector';
 import JsonFormatter from './tools/JSONFormatter';
@@ -56,7 +61,6 @@ export const toolGroups = [
 
 /**
  * Peta untuk mencocokkan 'id' tool dengan Komponen React-nya.
- * Simpan REFERENCE ke komponen (bukan JSX element).
  */
 export const toolComponentMap = {
   // JSON Tools
@@ -70,7 +74,11 @@ export const toolComponentMap = {
   SqlInjector: SqlInjector,
   SqlScriptGeneratorOtomatis: SqlScriptGeneratorOtomatis,
   ArchiveFileFinder: ArchiveFileFinder,
-  ApiRequestor: ApiRequestor,
+  
+  // --- PERUBAHAN DI SINI ---
+  ApiRequestor: ApiRequestorManager, // Ganti ini
+  // --- AKHIR PERUBAHAN ---
+
   SqlScriptGenerator: SqlScriptGenerator,
 
   // File & Document Tools
@@ -80,16 +88,6 @@ export const toolComponentMap = {
   DummyImageGenerator: DummyImageGenerator,
   BranchDataProcessor: BranchDataProcessor,
 };
-
-/**
- * Helper: render tool berdasarkan id.
- * Usage: renderTool('JsonFormatter') -> returns <JsonFormatter /> atau null.
- */
-export function renderToolById(id, props = {}) {
-  const Comp = toolComponentMap[id];
-  if (!Comp) return null;
-  return <Comp {...props} />;
-}
 
 /**
  * Array datar dari semua tool, berguna untuk membuat rute.

@@ -282,9 +282,8 @@ function SqlInjector() {
     setJsonStructure({}); setTemplateValues([]);
     setShowForm(false); setShowOutput(false);
   };
-
-  return (
-    <div>
+return (
+    <div id="SqlInjector">
       <div className="tool-header">
         <h1>SQL INSERT Query Generator</h1>
         <p>Tempelkan query SQL Anda untuk membuat form input data secara otomatis.</p>
@@ -308,7 +307,7 @@ function SqlInjector() {
         <div id="form-container" className="card" style={{ marginBottom: '1.5rem' }}>
           <h2 className="label">2. Masukkan Data Baru</h2>
           {/* ... Teks tips ... */}
-          <p style="color: #38a169; margin-bottom: 1rem; font-size: 0.9rem;"><strong>Tips:</strong> Header miring berwarna hijau adalah bagian dari JSON.</p>
+          <p style={{color: '#38a169', marginBottom: '1rem', fontSize: '0.9rem'}}><strong>Tips:</strong> Header miring berwarna hijau adalah bagian dari JSON.</p>
           <div id="data-table-container" className="results-table-wrapper" style={{ maxHeight: '50vh', overflow: 'auto' }}>
             <table className="results-table">
               <thead>
