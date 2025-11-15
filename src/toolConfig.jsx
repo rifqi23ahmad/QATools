@@ -1,0 +1,97 @@
+import React from 'react';
+
+// 1. Impor SEMUA 15 tool
+import SqlFormatter from './tools/SQLNumberFormatter';
+import JsonValueExtractor from './tools/JSONValueExtractor';
+import DataCompare from './tools/DataCompare';
+import JsonCompare from './tools/JSONCompare';
+import BranchDataProcessor from './tools/BranchDataProcessor';
+import ApiRequestor from './tools/ApiRequestor';
+import FileSplitter from './tools/FileSplitter';
+import SqlInjector from './tools/SqlInjector';
+import JsonFormatter from './tools/JSONFormatter';
+import ArchiveFileFinder from './tools/ArchiveFileFinder';
+import ImageCompare from './tools/ImageCompare';
+import DummyImageGenerator from './tools/DummyImageGenerator';
+import WordingCompare from './tools/WordingCompare';
+import SqlScriptGeneratorOtomatis from './tools/SqlScriptGeneratorOtomatis';
+import SqlScriptGenerator from './tools/SQLScriptGenerator';
+
+/**
+ * Mendefinisikan grup tool untuk sidebar.
+ * Menambahkan properti 'path' unik untuk routing.
+ */
+export const toolGroups = [
+  {
+    title: 'JSON Tools',
+    tools: [
+      { id: 'JsonFormatter', path: '/json-formatter', name: 'JSON Formatter', icon: 'fa-code' },
+      { id: 'JsonCompare', path: '/json-compare', name: 'JSON Compare', icon: 'fa-exchange-alt' },
+      { id: 'JsonValueExtractor', path: '/json-value-extractor', name: 'JSON Value Extractor', icon: 'fa-search-dollar' },
+    ]
+  },
+  {
+    title: 'SQL & Data Tools',
+    tools: [
+      { id: 'DataCompare', path: '/data-compare', name: 'Data Compare', icon: 'fa-table-list' },
+      { id: 'SqlFormatter', path: '/sql-formatter', name: 'SQL Formatter', icon: 'fa-database' },
+      { id: 'SqlInjector', path: '/sql-injector', name: 'SQL Injector', icon: 'fa-syringe' },
+      { id: 'SqlScriptGeneratorOtomatis', path: '/sql-gen-otomatis', name: 'SQL Gen (Otomatis)', icon: 'fa-magic' },
+      { id: 'ArchiveFileFinder', path: '/archive-finder', name: 'Archive Finder', icon: 'fa-file-archive' },
+      { id: 'ApiRequestor', path: '/api-requestor', name: 'API Requestor', icon: 'fa-paper-plane' },
+      { id: 'SqlScriptGenerator', path: '/sql-gen-manual', name: 'SQL Gen (Manual)', icon: 'fa-file-code' },
+    ]
+  },
+  {
+    title: 'File & Document Tools',
+    tools: [
+      { id: 'FileSplitter', path: '/file-splitter', name: 'File Splitter', icon: 'fa-file-zipper' },
+      { id: 'WordingCompare', path: '/doc-compare', name: 'Doc Compare', icon: 'fa-file-alt' },
+      { id: 'ImageCompare', path: '/image-compare', name: 'Image Compare', icon: 'fa-images' },
+      { id: 'DummyImageGenerator', path: '/dummy-file-gen', name: 'Dummy File Gen', icon: 'fa-file-image' },
+      { id: 'BranchDataProcessor', path: '/branch-data-processor', name: 'Branch Data Processor', icon: 'fa-file-excel' },
+    ]
+  }
+];
+
+/**
+ * Peta untuk mencocokkan 'id' tool dengan Komponen React-nya.
+ * Simpan REFERENCE ke komponen (bukan JSX element).
+ */
+export const toolComponentMap = {
+  // JSON Tools
+  JsonFormatter: JsonFormatter,
+  JsonCompare: JsonCompare,
+  JsonValueExtractor: JsonValueExtractor,
+
+  // SQL & Data Tools
+  DataCompare: DataCompare,
+  SqlFormatter: SqlFormatter,
+  SqlInjector: SqlInjector,
+  SqlScriptGeneratorOtomatis: SqlScriptGeneratorOtomatis,
+  ArchiveFileFinder: ArchiveFileFinder,
+  ApiRequestor: ApiRequestor,
+  SqlScriptGenerator: SqlScriptGenerator,
+
+  // File & Document Tools
+  FileSplitter: FileSplitter,
+  WordingCompare: WordingCompare,
+  ImageCompare: ImageCompare,
+  DummyImageGenerator: DummyImageGenerator,
+  BranchDataProcessor: BranchDataProcessor,
+};
+
+/**
+ * Helper: render tool berdasarkan id.
+ * Usage: renderTool('JsonFormatter') -> returns <JsonFormatter /> atau null.
+ */
+export function renderToolById(id, props = {}) {
+  const Comp = toolComponentMap[id];
+  if (!Comp) return null;
+  return <Comp {...props} />;
+}
+
+/**
+ * Array datar dari semua tool, berguna untuk membuat rute.
+ */
+export const allTools = toolGroups.flatMap(group => group.tools);
