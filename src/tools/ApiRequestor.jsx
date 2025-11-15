@@ -1,4 +1,21 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+
+// --- IMPORT ACE (langsung, tanpa Suspense/lazy) ---
+import AceEditor from 'react-ace';
+import 'ace-builds/src-noconflict/mode-json';
+import 'ace-builds/src-noconflict/theme-tomorrow_night';
+import 'ace-builds/src-noconflict/ext-language_tools';
+
+// Utility: hitung tinggi editor berdasarkan jumlah baris
+const calcEditorHeight = (text, opts = {}) => {
+  const lineHeight = opts.lineHeight ?? 18; // px per baris
+  const verticalPadding = opts.verticalPadding ?? 24; // padding atas+bawah
+  const minHeight = opts.minHeight ?? 150; // px
+  const maxHeight = opts.maxHeight ?? 480; // px (batas maksimal)
+  const lines = (text || '').split('\n').length || 1;
+  const raw = lines * lineHeight + verticalPadding;
+  return Math.max(minHeight, Math.min(raw, maxHeight));
+};
 
 // Komponen "dumb" ApiRequestor (props dikendalikan oleh parent)
 function ApiRequestor({
@@ -13,6 +30,14 @@ function ApiRequestor({
   const [copyResponseText, setCopyResponseText] = useState('Copy');
   const { method, url, body, headers } = requestState || { method: 'GET', url: '', body: '', headers: [] };
   const response = responseState;
+
+  // Editor sizing state (height in px)
+  const [editorHeight, setEditorHeight] = useState(() => calcEditorHeight(body));
+
+  useEffect(() => {
+    // recalc height whenever body changes
+    setEditorHeight(calcEditorHeight(body, { lineHeight: 18, verticalPadding: 24, minHeight: 150, maxHeight: 480 }));
+  }, [body]);
 
   // --- Syntax highlight yang aman (menerima object atau string) ---
   function highlightJsonSyntax(jsonInput) {
@@ -132,7 +157,6 @@ function ApiRequestor({
         // panjang opsi bentuk --header:value (jarang) or unknown option -> lewati
         if (token.startsWith('-')) {
           // skip unknown option and possibly its immediate value
-          // beberapa option tidak punya value; kita berusaha melihat apakah next terlihat seperti value (bukan option) -> jika bukan option, lewati next
           const next = tokens[i + 1];
           if (next && !next.startsWith('-')) i++;
           continue;
@@ -142,21 +166,18 @@ function ApiRequestor({
         if (!result.url) {
           result.url = unquote(token);
         }
-        // else ignore (positional args)
       }
 
       // Jika tidak ada metode tapi ada body -> POST; jika tidak ada metode dan tidak body -> GET
       if (!result.method) result.method = result.body ? 'POST' : 'GET';
 
       // --- PERBAIKAN BUG STATE BATCH ---
-      // 1. Kumpulkan semua pembaruan dalam satu objek
       const updates = {
         method: result.method,
         url: (result.url || '').trim()
       };
 
       if (result.body !== undefined) {
-        // coba parse JSON; jika berhasil, set pretty JSON; else set raw
         try {
           const parsed = JSON.parse(result.body);
           updates.body = JSON.stringify(parsed, null, 2);
@@ -169,7 +190,6 @@ function ApiRequestor({
         updates.headers = result.headers;
       }
 
-      // 2. Panggil onRequestChange HANYA SEKALI dengan objek batch
       onRequestChange(updates);
       // --- AKHIR PERBAIKAN BUG STATE BATCH ---
 
@@ -204,26 +224,43 @@ function ApiRequestor({
 
   const [requestTab, setRequestTab] = useState('headers');
 
+  // Beautify (pretty print) body
+  const beautifyBody = () => {
+    if (!body) return;
+    try {
+      const parsed = JSON.parse(body);
+      const pretty = JSON.stringify(parsed, null, 2);
+      onRequestChange('body', pretty);
+      // update editor height immediately
+      setEditorHeight(calcEditorHeight(pretty, { lineHeight: 18, verticalPadding: 24, minHeight: 150, maxHeight: 480 }));
+    } catch (err) {
+      alert('Tidak bisa merapikan: isi bukan JSON valid.');
+    }
+  };
+
   // Helper untuk render response headers dalam format yang rapi
   const renderResponseHeaders = (rh) => {
     if (!rh) return '';
-    // Jika array of {key, value}
     if (Array.isArray(rh)) {
       return rh.map(h => {
         if (typeof h === 'string') return h;
         if (h.key !== undefined) return `${h.key}: ${h.value}`;
-        // if object with name/value
         if (h.name !== undefined) return `${h.name}: ${h.value}`;
         return JSON.stringify(h);
       }).join('\n');
     }
-    // Jika object map
     if (typeof rh === 'object') {
       return Object.entries(rh).map(([k, v]) => `${k}: ${v}`).join('\n');
     }
-    // fallback: plain string
     return String(rh);
   };
+
+  // Memoized guarded Ace component (handles default export namespace)
+  const AceComp = useMemo(() => {
+    return (AceEditor && AceEditor.default) ? AceEditor.default : AceEditor;
+  }, []);
+
+  const isValidAce = AceComp && (typeof AceComp === 'function' || typeof AceComp === 'object');
 
   // --- Render ---
   return (
@@ -231,7 +268,7 @@ function ApiRequestor({
       <div className="api-request-zone">
         <div className="cors-warning">
           <p>
-            <strong>Jika ada Peringatan CORS:</strong> Gunakan <strong>"Allow CORS"</strong> extension agar bisa berjalan di browser kamu.
+            <strong>Jika kamu dapat response Peringatan CORS:</strong> Gunakan <strong>"Allow CORS"</strong> extension  agar bisa berjalan di browser kamu.
           </p>
         </div>
 
@@ -274,9 +311,25 @@ function ApiRequestor({
         </div>
 
         <div className="api-tabs-container" style={{ marginTop: '1rem' }}>
-          <div className="api-tabs-nav">
-            <button className={`api-tab-btn ${requestTab === 'headers' ? 'active' : ''}`} onClick={() => setRequestTab('headers')}>Headers</button>
-            <button className={`api-tab-btn ${requestTab === 'body' ? 'active' : ''}`} onClick={() => setRequestTab('body')}>Body (JSON)</button>
+          <div className="api-tabs-nav" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button className={`api-tab-btn ${requestTab === 'headers' ? 'active' : ''}`} onClick={() => setRequestTab('headers')}>Headers</button>
+              <button className={`api-tab-btn ${requestTab === 'body' ? 'active' : ''}`} onClick={() => setRequestTab('body')}>Body (JSON)</button>
+            </div>
+
+            {/* Beautify button visible when body tab selected */}
+            <div style={{ marginLeft: 'auto' }}>
+              {requestTab === 'body' && (
+                <button
+                  className="button secondary"
+                  onClick={beautifyBody}
+                  title="Beautify / Pretty-print JSON"
+                  style={{ marginRight: '0.5rem', fontSize: '0.85rem' }}
+                >
+                  <i className="fas fa-magic" style={{ marginRight: '0.5rem' }} /> Beautify
+                </button>
+              )}
+            </div>
           </div>
 
           <div id="tab-headers" className={`api-tab-content ${requestTab === 'headers' ? 'active' : ''}`}>
@@ -294,16 +347,67 @@ function ApiRequestor({
             </button>
           </div>
 
+          {/* --- Body tab dengan guarded AceEditor (fallback textarea jika import tidak valid) --- */}
           <div id="tab-body" className={`api-tab-content ${requestTab === 'body' ? 'active' : ''}`}>
-            <textarea
-              id="api-body"
-              className="textarea textarea-editor"
-              rows="4"
-              placeholder='{ "key": "value" }'
-              value={body || ''}
-              onChange={(e) => onRequestChange('body', e.target.value)}
-            />
+
+            {/* Render editor with dynamic height (editorHeight state) */}
+            {isValidAce ? (
+              <AceComp
+                mode="json"
+                theme="tomorrow_night"
+                onChange={(newValue) => onRequestChange('body', newValue)}
+                value={body || ''}
+                name="api-body-editor"
+                editorProps={{ $blockScrolling: true }}
+                width="100%"
+                height={`${editorHeight}px`}
+                fontSize={14}
+                showPrintMargin={false}
+                showGutter={true}
+                highlightActiveLine={true}
+                setOptions={{
+                  enableBasicAutocompletion: false,
+                  enableLiveAutocompletion: false,
+                  showLineNumbers: true,
+                  tabSize: 2,
+                  useWorker: true
+                }}
+                style={{ borderRadius: '6px', border: '1px solid var(--card-border)', overflow: 'auto' }}
+              />
+            ) : (
+              <textarea
+                value={body || ''}
+                onChange={(e) => onRequestChange('body', e.target.value)}
+                style={{
+                  width: '100%',
+                  height: `${editorHeight}px`,
+                  padding: '0.75rem',
+                  borderRadius: '6px',
+                  border: '1px solid var(--card-border)',
+                  fontFamily: 'monospace',
+                  fontSize: 14,
+                  background: 'var(--editor-bg, #0f172a)',
+                  color: 'var(--editor-fg, #e2e8f0)',
+                  overflow: 'auto',
+                  resize: 'vertical' // masih boleh di-resize manual jika mau
+                }}
+                placeholder="JSON body..."
+              />
+            )}
+
+            {/* If content taller than max, show small notice */}
+            {(() => {
+              const maxHeight = 480;
+              const natural = calcEditorHeight(body, { lineHeight: 18, verticalPadding: 24, minHeight: 150, maxHeight });
+              return natural >= maxHeight ? (
+                <div style={{ marginTop: '0.5rem', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+                  Konten panjang — editor dibatasi maksimal {Math.round(maxHeight)}px dan akan muncul scroll.
+                </div>
+              ) : null;
+            })()}
           </div>
+          {/* --- AKHIR PERGANTIAN --- */}
+
         </div>
       </div>
 
@@ -326,15 +430,17 @@ function ApiRequestor({
                     <button className={`api-tab-btn ${responseTab === 'response-body' ? 'active' : ''}`} onClick={() => onResponseTabChange('response-body')}>Body</button>
                     <button className={`api-tab-btn ${responseTab === 'response-headers' ? 'active' : ''}`} onClick={() => onResponseTabChange('response-headers')}>Headers</button>
                   </div>
-                  <button
-                    id="api-copy-response-btn"
-                    className="button secondary"
-                    style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem', marginBottom: '0.5rem' }}
-                    onClick={handleCopyResponse}
-                  >
-                    <i className={`fas ${copyResponseText === 'Disalin!' ? 'fa-check' : 'fa-copy'}`} style={{ marginRight: '0.5rem' }} />
-                    {copyResponseText}
-                  </button>
+                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <button
+                      id="api-copy-response-btn"
+                      className="button secondary"
+                      style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem' }}
+                      onClick={handleCopyResponse}
+                    >
+                      <i className={`fas ${copyResponseText === 'Disalin!' ? 'fa-check' : 'fa-copy'}`} style={{ marginRight: '0.5rem' }} />
+                      {copyResponseText}
+                    </button>
+                  </div>
                 </div>
 
                 {/* --- PERBAIKAN SCROLL, WARNA, DAN TAB --- */}
@@ -348,7 +454,6 @@ function ApiRequestor({
                         color: '#e2e8f0',
                         whiteSpace: 'pre-wrap',
                         padding: '1rem',
-                        // Solusi scroll "seperti header"
                         maxHeight: '40vh',
                         overflow: 'auto'
                       }}
@@ -356,7 +461,7 @@ function ApiRequestor({
                     />
                   </div>
                 )}
-                
+
                 {responseTab === 'response-headers' && (
                   <div id="tab-response-headers" className="api-tab-content active">
                     <pre
@@ -366,7 +471,6 @@ function ApiRequestor({
                         backgroundColor: '#f7fafc',
                         padding: '1rem',
                         whiteSpace: 'pre-wrap',
-                        // Solusi scroll "seperti header"
                         maxHeight: '40vh',
                         overflow: 'auto'
                       }}

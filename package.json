@@ -10,7 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "ace-builds": "^1.43.4",
+    "ace-code-editor": "^1.2.3",
     "react": "^19.2.0",
+    "react-ace": "^14.0.1",
     "react-dom": "^19.2.0",
     "react-router-dom": "^7.9.6"
   },
