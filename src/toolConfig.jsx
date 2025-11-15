@@ -1,17 +1,12 @@
 import React from 'react';
 
-// 1. Impor SEMUA 15 tool
+// 1. Impor SEMUA tool
 import SqlFormatter from './tools/SQLNumberFormatter';
 import JsonValueExtractor from './tools/JSONValueExtractor';
 import DataCompare from './tools/DataCompare';
 import JsonCompare from './tools/JSONCompare';
 import BranchDataProcessor from './tools/BranchDataProcessor';
-
-// --- PERUBAHAN DI SINI ---
-// Impor 'manager' baru
 import ApiRequestorManager from './tools/ApiRequestorManager'; 
-// --- AKHIR PERUBAHAN ---
-
 import FileSplitter from './tools/FileSplitter';
 import SqlInjector from './tools/SqlInjector';
 import JsonFormatter from './tools/JSONFormatter';
@@ -22,11 +17,24 @@ import WordingCompare from './tools/WordingCompare';
 import SqlScriptGeneratorOtomatis from './tools/SqlScriptGeneratorOtomatis';
 import SqlScriptGenerator from './tools/SQLScriptGenerator';
 
+// Impor tool kalkulasi BARU
+import CalculationTools from './tools/CalculationTools.jsx';
+// HAPUS: import AgeCalculator from './tools/AgeCalculator.jsx';
+// HAPUS: import CharacterCounter from './tools/CharacterCounter.jsx';
+
+
 /**
  * Mendefinisikan grup tool untuk sidebar.
  * Menambahkan properti 'path' unik untuk routing.
  */
 export const toolGroups = [
+  {
+    title: 'Kalkulasi',
+    tools: [
+      // UBAH BAGIAN INI: Hanya satu menu "Kalkulasi"
+      { id: 'CalculationTools', path: '/kalkulasi', name: 'Kalkulasi', icon: 'fa-calculator' },
+    ]
+  },
   {
     title: 'JSON Tools',
     tools: [
@@ -63,6 +71,11 @@ export const toolGroups = [
  * Peta untuk mencocokkan 'id' tool dengan Komponen React-nya.
  */
 export const toolComponentMap = {
+  // Kalkulasi
+  CalculationTools: CalculationTools, // <-- UBAH DI SINI
+  // HAPUS: AgeCalculator: AgeCalculator,
+  // HAPUS: CharacterCounter: CharacterCounter,
+  
   // JSON Tools
   JsonFormatter: JsonFormatter,
   JsonCompare: JsonCompare,
@@ -74,11 +87,7 @@ export const toolComponentMap = {
   SqlInjector: SqlInjector,
   SqlScriptGeneratorOtomatis: SqlScriptGeneratorOtomatis,
   ArchiveFileFinder: ArchiveFileFinder,
-  
-  // --- PERUBAHAN DI SINI ---
-  ApiRequestor: ApiRequestorManager, // Ganti ini
-  // --- AKHIR PERUBAHAN ---
-
+  ApiRequestor: ApiRequestorManager,
   SqlScriptGenerator: SqlScriptGenerator,
 
   // File & Document Tools
