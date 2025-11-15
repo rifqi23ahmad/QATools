@@ -13,12 +13,24 @@ const StatusMessage = ({ message, type }) => {
 
 function FileSplitter() {
   const [file, setFile] = useState(null);
+  // State baru untuk nama file, untuk ditampilkan di tombol
+  const [fileName, setFileName] = useState('Pilih File (.csv, .txt, .sql)...'); 
   const [numParts, setNumParts] = useState(3);
   const [status, setStatus] = useState({ message: '', type: 'idle' });
 
   const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
-    setStatus({ message: '', type: 'idle' }); // Reset status
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      setFile(selectedFile);
+      setFileName(selectedFile.name); // Atur nama file
+      setStatus({ message: '', type: 'idle' }); // Reset status
+    } else {
+      setFile(null);
+      setFileName('Pilih File (.csv, .txt, .sql)...'); // Reset ke default
+      setStatus({ message: '', type: 'idle' });
+    }
+    // Reset value input agar bisa upload file yang sama lagi
+    e.target.value = '';
   };
 
   const downloadFile = (content, originalFilename, partNumber) => {
@@ -91,16 +103,43 @@ function FileSplitter() {
         <p>Unggah file Anda, tentukan jumlah bagian, dan file akan terunduh secara otomatis.</p>
       </div>
       <div className="card">
+        {/* --- BLOK INPUT FILE YANG DIMODIFIKASI --- */}
         <div className="input-group">
           <label htmlFor="fileInput">1. Pilih File (.csv, .txt, .sql)</label>
+          <label 
+            htmlFor="fileInput" 
+            className="button secondary" 
+            style={{
+              width: '100%', 
+              justifyContent: 'flex-start',
+              overflow: 'hidden',
+              cursor: 'pointer'
+            }}
+          >
+            {file ? (
+              <>
+                <i className="fas fa-check-circle" style={{ color: 'var(--success-color)', marginRight: '0.75rem', flexShrink: 0 }}></i>
+                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {fileName}
+                </span>
+              </>
+            ) : (
+              <>
+                <i className="fas fa-upload" style={{ marginRight: '0.75rem', flexShrink: 0 }}></i>
+                <span>{fileName}</span>
+              </>
+            )}
+          </label>
           <input 
             type="file" 
             id="fileInput" 
             accept=".csv,.txt,.sql" 
-            className="input"
+            className="is-hidden" // Input asli disembunyikan
             onChange={handleFileChange}
           />
         </div>
+        {/* --- AKHIR BLOK INPUT FILE --- */}
+
         <div className="input-group" style={{ marginTop: '1.5rem' }}>
           <label htmlFor="numParts">2. Ingin Dibagi Menjadi Berapa Bagian?</label>
           <input 

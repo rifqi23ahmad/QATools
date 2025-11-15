@@ -62,6 +62,7 @@ function SqlScriptGeneratorOtomatis() {
   
   const [detectInfo, setDetectInfo] = useState('');
   const [excelInfo, setExcelInfo] = useState('');
+  const [fileName, setFileName] = useState(''); // <-- State baru untuk nama file
   const [copySuccess, setCopySuccess] = useState(false);
   
   // State baru untuk output, menggantikan showOutputSection
@@ -140,7 +141,13 @@ function SqlScriptGeneratorOtomatis() {
     setShowOutput(false); // Sembunyikan output lama saat unggah baru
     setOutputSql('');     // Hapus SQL lama
     const file = event.target.files[0];
-    if (!file) return;
+    if (!file) {
+      setFileName(''); // <-- Reset nama file jika batal
+      setExcelInfo(''); // <-- Reset info jika batal
+      return;
+    }
+    
+    setFileName(file.name); // <-- Atur nama file
     setExcelInfo('Memproses file...');
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -166,6 +173,7 @@ function SqlScriptGeneratorOtomatis() {
         } catch (error) {
             console.error(error);
             setExcelInfo(`Gagal memproses file Excel. ${error.message}`);
+            setFileName(''); // <-- Reset nama file jika error
         }
     };
     reader.readAsArrayBuffer(file);
@@ -315,17 +323,53 @@ function SqlScriptGeneratorOtomatis() {
             </button>
             <div id="detect-info" className={`text-sm mt-2 ${detectInfo.startsWith('Error') ? 'text-red-600' : 'text-green-600'}`}>{detectInfo}</div>
           </div>
-          <div style={{ marginTop: '1.5rem' }}> {/* Ganti space-y-6 */}
+          
+          {/* --- BLOK INPUT FILE YANG DIMODIFIKASI --- */}
+          <div style={{ marginTop: '1.5rem' }}>
             <label htmlFor="excel-upload" className="label">3. Unggah File Excel</label>
+            
+            <label 
+              htmlFor="excel-upload" 
+              className="button secondary" 
+              style={{
+                width: '100%', 
+                justifyContent: 'flex-start',
+                overflow: 'hidden',
+                cursor: 'pointer'
+              }}
+            >
+              {fileName ? (
+                <>
+                  <i className="fas fa-check-circle" style={{ color: 'var(--success-color)', marginRight: '0.75rem', flexShrink: 0 }}></i>
+                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {fileName}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <i className="fas fa-upload" style={{ marginRight: '0.75rem', flexShrink: 0 }}></i>
+                  <span>Pilih File Excel...</span>
+                </>
+              )}
+            </label>
             <input 
               type="file" 
               id="excel-upload" 
-              className="input" // Menggunakan .input
+              className="is-hidden" // Input asli disembunyikan
               accept=".xlsx, .xls"
               onChange={handleExcelUpload}
             />
-            <div id="excel-info" className={`text-sm mt-2 ${excelInfo.startsWith('Gagal') ? 'text-red-600' : 'text-green-600'}`}>{excelInfo}</div>
+            
+            <div 
+              id="excel-info" 
+              className={`text-sm mt-2 ${excelInfo.startsWith('Gagal') ? 'text-red-600' : 'text-green-600'}`}
+              style={{minHeight: '1.25rem'}} // Mencegah layout "lompat"
+            >
+              {fileName ? excelInfo : 'Silakan pilih file untuk diproses.'}
+            </div>
           </div>
+          {/* --- AKHIR BLOK INPUT FILE --- */}
+
         </div>
 
         <div>

@@ -25,8 +25,15 @@ function JsonCompare() {
     try { json1 = JSON.parse(input1); } catch (e) { alert(`Error pada JSON Asli: ${e.message}`); return; }
     try { json2 = JSON.parse(input2); } catch (e) { alert(`Error pada JSON Revisi: ${e.message}`); return; }
 
+    // Format kedua JSON (auto-beauty)
     const str1 = JSON.stringify(json1, null, 2);
     const str2 = JSON.stringify(json2, null, 2);
+
+    // --- PERBAIKAN DI SINI ---
+    // Perbarui state textarea dengan versi yang sudah di-beautify
+    setInput1(str1);
+    setInput2(str2);
+    // --- AKHIR PERBAIKAN ---
 
     // Pastikan 'diff_match_patch' sudah dimuat dari index.html
     if (typeof diff_match_patch === 'undefined') {
@@ -111,7 +118,6 @@ function JsonCompare() {
   };
 
   return (
-    //  PERUBAHAN DI SINI: Tambahkan id="JsonCompare"
     <div id="JsonCompare"> 
       <div className="tool-header">
         <h1>JSON Compare</h1>

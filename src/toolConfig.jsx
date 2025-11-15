@@ -13,14 +13,13 @@ import JsonFormatter from './tools/JSONFormatter';
 import ArchiveFileFinder from './tools/ArchiveFileFinder';
 import ImageCompare from './tools/ImageCompare';
 import DummyImageGenerator from './tools/DummyImageGenerator';
-import WordingCompare from './tools/WordingCompare';
+// Impor ulang WordingCompare
+import WordingCompare from './tools/WordingCompare.jsx';
 import SqlScriptGeneratorOtomatis from './tools/SqlScriptGeneratorOtomatis';
 import SqlScriptGenerator from './tools/SQLScriptGenerator';
-
-// Impor tool kalkulasi BARU
 import CalculationTools from './tools/CalculationTools.jsx';
-// HAPUS: import AgeCalculator from './tools/AgeCalculator.jsx';
-// HAPUS: import CharacterCounter from './tools/CharacterCounter.jsx';
+
+// HAPUS: import DocumentCompare from './tools/DocumentCompare.jsx';
 
 
 /**
@@ -31,7 +30,6 @@ export const toolGroups = [
   {
     title: 'Kalkulasi',
     tools: [
-      // UBAH BAGIAN INI: Hanya satu menu "Kalkulasi"
       { id: 'CalculationTools', path: '/kalkulasi', name: 'Kalkulasi', icon: 'fa-calculator' },
     ]
   },
@@ -59,7 +57,8 @@ export const toolGroups = [
     title: 'File & Document Tools',
     tools: [
       { id: 'FileSplitter', path: '/file-splitter', name: 'File Splitter', icon: 'fa-file-zipper' },
-      { id: 'WordingCompare', path: '/doc-compare', name: 'Doc Compare', icon: 'fa-file-alt' },
+      // GANTI KEMBALI
+      { id: 'WordingCompare', path: '/doc-compare', name: 'PDF Compare (Visual)', icon: 'fa-file-pdf' },
       { id: 'ImageCompare', path: '/image-compare', name: 'Image Compare', icon: 'fa-images' },
       { id: 'DummyImageGenerator', path: '/dummy-file-gen', name: 'Dummy File Gen', icon: 'fa-file-image' },
       { id: 'BranchDataProcessor', path: '/branch-data-processor', name: 'Branch Data Processor', icon: 'fa-file-excel' },
@@ -72,9 +71,7 @@ export const toolGroups = [
  */
 export const toolComponentMap = {
   // Kalkulasi
-  CalculationTools: CalculationTools, // <-- UBAH DI SINI
-  // HAPUS: AgeCalculator: AgeCalculator,
-  // HAPUS: CharacterCounter: CharacterCounter,
+  CalculationTools: CalculationTools,
   
   // JSON Tools
   JsonFormatter: JsonFormatter,
@@ -89,8 +86,6 @@ export const toolComponentMap = {
   ArchiveFileFinder: ArchiveFileFinder,
   ApiRequestor: ApiRequestorManager,
   SqlScriptGenerator: SqlScriptGenerator,
-
-  // File & Document Tools
   FileSplitter: FileSplitter,
   WordingCompare: WordingCompare,
   ImageCompare: ImageCompare,
@@ -98,7 +93,5 @@ export const toolComponentMap = {
   BranchDataProcessor: BranchDataProcessor,
 };
 
-/**
- * Array datar dari semua tool, berguna untuk membuat rute.
- */
+
 export const allTools = toolGroups.flatMap(group => group.tools);

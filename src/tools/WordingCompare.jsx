@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-// --- Algoritma Diff (dari file asli) ---
+// --- Algoritma Diff (LCS) dari file asli ---
+// Diperlukan untuk perbandingan teks
 function findLongestCommonSubsequence(seq1, seq2) {
     const m = seq1.length, n = seq2.length;
     const dp = Array(m + 1).fill(null).map(() => Array(n + 1).fill(0));
@@ -31,10 +32,17 @@ function findLongestCommonSubsequence(seq1, seq2) {
 
 // --- Komponen Sub: PdfPage ---
 // Komponen ini mengurus rendering satu halaman PDF ke canvas
+// DAN menggambar highlight di atasnya
 const PdfPage = ({ page, highlights }) => {
   const canvasRef = useRef(null);
-  
+  const [renderTask, setRenderTask] = useState(null);
+
   useEffect(() => {
+    if (renderTask) {
+      // Batalkan render sebelumnya jika ada
+      renderTask.cancel();
+    }
+
     if (page && canvasRef.current) {
       const viewport = page.getViewport({ scale: 1.5 });
       const canvas = canvasRef.current;
@@ -42,10 +50,21 @@ const PdfPage = ({ page, highlights }) => {
       canvas.height = viewport.height;
       canvas.width = viewport.width;
 
-      const renderContext = { canvasContext: context, viewport: viewport };
-      page.render(renderContext);
+      const task = page.render({ canvasContext: context, viewport: viewport });
+      setRenderTask(task);
+      task.promise.catch(err => {
+        if (err.name !== 'RenderingCancelledException') {
+          console.error("Gagal merender halaman PDF:", err);
+        }
+      });
     }
-  }, [page]); // Render ulang jika 'page' berubah
+    
+    return () => {
+      if (renderTask) {
+        renderTask.cancel();
+      }
+    };
+  }, [page]); // Render ulang hanya jika 'page' berubah
 
   if (!page) return null;
 
@@ -53,9 +72,8 @@ const PdfPage = ({ page, highlights }) => {
 
   return (
     <div className="pdf-page-wrapper" style={{ position: 'relative', width: viewport.width, height: viewport.height }}>
-      <canvas ref={canvasRef} className="pdf-canvas" style={{ position: 'absolute', top: 0, left: 0, zIndex: 1 }} />
-      <div className="highlight-layer" style={{ position: 'absolute', top: 0, left: 0, zIndex: 2, width: viewport.width, height: viewport.height }}>
-        {/* Render highlight di sini */}
+      <canvas ref={canvasRef} className="pdf-canvas" />
+      <div className="highlight-layer">
         {highlights.map((h, i) => (
           <div 
             key={i}
@@ -67,6 +85,7 @@ const PdfPage = ({ page, highlights }) => {
               width: h.width,
               height: h.height,
             }}
+            title={h.text} // Tampilkan teks saat hover
           />
         ))}
       </div>
@@ -76,86 +95,119 @@ const PdfPage = ({ page, highlights }) => {
 
 // --- Komponen Utama: WordingCompare ---
 function WordingCompare() {
-  const [file1, setFile1] = useState(null);
-  const [file2, setFile2] = useState(null);
-  const [doc1, setDoc1] = useState({ name: 'No file selected', pages: [], tokens: [] });
-  const [doc2, setDoc2] = useState({ name: 'No file selected', pages: [], tokens: [] });
+  // HAPUS state file1 dan file2, kita akan cek langsung dari doc1 dan doc2
+  const [doc1, setDoc1] = useState({ name: 'Belum ada file', pages: [], tokens: [] });
+  const [doc2, setDoc2] = useState({ name: 'Belum ada file', pages: [], tokens: [] });
+  
   const [changeGroups, setChangeGroups] = useState([]);
   const [searchFilter, setSearchFilter] = useState('');
   const [syncScroll, setSyncScroll] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const [statusText, setStatusText] = useState('Pilih 2 file PDF untuk dibandingkan.');
   
   const viewer1Ref = useRef(null);
   const viewer2Ref = useRef(null);
+  const isSyncingScroll = useRef(false);
   
-  // --- Logika Sinkronisasi Scroll ---
-  const handleScroll = (source, target) => {
-    if (!syncScroll || !source.current || !target.current) return;
-    if (isLoading) return; // Jangan sinkronisasi saat sedang scroll
+  const handleScroll = (sourceRef, targetRef) => {
+    if (!syncScroll || isSyncingScroll.current) return;
     
-    setIsLoading(true); // 'isLoading' dipakai sebagai 'isSyncing'
-    target.current.scrollTop = source.current.scrollTop;
-    setTimeout(() => setIsLoading(false), 50);
+    isSyncingScroll.current = true;
+    const source = sourceRef.current;
+    const target = targetRef.current;
+    
+    if (source && target) {
+      const percentage = source.scrollTop / (source.scrollHeight - source.clientHeight);
+      target.scrollTop = percentage * (target.scrollHeight - target.clientHeight);
+    }
+    
+    setTimeout(() => {
+      isSyncingScroll.current = false;
+    }, 50); 
   };
   
-  // --- Logika Memuat PDF ---
   const loadPdf = async (file, setDocState) => {
     if (!file) return;
     setIsLoading(true);
     setChangeGroups([]);
-    setDocState({ name: `Loading ${file.name}...`, pages: [], tokens: [] });
+    setDocState({ name: `Memuat ${file.name}...`, pages: [], tokens: [] });
+    setStatusText(`Membaca ${file.name}...`);
     
-    const fileData = await file.arrayBuffer();
-    window.pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js`;
-    const pdf = await window.pdfjsLib.getDocument({ data: fileData }).promise;
-    
-    let allTokens = [];
-    let pagePromises = [];
-    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-      pagePromises.push(pdf.getPage(pageNum));
-    }
-    const pages = await Promise.all(pagePromises);
+    try {
+      const fileData = await file.arrayBuffer();
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js`;
+      const pdf = await window.pdfjsLib.getDocument({ data: fileData }).promise;
+      
+      let allTokens = [];
+      let pagePromises = [];
+      for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+        pagePromises.push(pdf.getPage(pageNum));
+      }
+      const pages = await Promise.all(pagePromises);
 
-    for (let i = 0; i < pages.length; i++) {
-      const page = pages[i];
-      const pageNum = i + 1;
-      const textContent = await page.getTextContent();
-      const viewport = page.getViewport({ scale: 1.5 });
-      textContent.items.forEach(item => {
-        if (item.str.trim()) { allTokens.push({ ...item, pageNum, viewport }); }
+      for (let i = 0; i < pages.length; i++) {
+        const page = pages[i];
+        const pageNum = i + 1;
+        const textContent = await page.getTextContent();
+        const viewport = page.getViewport({ scale: 1.5 });
+        
+        textContent.items.forEach(item => {
+          if (item.str.trim()) {
+            const tx = window.pdfjsLib.Util.transform(viewport.transform, item.transform);
+            const x = tx[4];
+            const y = tx[5] - item.height; 
+            allTokens.push({ 
+              str: item.str, 
+              pageNum, 
+              x, y, 
+              width: item.width, 
+              height: item.height 
+            });
+          }
+        });
+      }
+      
+      allTokens.sort((a, b) => {
+          if (a.pageNum !== b.pageNum) return a.pageNum - b.pageNum;
+          if (Math.abs(b.y - a.y) > 2) return a.y - b.y; 
+          return a.x - b.x; 
       });
-    }
-    
-    allTokens.sort((a, b) => {
-        if (a.pageNum !== b.pageNum) return a.pageNum - b.pageNum;
-        if (Math.abs(b.transform[5] - a.transform[5]) > 2) return b.transform[5] - a.transform[5];
-        return a.transform[4] - b.transform[4];
-    });
 
-    setDocState({ name: file.name, pages: pages, tokens: allTokens });
-    setIsLoading(false);
+      setDocState({ name: file.name, pages: pages, tokens: allTokens });
+      setStatusText(`Selesai memuat ${file.name}.`);
+    } catch (err) {
+      setDocState({ name: `Gagal memuat ${file.name}`, pages: [], tokens: [] });
+      setStatusText(`Gagal memuat file: ${err.message}`);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleFileChange = (e, fileNum) => {
     const file = e.target.files[0];
     if (fileNum === 1) {
-      setFile1(file);
       loadPdf(file, setDoc1);
     } else {
-      setFile2(file);
       loadPdf(file, setDoc2);
     }
   };
 
-  // --- Logika Perbandingan ---
   const handleCompare = () => {
-    if (!doc1.tokens.length || !doc2.tokens.length) return alert('Harap muat kedua dokumen.');
+    // --- PERBAIKAN BUG DI SINI ---
+    // Cek apakah 'tokens' sudah terisi
+    if (!doc1.tokens || doc1.tokens.length === 0 || !doc2.tokens || doc2.tokens.length === 0) {
+      return setStatusText('Harap muat kedua dokumen PDF dan tunggu proses ekstrak teks selesai.');
+    }
     
-    const words1 = doc1.tokens.flatMap(token => token.str.split(/\b/).filter(s => s.trim()).map(wordStr => ({ word: wordStr, token })));
-    const words2 = doc2.tokens.flatMap(token => token.str.split(/\b/).filter(s => s.trim()).map(wordStr => ({ word: wordStr, token })));
+    setStatusText('Membandingkan dokumen...');
+    setIsLoading(true);
+
+    const words1 = doc1.tokens.map(t => ({ word: t.str, token: t }));
+    const words2 = doc2.tokens.map(t => ({ word: t.str, token: t }));
     
     const textSeq1 = words1.map(w => w.word);
     const textSeq2 = words2.map(w => w.word);
+    
     const lcs = findLongestCommonSubsequence(textSeq1, textSeq2);
 
     let i = 0, j = 0, k = 0;
@@ -172,33 +224,40 @@ function WordingCompare() {
             i++; j++; k++;
         } else {
             if (!currentGroup) currentGroup = { oldWords: [], newWords: [] };
-            if (word1 !== lcsWord && words1[i]) { currentGroup.oldWords.push(words1[i]); i++; }
-            if (word2 !== lcsWord && words2[j]) { currentGroup.newWords.push(words2[j]); j++; }
+            if (word1 !== lcsWord && words1[i]) { 
+              currentGroup.oldWords.push(words1[i]); 
+              i++; 
+            }
+            if (word2 !== lcsWord && words2[j]) { 
+              currentGroup.newWords.push(words2[j]); 
+              j++; 
+            }
         }
     }
     if (currentGroup) groups.push(currentGroup);
     
-    setChangeGroups(groups.filter(g => g.oldWords.length > 0 || g.newWords.length > 0));
+    const finalGroups = groups.filter(g => g.oldWords.length > 0 || g.newWords.length > 0);
+    setChangeGroups(finalGroups);
+    setStatusText(`Perbandingan selesai. Ditemukan ${finalGroups.length} grup perbedaan.`);
+    setIsLoading(false);
   };
   
-  // --- Logika Highlighting ---
   const getHighlightsForDoc = (docId) => {
     const highlights = [];
     changeGroups.forEach(group => {
       const words = (docId === 1) ? group.oldWords : group.newWords;
       const type = (docId === 1) ? 'removed' : 'added';
-      
-      const tokens = [...new Set(words.map(w => w.token))]; // Token unik
+      const tokens = [...new Set(words.map(w => w.token))]; 
       
       tokens.forEach(token => {
-          const tx = window.pdfjsLib.Util.transform(token.viewport.transform, token.transform);
           highlights.push({
             type: type,
             pageNum: token.pageNum,
-            x: tx[4],
-            y: tx[5] - token.height,
+            x: token.x,
+            y: token.y,
             width: token.width,
-            height: token.height
+            height: token.height,
+            text: token.str
           });
       });
     });
@@ -211,13 +270,20 @@ function WordingCompare() {
   const filteredChangeGroups = changeGroups.filter(g => 
     (g.oldWords.map(w=>w.word).join(' ') + g.newWords.map(w=>w.word).join(' ')).toLowerCase().includes(searchFilter.toLowerCase())
   );
+  
+  // --- PERBAIKAN BUG DI SINI ---
+  // Tombol "Bandingkan" sekarang dinonaktifkan jika:
+  // 1. Sedang loading
+  // 2. Doc 1 belum selesai diekstrak (tokens.length === 0)
+  // 3. Doc 2 belum selesai diekstrak (tokens.length === 0)
+  const isCompareDisabled = isLoading || doc1.tokens.length === 0 || doc2.tokens.length === 0;
 
   return (
     <div className="adv-compare-container">
       <div className="adv-compare-toolbar">
-        <div className="toolbar-title">Bandingkan teks antara dua PDF.</div>
+        <div className="toolbar-title">{statusText}</div>
         <label className="sync-scroll-toggle" title="Toggle scroll synchronization">
-          <span>Sync Scroll</span>
+          <span>Scroll Sync</span>
           <input type="checkbox" className="is-hidden" checked={syncScroll} onChange={() => setSyncScroll(!syncScroll)} />
           <div className="switch"></div>
         </label>
@@ -267,17 +333,18 @@ function WordingCompare() {
         {/* Sidebar Perubahan */}
         <div className="change-report-sidebar">
           <div className="sidebar-header">
-            <h3 id="changes-header">Laporan Perubahan ({filteredChangeGroups.length})</h3>
-            <button id="compare-wording-btn" className="button primary" onClick={handleCompare} disabled={isLoading}>
-              {isLoading ? 'Memuat...' : 'Bandingkan'}
+            <h3>Laporan Perubahan ({filteredChangeGroups.length})</h3>
+            {/* Menggunakan state isCompareDisabled */}
+            <button id="compare-wording-btn" className="button primary" onClick={handleCompare} disabled={isCompareDisabled}>
+              {isLoading ? 'Memproses...' : 'Bandingkan'}
             </button>
           </div>
           <div className="sidebar-search">
             <i className="fas fa-search"></i>
-            <input type="text" placeholder="Cari teks" value={searchFilter} onChange={(e) => setSearchFilter(e.target.value)} />
+            <input type="text" placeholder="Cari teks..." value={searchFilter} onChange={(e) => setSearchFilter(e.target.value)} />
           </div>
           <div className="sidebar-body" id="changes-list">
-            {changeGroups.length === 0 && <p className="no-changes-yet">Muat dua dokumen lalu klik "Bandingkan".</p>}
+            {changeGroups.length === 0 && !isLoading && <p className="no-changes-yet">Muat dua dokumen lalu klik "Bandingkan".</p>}
             {filteredChangeGroups.map((group, i) => {
               const oldText = group.oldWords.map(w => w.word).join(' ').trim();
               const newText = group.newWords.map(w => w.word).join(' ').trim();
@@ -286,8 +353,8 @@ function WordingCompare() {
                 <div className="change-card" key={i}>
                   <div className="change-card-header"><span>Hal {firstToken ? firstToken.pageNum : 'N/A'}</span></div>
                   <div className="change-card-body">
-                    {oldText && <div className="text-block old"><span>Old</span><p><span className="highlight-word">{oldText}</span></p></div>}
-                    {newText && <div className="text-block new"><span>New</span><p><span className="highlight-word">{newText}</span></p></div>}
+                    {oldText && <div className="text-block old"><span>Dihapus</span><p><span className="highlight-word">{oldText}</span></p></div>}
+                    {newText && <div className="text-block new"><span>Ditambah</span><p><span className="highlight-word">{newText}</span></p></div>}
                   </div>
                 </div>
               );

@@ -304,211 +304,211 @@ body {
 .toast.show { opacity: 1; visibility: visible; bottom: 40px; }
 
 
-/*
-================================================================
-*
-* 6. ADVANCED DOCUMENT COMPARE (REVISED & FINAL)
-*
-================================================================
-*/
-.adv-compare-container {
-    display: flex;
-    flex-direction: column;
-    height: calc(100vh - 5rem);
-    background-color: #f0f2f5;
-}
+    /*
+    ================================================================
+    *
+    * 6. ADVANCED DOCUMENT COMPARE (REVISED & FINAL)
+    *
+    ================================================================
+    */
+    .adv-compare-container {
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 5rem);
+        background-color: #f0f2f5;
+    }
 
-.adv-compare-toolbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.75rem 1.5rem;
-    background-color: #f8f9fa;
-    border-bottom: 1px solid var(--card-border);
-    flex-shrink: 0;
-}
-.toolbar-title {
-    font-weight: 500;
-    color: var(--text-secondary);
-}
-.sync-scroll-toggle {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    cursor: pointer;
-    -webkit-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-}
-.sync-scroll-toggle .switch {
-    position: relative;
-    display: inline-block;
-    width: 34px;
-    height: 20px;
-    background-color: #ccc;
-    border-radius: 20px;
-    transition: background-color 0.2s;
-}
-.sync-scroll-toggle .switch::before {
-    content: '';
-    position: absolute;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background-color: white;
-    top: 2px;
-    left: 2px;
-    transition: transform 0.2s;
-}
-.sync-scroll-toggle input:checked + .switch {
-    background-color: var(--primary-color);
-}
-.sync-scroll-toggle input:checked + .switch::before {
-    transform: translateX(14px);
-}
+    .adv-compare-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.75rem 1.5rem;
+        background-color: #f8f9fa;
+        border-bottom: 1px solid var(--card-border);
+        flex-shrink: 0;
+    }
+    .toolbar-title {
+        font-weight: 500;
+        color: var(--text-secondary);
+    }
+    .sync-scroll-toggle {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        -webkit-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+    .sync-scroll-toggle .switch {
+        position: relative;
+        display: inline-block;
+        width: 34px;
+        height: 20px;
+        background-color: #ccc;
+        border-radius: 20px;
+        transition: background-color 0.2s;
+    }
+    .sync-scroll-toggle .switch::before {
+        content: '';
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background-color: white;
+        top: 2px;
+        left: 2px;
+        transition: transform 0.2s;
+    }
+    .sync-scroll-toggle input:checked + .switch {
+        background-color: var(--primary-color);
+    }
+    .sync-scroll-toggle input:checked + .switch::before {
+        transform: translateX(14px);
+    }
 
-.adv-compare-main {
-    display: flex;
-    flex-grow: 1;
-    gap: 1.5rem;
-    padding: 1.5rem;
-    overflow: hidden;
-}
+    .adv-compare-main {
+        display: flex;
+        flex-grow: 1;
+        gap: 1.5rem;
+        padding: 1.5rem;
+        overflow: hidden;
+    }
 
-.pdf-viewer-area {
-    display: flex;
-    flex-grow: 1;
-    gap: 1.5rem;
-    width: 65%;
-}
+    .pdf-viewer-area {
+        display: flex;
+        flex-grow: 1;
+        gap: 1.5rem;
+        width: 65%;
+    }
 
-.pdf-viewer-pane {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    background-color: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    overflow: hidden;
-}
+    .pdf-viewer-pane {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background-color: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
 
-/* --- PERBAIKAN FINAL UNTUK STACKING LAYER --- */
-.pdf-page-wrapper {
-    position: relative; /* Menjadi acuan untuk elemen di dalamnya */
-    margin: 0 auto 1rem auto;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    line-height: 0; /* Mencegah spasi aneh di bawah PDF */
-}
+    /* --- PERBAIKAN FINAL UNTUK STACKING LAYER --- */
+    .pdf-page-wrapper {
+        position: relative; /* Menjadi acuan untuk elemen di dalamnya */
+        margin: 0 auto 1rem auto;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        line-height: 0; /* Mencegah spasi aneh di bawah PDF */
+    }
 
-/* Keduanya dibuat absolute agar menumpuk di titik yang sama */
-.pdf-canvas,
-.highlight-layer {
-    position: absolute;
-    top: 0;
-    left: 0;
-}
+    /* Keduanya dibuat absolute agar menumpuk di titik yang sama */
+    .pdf-canvas,
+    .highlight-layer {
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
 
-.pdf-canvas {
-    z-index: 1; /* PDF di lapisan bawah */
-}
+    .pdf-canvas {
+        z-index: 1; /* PDF di lapisan bawah */
+    }
 
-.highlight-layer {
-    z-index: 2; /* Warna di lapisan atas */
-    pointer-events: none; /* Lapisan warna tidak bisa di-klik */
-}
+    .highlight-layer {
+        z-index: 2; /* Warna di lapisan atas */
+        pointer-events: none; /* Lapisan warna tidak bisa di-klik */
+    }
 
-.highlight-area {
-    position: absolute;
-}
-/* --- AKHIR PERBAIKAN --- */
+    .highlight-area {
+        position: absolute;
+    }
+    /* --- AKHIR PERBAIKAN --- */
 
 
-.highlight-area.removed {
-    background-color: rgba(229, 62, 62, 0.5); /* Merah transparan */
-}
+    .highlight-area.removed {
+        background-color: rgba(229, 62, 62, 0.5); /* Merah transparan */
+    }
 
-.highlight-area.added {
-    background-color: rgba(56, 161, 105, 0.5); /* Hijau transparan */
-}
+    .highlight-area.added {
+        background-color: rgba(56, 161, 105, 0.5); /* Hijau transparan */
+    }
 
-.pdf-viewer-content {
-    flex-grow: 1;
-    overflow: auto;
-    background-color: #e9ecef;
-    position: relative;
-    padding-top: 1rem;
-}
-.pdf-viewer-content .upload-prompt {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-    color: var(--text-secondary);
-    cursor: pointer;
-}
-.pdf-viewer-content .upload-prompt i { color: #ced4da; }
+    .pdf-viewer-content {
+        flex-grow: 1;
+        overflow: auto;
+        background-color: #e9ecef;
+        position: relative;
+        padding-top: 1rem;
+    }
+    .pdf-viewer-content .upload-prompt {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+        color: var(--text-secondary);
+        cursor: pointer;
+    }
+    .pdf-viewer-content .upload-prompt i { color: #ced4da; }
 
-.pane-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.5rem 1rem;
-    background-color: #f8f9fa;
-    border-top: 1px solid var(--card-border);
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    flex-shrink: 0;
-}
+    .pane-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        background-color: #f8f9fa;
+        border-top: 1px solid var(--card-border);
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        flex-shrink: 0;
+    }
 
-.change-report-sidebar {
-    width: 380px;
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-    background-color: var(--card-bg);
-    border: 1px solid var(--card-border);
-    border-radius: 8px;
-}
-.sidebar-header { padding: 1rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--card-border);}
-.sidebar-search { padding: 0.75rem 1rem; border-bottom: 1px solid var(--card-border); position: relative; }
-.sidebar-search input { width: 100%; padding: 0.5rem 0.5rem 0.5rem 2rem; border-radius: 6px; border: 1px solid var(--card-border); }
-.sidebar-search i { position: absolute; top: 50%; left: 1.5rem; transform: translateY(-50%); color: var(--text-secondary); }
-.sidebar-body { flex-grow: 1; overflow-y: auto; padding: 0.5rem; }
+    .change-report-sidebar {
+        width: 380px;
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        background-color: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 8px;
+    }
+    .sidebar-header { padding: 1rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--card-border);}
+    .sidebar-search { padding: 0.75rem 1rem; border-bottom: 1px solid var(--card-border); position: relative; }
+    .sidebar-search input { width: 100%; padding: 0.5rem 0.5rem 0.5rem 2rem; border-radius: 6px; border: 1px solid var(--card-border); }
+    .sidebar-search i { position: absolute; top: 50%; left: 1.5rem; transform: translateY(-50%); color: var(--text-secondary); }
+    .sidebar-body { flex-grow: 1; overflow-y: auto; padding: 0.5rem; }
 
-.change-card {
-    border: 1px solid var(--card-border);
-    border-radius: 6px;
-    margin: 0.5rem;
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: box-shadow 0.2s;
-}
-.change-card:hover {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-.change-card-header { display: flex; justify-content: space-between; padding: 0.5rem 0.75rem; background-color: #f7fafc; border-bottom: 1px solid var(--card-border); color: var(--text-secondary); }
-.change-card-body .text-block { padding: 0.75rem; }
-.change-card-body .text-block span { font-weight: 600; display: block; margin-bottom: 0.25rem; }
-.change-card-body .text-block p { margin: 0; word-wrap: break-word; line-height: 1.4; }
-.text-block.old { background-color: #fff5f5; }
-.text-block.old span { color: #c53030; }
-.text-block.new { background-color: #f0fff4; }
-.text-block.new span { color: #2f855a; }
+    .change-card {
+        border: 1px solid var(--card-border);
+        border-radius: 6px;
+        margin: 0.5rem;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: box-shadow 0.2s;
+    }
+    .change-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .change-card-header { display: flex; justify-content: space-between; padding: 0.5rem 0.75rem; background-color: #f7fafc; border-bottom: 1px solid var(--card-border); color: var(--text-secondary); }
+    .change-card-body .text-block { padding: 0.75rem; }
+    .change-card-body .text-block span { font-weight: 600; display: block; margin-bottom: 0.25rem; }
+    .change-card-body .text-block p { margin: 0; word-wrap: break-word; line-height: 1.4; }
+    .text-block.old { background-color: #fff5f5; }
+    .text-block.old span { color: #c53030; }
+    .text-block.new { background-color: #f0fff4; }
+    .text-block.new span { color: #2f855a; }
 
-.text-block.old .highlight-word {
-    background-color: rgba(254, 178, 178, 0.7);
-    border-radius: 3px;
-    padding: 1px 0;
-    font-weight: 600;
-}
-.text-block.new .highlight-word {
-    background-color: rgba(154, 230, 180, 0.7);
-    border-radius: 3px;
-    padding: 1px 0;
-    font-weight: 600;
-}
+    .text-block.old .highlight-word {
+        background-color: rgba(254, 178, 178, 0.7);
+        border-radius: 3px;
+        padding: 1px 0;
+        font-weight: 600;
+    }
+    .text-block.new .highlight-word {
+        background-color: rgba(154, 230, 180, 0.7);
+        border-radius: 3px;
+        padding: 1px 0;
+        font-weight: 600;
+    }
 
 /* --- 2.1. Sidebar Navigation Groups --- */
 .sidebar-nav .nav-group-header {
@@ -1406,31 +1406,38 @@ SQL SCRIPT GENERATOR (OTOMATIS) STYLES
 *
 ================================================================
 */
-.standard-calculator {
+..standard-calculator {
     background: #ffffff;
     border-radius: 8px;
-    padding: 0.75rem; /* Diperkecil dari 1rem */
+    padding: 0.75rem; 
     box-shadow: 0 4px 10px rgba(0,0,0,0.05);
     border: 1px solid var(--card-border);
+    display: flex;
+    flex-direction: column; 
+}
+.standard-calculator:focus {
+    outline: 2px solid var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5);
 }
 
 .calc-display {
     background-color: var(--sidebar-bg);
     color: var(--sidebar-active-text);
     font-family: var(--monospace-font);
-    font-size: 2rem; /* Diperkecil dari 2.5rem */
+    font-size: 2.5rem; /* Kembalikan ke ukuran 2.5rem agar lebih besar */
     text-align: right;
-    padding: 0.75rem 1rem; /* Diperkecil dari 1rem 1.5rem */
+    padding: 1rem 1.25rem; /* Beri padding yang lebih pas */
     border-radius: 6px;
-    margin-bottom: 0.75rem; /* Diperkecil dari 1rem */
+    margin-bottom: 0.75rem; 
     overflow-x: auto;
     white-space: nowrap;
+    min-height: 2.5em; /* Set tinggi minimum jika display kosong */
 }
 
 .standard-calculator-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 0.5rem; /* Diperkecil dari 0.75rem */
+    gap: 0.5rem; 
 }
 
 .calc-button {
