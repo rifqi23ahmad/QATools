@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import styles from './PercentageCalculator.module.css';
 
 function PercentageCalculator() {
   const [percent, setPercent] = useState('');
@@ -43,9 +44,9 @@ function PercentageCalculator() {
       </div>
 
       {result !== null && (
-        <div className="percentage-result-box">
-          <span className="percentage-result-label">Hasil:</span>
-          <span className="percentage-result-value">
+        <div className={styles.percentageResultBox}>
+          <span className={styles.percentageResultLabel}>Hasil:</span>
+          <span className={styles.percentageResultValue}>
             {/* Format angka agar lebih mudah dibaca */}
             {new Intl.NumberFormat('id-ID').format(result)}
           </span>

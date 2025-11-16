@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { NavLink } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { toolGroups } from '../toolConfig';
 
 function Sidebar() {
@@ -8,29 +8,28 @@ function Sidebar() {
   );
   const counterContainerRef = useRef(null);
 
+  const navigate = useNavigate();
+  const location = useLocation();
+
   // Persist isMinimized ke localStorage
   useEffect(() => {
     localStorage.setItem('sidebarMinimized', isMinimized);
   }, [isMinimized]);
 
-  // Inject GNRCounter — sekarang bereaksi terhadap isMinimized
+  // Inject GNRCounter
   useEffect(() => {
     const container = counterContainerRef.current;
+    if (!container) return; // Guard clause
+
     const counterUrl = 'https://gnrcounter.com/counter.php?accId=f4cdd2f47d0878be22ec2c9252b1ea67';
     let fallbackTimeout;
 
-    // Jika sidebar diminimize, jangan render counter — tapi tetap bersihkan
-    if (!container || isMinimized) {
-      if (container) container.innerHTML = '';
-      return () => {
-        if (container) container.innerHTML = '';
-        clearTimeout(fallbackTimeout);
-      };
+    if (isMinimized) {
+      container.innerHTML = '';
+      return; // Jangan render jika minimize
     }
 
-    // Bersihkan dulu
     container.innerHTML = '';
-
     const iframe = document.createElement('iframe');
     iframe.style.width = '100%';
     iframe.style.height = '180px';
@@ -41,17 +40,12 @@ function Sidebar() {
     iframe.srcdoc = `
       <!doctype html>
       <html>
-        <head>
-          <meta charset="utf-8"/>
-          <meta name="viewport" content="width=device-width,initial-scale=1"/>
-          <style>body{margin:0;padding:0;display:flex;align-items:center;justify-content:center;}</style>
-        </head>
+        <head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+        <style>body{margin:0;padding:0;display:flex;align-items:center;justify-content:center;}</style></head>
         <body>
           <div id="counter-root"></div>
           <script src="${counterUrl}"></script>
-          <noscript>
-            <div style="font-size:12px;padding:6px;text-align:center;">Enable JavaScript to see the counter.</div>
-          </noscript>
+          <noscript><div style="font-size:12px;padding:6px;text-align:center;">Enable JavaScript to see the counter.</div></noscript>
         </body>
       </html>
     `;
@@ -73,7 +67,7 @@ function Sidebar() {
       clearTimeout(fallbackTimeout);
       if (container) container.innerHTML = '';
     };
-  }, [isMinimized]); // <-- efek dijalankan ulang saat isMinimized berubah
+  }, [isMinimized]); 
 
   return (
     <aside className={`sidebar ${isMinimized ? 'minimized' : ''}`}>
@@ -97,28 +91,33 @@ function Sidebar() {
           {toolGroups.map(group => (
             <React.Fragment key={group.title}>
               <li className="nav-group-header"><span>{group.title}</span></li>
-              {group.tools.map(tool => (
-                <li
-                  key={tool.id}
-                  className="nav-item" 
-                  title={tool.name}
-                >
-                  <NavLink 
-                    to={tool.path}
-                    className={({ isActive }) => isActive ? 'active' : ''} 
+              {group.tools.map(tool => {
+                const isActive = location.pathname === tool.path;
+                return (
+                  <li
+                    key={tool.id}
+                    className="nav-item" 
+                    title={tool.name} // Tooltip dikembalikan
                   >
-                    <i className={`fas ${tool.icon} fa-fw`} />
-                    <span>{tool.name}</span>
-                  </NavLink>
-                </li>
-              ))}
+                    <div 
+                      role="link"
+                      tabIndex="0"
+                      className={`nav-link-custom ${isActive ? 'active' : ''}`}
+                      onClick={() => navigate(tool.path)}
+                      onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && navigate(tool.path)}
+                    >
+                      <i className={`fas ${tool.icon} fa-fw`} />
+                      <span>{tool.name}</span>
+                    </div>
+                  </li>
+                );
+              })}
             </React.Fragment>
           ))}
         </ul>
       </nav>
 
       <div className="sidebar-footer">
-        {/* Render counter hanya jika tidak diminimize */}
         {!isMinimized && (
           <div
             ref={counterContainerRef}
@@ -129,7 +128,6 @@ function Sidebar() {
             }}
           />
         )}
-
         <button
           id="sidebar-toggle"
           title={isMinimized ? "Expand Sidebar" : "Minimize Sidebar"}

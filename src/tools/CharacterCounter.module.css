@@ -1,0 +1,38 @@
+/*
+================================================================
+CHARACTER COUNTER (PENGHITUNG KARAKTER)
+================================================================
+*/
+.charCounterControls {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--card-border);
+}
+
+.charCounterResult {
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: var(--sidebar-bg);
+    color: var(--sidebar-active-text);
+    border-radius: 8px;
+    text-align: center;
+}
+
+.charResultValue {
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1;
+    display: block;
+    color: var(--success-color);
+}
+
+.charResultLabel {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--sidebar-text);
+    margin-top: 0.5rem;
+    display: block;
+}

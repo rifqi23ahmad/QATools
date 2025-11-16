@@ -1,0 +1,122 @@
+/*
+================================================================
+AGE CALCULATOR (KALKULATOR UMUR)
+================================================================
+*/
+
+/* Style untuk tombol Tab Mode */
+.tabButton {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--card-border);
+  background: #f7fafc;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-weight: 500;
+  border-bottom: none;
+  margin-bottom: -1px;
+}
+
+.activeTabButton {
+  composes: tabButton; /* Mewarisi style dari .tabButton */
+  background: var(--card-bg);
+  color: var(--primary-color);
+  border-bottom: 1px solid var(--card-bg);
+  font-weight: 600;
+}
+
+
+/* Style untuk kotak hasil */
+.ageCalculatorResults {
+    display: grid;
+    /* grid-template-columns diatur inline di JSX */
+    gap: 1rem;
+    margin-top: 1.5rem;
+    text-align: center;
+}
+.ageResultBox {
+    background-color: #f7fafc; 
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--card-border);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.ageResultValue {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--primary-color);
+    display: block;
+}
+.ageResultLabel {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-top: 0.25rem;
+    display: block;
+    text-transform: uppercase;
+}
+
+/* Style dinamis untuk countdown (Hitung Masa Aktif) */
+.countdownBox {
+    margin-top: 1rem;
+    text-align: center;
+}
+.countdownBox .label {
+    font-size: 0.9rem;
+}
+.countdownBox .value {
+    font-size: 2.5rem;
+    margin-top: 0.5rem;
+    line-height: 1.2;
+}
+
+/* Tipe-tipe box */
+.successBox {
+    background-color: #f0fdf4;
+    border-color: #c6f6d5;
+}
+.successBox .label {
+    color: #2f855a;
+}
+.successBox .value {
+    color: #38a169;
+}
+
+.warnBox {
+    background-color: #fffbea;
+    border-color: #f7d87f;
+}
+.warnBox .label {
+    color: #b7791f;
+}
+.warnBox .value {
+    color: #d69e2e;
+}
+
+.dangerBox {
+    background-color: #fff5f5;
+    border-color: #fed7d7;
+}
+.dangerBox .label {
+    color: #c53030;
+}
+.dangerBox .value {
+    color: #e53e3e;
+}
+
+/* Box untuk Total Hari (Hitung Umur) */
+.totalDaysBox {
+    margin-top: 1rem;
+    text-align: center;
+    background-color: #f0f2f5;
+}
+.totalDaysBox .label {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+.totalDaysBox .value {
+    font-size: 2.5rem;
+    color: var(--text-primary);
+    margin-top: 0.5rem;
+    line-height: 1.2;
+}

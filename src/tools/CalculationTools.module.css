@@ -1,0 +1,41 @@
+/*
+================================================================
+CALCULATION TOOLS
+================================================================
+*/
+.calculationToolTitle {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--card-border);
+    display: flex;
+    align-items: center;
+}
+
+.calculationToolTitle i {
+    color: var(--primary-color);
+}
+
+/*
+================================================================
+DRAG AND DROP (DnD) STYLES
+================================================================
+*/
+.draggableCard {
+    cursor: move; /* Menunjukkan bahwa item bisa dipindah */
+    transition: all 0.2s ease-out;
+}
+
+.dragging {
+    opacity: 0.5; /* Buat semi-transparan saat ditarik */
+    transform: scale(0.98);
+}
+
+.dragOver {
+    /* Style saat item lain melintas di atasnya */
+    border: 2px dashed var(--primary-color);
+    background-color: #ebf8ff; /* Biru muda */
+    box-shadow: 0 4px 12px rgba(66, 153, 225, 0.2);
+}

@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import styles from './CharacterCounter.module.css';
 
 function CharacterCounter() {
   const [text, setText] = useState('');
@@ -23,13 +24,14 @@ function CharacterCounter() {
       <textarea 
         id="char-input"
         className="textarea textarea-editor"
-        rows="4" // <-- Diperkecil dari 5 menjadi 4
+        rows="4"
         placeholder="Ketik atau tempel teks di sini..."
         value={text}
         onChange={(e) => setText(e.target.value)}
       />
 
-      <div className="char-counter-controls">
+      {/* Gunakan class dari CSS Module */}
+      <div className={styles.charCounterControls}>
         <label htmlFor="include-spaces-toggle" className="sync-scroll-toggle">
           <span>Hitung Spasi</span>
           <input 
@@ -43,9 +45,9 @@ function CharacterCounter() {
         </label>
       </div>
 
-      <div className="char-counter-result">
-        <span className="char-result-value">{displayCount}</span>
-        <span className="char-result-label">
+      <div className={styles.charCounterResult}>
+        <span className={styles.charResultValue}>{displayCount}</span>
+        <span className={styles.charResultLabel}>
           {includeSpaces ? 'Karakter (Termasuk Spasi)' : 'Karakter (Tanpa Spasi)'}
         </span>
       </div>

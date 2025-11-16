@@ -1,125 +1,9 @@
 /*
 ================================================================
 *
-* 1. GLOBAL & RESET STYLES
-* (Definisi Root, Reset CSS, Body, Font)
-*
-================================================================
-*/
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-:root {
-    --sidebar-bg: #1a202c;
-    --sidebar-text: #a0aec0;
-    --sidebar-active-bg: #2d3748;
-    --sidebar-active-text: #ffffff;
-    --sidebar-hover-bg: #2c3344;
-    --main-bg: #f7fafc;
-    --card-bg: #ffffff;
-    --card-border: #e2e8f0;
-    --primary-color: #4299e1;
-    --primary-hover: #2b6cb0;
-    --success-color: #48bb78;
-    --danger-color: #f56565;
-    --warning-color: #ecc94b;
-    --text-primary: #2d3748;
-    --text-secondary: #718096;
-    --monospace-font: 'Fira Code', 'Courier New', monospace;
-}
-body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background-color: var(--main-bg);
-    color: var(--text-primary);
-    line-height: 1.6;
-    overflow-x: hidden;
-}
-.is-hidden { display: none !important; }
-
-/*
-================================================================
-*
-* 2. APP LAYOUT & NAVIGATION
-* (Sidebar, Main Content, Halaman Tool)
-*
-================================================================
-*/
-.app-layout { display: flex; min-height: 100vh; }
-.sidebar { 
-    width: 230px; 
-    background-color: var(--sidebar-bg); 
-    color: var(--sidebar-text); 
-    display: flex; 
-    flex-direction: column; 
-    transition: width 0.3s ease; 
-    flex-shrink: 0; 
-    height: 100vh; 
-    position: sticky; 
-    top: 0; 
-}
-.sidebar-header { 
-    padding: 0.75rem 1rem;
-    display: flex; 
-    align-items: center; 
-    gap: 0.75rem; 
-    font-size: 1.5rem; 
-    font-weight: 700; 
-    color: var(--sidebar-active-text); 
-    border-bottom: 1px solid #2d3748; 
-    flex-shrink: 0;
-}
-.sidebar-nav { overflow-y: auto; flex-grow: 1; }
-.sidebar-nav ul { list-style: none; }
-.sidebar-nav .nav-item a { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; text-decoration: none; color: var(--sidebar-text); font-weight: 500; transition: all 0.2s ease; white-space: nowrap; }
-.sidebar-nav .nav-item a i { font-size: 1rem; flex-shrink: 0; }
-.sidebar-nav .nav-item a:hover { background-color: var(--sidebar-hover-bg); color: var(--sidebar-active-text); }
-.sidebar-nav .nav-item.active a { background-color: var(--sidebar-active-bg); color: var(--sidebar-active-text); border-left: 3px solid var(--primary-color); padding-left: calc(1.5rem - 3px); }
-.main-content { flex-grow: 1; padding: 2.5rem; overflow-y: auto; }
-.tool-page { display: none; }
-.tool-page.active { display: block; animation: fadeIn 0.5s ease; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-/*
-================================================================
-*
-* 3. GENERAL COMPONENTS
-* (Card, Header, Button, Input, Label, Grid, Flex)
-*
-================================================================
-*/
-.card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); padding: 2rem; }
-.tool-header { margin-bottom: 2rem; }
-.tool-header h1 { font-size: 2rem; font-weight: 700; color: var(--text-primary); }
-.tool-header p { font-size: 1.1rem; color: var(--text-secondary); }
-.grid { display: grid; gap: 1.5rem; }
-.grid-cols-1 { grid-template-columns: repeat(1, 1fr); }
-.grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
-.grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
-.grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
-.flex { display: flex; gap: 1rem; }
-.flex-col { flex-direction: column; }
-.items-center { align-items: center; }
-.justify-between { justify-content: space-between; }
-.text-center { text-align: center; }
-.button { display: inline-flex; align-items: center; justify-content: center; padding: 0.75rem 1.25rem; border: 1px solid transparent; border-radius: 6px; font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: all 0.2s ease; text-align: center; text-decoration: none; }
-.button.primary { background-color: var(--primary-color); color: white; border-color: var(--primary-color);}
-.button.primary:hover { background-color: var(--primary-hover); border-color: var(--primary-hover); }
-.button.secondary { background-color: #edf2f7; color: var(--text-primary); border-color: #d2dae7;}
-.button.secondary:hover { background-color: #e2e8f0; }
-.button.success { background-color: var(--success-color); color: white; border-color: var(--success-color); }
-.button:disabled { opacity: 0.6; cursor: not-allowed; }
-.button:focus, .button:active {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.5);
-}
-.textarea, .select, .input { width: 100%; padding: 0.75rem; border: 1px solid var(--card-border); border-radius: 6px; font-size: 1rem; font-family: inherit; background-color: #fff; color: var(--text-primary); }
-.textarea:focus, .select:focus, .input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.5); }
-.label { font-weight: 600; margin-bottom: 0.5rem; display: block;}
-.textarea-editor { font-family: var(--monospace-font); }
-
-/*
-================================================================
-*
 * 4. TOOL-SPECIFIC STYLES
+* (Style global, layout, dan komponen umum sudah dipindah)
+* (Style kalkulator sudah dipindah ke CSS Modules)
 *
 ================================================================
 */
@@ -128,19 +12,15 @@ body {
 #JsonFormatter {
   color: #1f2937;
 }
-
-/* wrapper editor */
 #JsonFormatter .editor-wrapper {
   display: flex;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
   height: 70vh;
-  overflow: hidden; /* Ini SANGAT PENTING agar wrapper memotong konten */
+  overflow: hidden;
   background: #ffffff;
   box-shadow: 0 1px 3px rgba(16,24,40,0.06);
 }
-
-/* gutter / line numbers */
 #JsonFormatter .line-numbers {
   width: 60px;
   padding: 12px 10px 12px 12px;
@@ -150,27 +30,15 @@ body {
   background: linear-gradient(180deg,#f8fafc,#f1f5f9);
   user-select: none;
   border-right: 1px solid #e6eef7;
-  
-  /* [PERBAIKAN KUNCI] Buat agar bisa di-scroll tapi sembunyikan scrollbar-nya */
   height: 100%;
   overflow-y: auto;
-  -ms-overflow-style: none;  /* IE dan Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
-/* Sembunyikan scrollbar untuk Chrome, Safari, dan Opera */
-#JsonFormatter .line-numbers::-webkit-scrollbar {
-    display: none;
-}
-#JsonFormatter .line-numbers span {
-  display: block;
-  line-height: 1.5rem;
-}
-
-
-/* editors (textarea input dan pre output) */
+#JsonFormatter .line-numbers::-webkit-scrollbar { display: none; }
+#JsonFormatter .line-numbers span { display: block; line-height: 1.5rem; }
 #JsonFormatter .textarea-editor,
 #JsonFormatter .pre-editor {
-  /* [PERBAIKAN KUNCI] Gunakan flex: 1 agar mengisi sisa ruang, BUKAN width: 100% */
   flex: 1;
   border: none !important;
   box-shadow: none !important;
@@ -178,49 +46,34 @@ body {
   padding: 12px;
   background: transparent;
   color: #0f172a;
-  overflow-y: auto; /* Editor harus bisa di-scroll */
+  overflow-y: auto;
   font-size: 0.95rem;
   line-height: 1.5;
   tab-size: 4;
   white-space: pre;
-  height: 100%; /* Pastikan tingginya 100% dari wrapper */
+  height: 100%;
 }
-
-/* Input area specific */
 #JsonFormatter .textarea-editor {
   background: #ffffff;
   caret-color: #111827;
   color: #0f172a;
 }
-
-/* Output area */
 #JsonFormatter .pre-editor {
   background: #fbfdff;
   padding: 12px 16px;
   color: #0b1220;
 }
-
-/* placeholder */
 #JsonFormatter .textarea-editor::placeholder { color: #94a3b8; }
-
-/* syntax colors */
 #JsonFormatter .json-key { color: #1f6feb; }
 #JsonFormatter .json-string { color: #00875a; }
 #JsonFormatter .json-number { color: #a31515; }
 #JsonFormatter .json-boolean { color: #7950f2; }
 #JsonFormatter .json-null { color: #6b7280; }
 #JsonFormatter .json-error { color: #b91c1c; font-weight: 700; }
-
-/* selection highlight */
 #JsonFormatter .textarea-editor::selection,
 #JsonFormatter .pre-editor ::selection {
   background: rgba(31,99,255,0.15);
 }
-
-/* buttons / controls */
-
-
-/* scrollbar (light and thin) */
 #JsonFormatter .textarea-editor::-webkit-scrollbar,
 #JsonFormatter .pre-editor::-webkit-scrollbar {
   width: 8px;
@@ -261,345 +114,98 @@ body {
 #JsonCompare .summary-list code { font-size: 0.8rem; color: var(--text-secondary); display: block; margin-top: 0.25rem; }
 #JsonCompare .line-highlighted { transition: background-color 0.5s ease-in-out; background-color: #ebf8ff !important; }
 
-/* --- 4.3. Universal Tool Styles (Table, Image Upload, etc.) --- */
-.results-table-wrapper { overflow-x: auto; }
-.results-table { width: 100%; border-collapse: collapse; }
-.results-table th, .results-table td { padding: 0.75rem 1rem; border: 1px solid var(--card-border); text-align: left; font-size: 0.9rem;}
-.results-table thead { background-color: #edf2f7; }
-.image-upload-box { border: 2px dashed var(--card-border); border-radius: 8px; min-height: 300px; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: all 0.3s; cursor: pointer; color: var(--text-secondary); }
-.image-upload-box:hover { border-color: var(--primary-color); background-color: #ebf8ff; }
-.image-upload-box.has-image img { display: block; max-height: 250px; border-radius: 4px;}
-.image-upload-box.has-image .upload-area { display: none; }
-.image-comparison-view { position: relative; width: 100%; padding-top: 56.25%; background-color: #2d3748; border-radius: 8px; }
-.image-comparison-view img { position: absolute; top: 50%; left: 50%; width: 100%; height: 100%; object-fit: contain; transform: translate(-50%, -50%);}
-.pdf-viewer-wrapper { height: 75vh; overflow: auto; background-color: #edf2f7; border-radius: 8px; padding: 1rem; cursor: pointer; border: 1px solid var(--card-border); }
-.upload-prompt { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; color: var(--text-secondary); }
-
 /*
 ================================================================
 *
-* 5. HELPER & MISCELLANEOUS STYLES
-* (Checkbox, Spinner, Toast Notifications)
+* 6. ADVANCED DOCUMENT COMPARE
 *
 ================================================================
 */
-.checkbox-label {
-    width: 100%;
-    transition: all 0.2s ease-in-out;
-    -webkit-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-}
-.checkbox-input:checked + .checkbox-label {
-    background-color: var(--primary-color) !important;
-    color: white !important;
-    border-color: var(--primary-color) !important;
-    font-weight: 600;
-}
-.loader-spinner { width: 20px; height: 20px; border: 3px solid var(--card-border); border-top-color: var(--primary-color); border-radius: 50%; animation: spin 1s linear infinite; }
-@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-.toast { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); padding: 12px 24px; border-radius: 8px; background-color: var(--success-color); color: white; font-weight: 500; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s, bottom 0.3s; z-index: 1000; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
-.toast.error { background-color: var(--danger-color); }
-.toast.show { opacity: 1; visibility: visible; bottom: 40px; }
-
-
-    /*
-    ================================================================
-    *
-    * 6. ADVANCED DOCUMENT COMPARE (REVISED & FINAL)
-    *
-    ================================================================
-    */
-    .adv-compare-container {
-        display: flex;
-        flex-direction: column;
-        height: calc(100vh - 5rem);
-        background-color: #f0f2f5;
-    }
-
-    .adv-compare-toolbar {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0.75rem 1.5rem;
-        background-color: #f8f9fa;
-        border-bottom: 1px solid var(--card-border);
-        flex-shrink: 0;
-    }
-    .toolbar-title {
-        font-weight: 500;
-        color: var(--text-secondary);
-    }
-    .sync-scroll-toggle {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        cursor: pointer;
-        -webkit-user-select: none;
-        -ms-user-select: none;
-        user-select: none;
-    }
-    .sync-scroll-toggle .switch {
-        position: relative;
-        display: inline-block;
-        width: 34px;
-        height: 20px;
-        background-color: #ccc;
-        border-radius: 20px;
-        transition: background-color 0.2s;
-    }
-    .sync-scroll-toggle .switch::before {
-        content: '';
-        position: absolute;
-        width: 16px;
-        height: 16px;
-        border-radius: 50%;
-        background-color: white;
-        top: 2px;
-        left: 2px;
-        transition: transform 0.2s;
-    }
-    .sync-scroll-toggle input:checked + .switch {
-        background-color: var(--primary-color);
-    }
-    .sync-scroll-toggle input:checked + .switch::before {
-        transform: translateX(14px);
-    }
-
-    .adv-compare-main {
-        display: flex;
-        flex-grow: 1;
-        gap: 1.5rem;
-        padding: 1.5rem;
-        overflow: hidden;
-    }
-
-    .pdf-viewer-area {
-        display: flex;
-        flex-grow: 1;
-        gap: 1.5rem;
-        width: 65%;
-    }
-
-    .pdf-viewer-pane {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        background-color: var(--card-bg);
-        border: 1px solid var(--card-border);
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        overflow: hidden;
-    }
-
-    /* --- PERBAIKAN FINAL UNTUK STACKING LAYER --- */
-    .pdf-page-wrapper {
-        position: relative; /* Menjadi acuan untuk elemen di dalamnya */
-        margin: 0 auto 1rem auto;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        line-height: 0; /* Mencegah spasi aneh di bawah PDF */
-    }
-
-    /* Keduanya dibuat absolute agar menumpuk di titik yang sama */
-    .pdf-canvas,
-    .highlight-layer {
-        position: absolute;
-        top: 0;
-        left: 0;
-    }
-
-    .pdf-canvas {
-        z-index: 1; /* PDF di lapisan bawah */
-    }
-
-    .highlight-layer {
-        z-index: 2; /* Warna di lapisan atas */
-        pointer-events: none; /* Lapisan warna tidak bisa di-klik */
-    }
-
-    .highlight-area {
-        position: absolute;
-    }
-    /* --- AKHIR PERBAIKAN --- */
-
-
-    .highlight-area.removed {
-        background-color: rgba(229, 62, 62, 0.5); /* Merah transparan */
-    }
-
-    .highlight-area.added {
-        background-color: rgba(56, 161, 105, 0.5); /* Hijau transparan */
-    }
-
-    .pdf-viewer-content {
-        flex-grow: 1;
-        overflow: auto;
-        background-color: #e9ecef;
-        position: relative;
-        padding-top: 1rem;
-    }
-    .pdf-viewer-content .upload-prompt {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        height: 100%;
-        color: var(--text-secondary);
-        cursor: pointer;
-    }
-    .pdf-viewer-content .upload-prompt i { color: #ced4da; }
-
-    .pane-footer {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.5rem 1rem;
-        background-color: #f8f9fa;
-        border-top: 1px solid var(--card-border);
-        font-size: 0.85rem;
-        color: var(--text-secondary);
-        flex-shrink: 0;
-    }
-
-    .change-report-sidebar {
-        width: 380px;
-        flex-shrink: 0;
-        display: flex;
-        flex-direction: column;
-        background-color: var(--card-bg);
-        border: 1px solid var(--card-border);
-        border-radius: 8px;
-    }
-    .sidebar-header { padding: 1rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--card-border);}
-    .sidebar-search { padding: 0.75rem 1rem; border-bottom: 1px solid var(--card-border); position: relative; }
-    .sidebar-search input { width: 100%; padding: 0.5rem 0.5rem 0.5rem 2rem; border-radius: 6px; border: 1px solid var(--card-border); }
-    .sidebar-search i { position: absolute; top: 50%; left: 1.5rem; transform: translateY(-50%); color: var(--text-secondary); }
-    .sidebar-body { flex-grow: 1; overflow-y: auto; padding: 0.5rem; }
-
-    .change-card {
-        border: 1px solid var(--card-border);
-        border-radius: 6px;
-        margin: 0.5rem;
-        font-size: 0.85rem;
-        cursor: pointer;
-        transition: box-shadow 0.2s;
-    }
-    .change-card:hover {
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    .change-card-header { display: flex; justify-content: space-between; padding: 0.5rem 0.75rem; background-color: #f7fafc; border-bottom: 1px solid var(--card-border); color: var(--text-secondary); }
-    .change-card-body .text-block { padding: 0.75rem; }
-    .change-card-body .text-block span { font-weight: 600; display: block; margin-bottom: 0.25rem; }
-    .change-card-body .text-block p { margin: 0; word-wrap: break-word; line-height: 1.4; }
-    .text-block.old { background-color: #fff5f5; }
-    .text-block.old span { color: #c53030; }
-    .text-block.new { background-color: #f0fff4; }
-    .text-block.new span { color: #2f855a; }
-
-    .text-block.old .highlight-word {
-        background-color: rgba(254, 178, 178, 0.7);
-        border-radius: 3px;
-        padding: 1px 0;
-        font-weight: 600;
-    }
-    .text-block.new .highlight-word {
-        background-color: rgba(154, 230, 180, 0.7);
-        border-radius: 3px;
-        padding: 1px 0;
-        font-weight: 600;
-    }
-
-/* --- 2.1. Sidebar Navigation Groups --- */
-.sidebar-nav .nav-group-header {
-    padding: 1.5rem 1.5rem 0.5rem 1.5rem;
-    font-size: 0.8rem;
-    font-weight: 700;
-    color: #a0aec0; /* --sidebar-text color */
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-.sidebar-nav .nav-group-header:not(:first-child) {
-    border-top: 1px solid #2d3748;
-    margin-top: 0.5rem;
-    padding-top: 1.5rem;
-}
-
-/* --- Sidebar Footer & Toggle --- */
-/* --- Sidebar Footer & Toggle (VERSI BENAR) --- */
-/* --- Sidebar Footer & Toggle (VERSI BENAR) --- */
-.sidebar-footer {
-    padding: 1rem;
-    border-top: 1px solid #2d3748;
-    flex-shrink: 0;
+.adv-compare-container {
     display: flex;
-    align-items: center; /* Menjaga vertikal tetap di tengah */
+    flex-direction: column;
+    height: calc(100vh - 5rem);
+    background-color: #f0f2f5;
 }
-
-/* TAMBAHKAN INI */
-.sidebar-counter {
-    flex-grow: 1; /* Biarkan counter mengisi sisa ruang */
-    /* text-align: center; sudah ada di inline style */
+.adv-compare-toolbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.75rem 1.5rem; background-color: #f8f9fa;
+    border-bottom: 1px solid var(--card-border); flex-shrink: 0;
 }
-#sidebar-toggle {
-    background-color: var(--sidebar-active-bg);
-    color: var(--sidebar-text);
-    border: none;
-    width: 30px;
-    height: 30px;
-    border-radius: 6px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background-color 0.2s, transform 0.3s ease;
+.toolbar-title { font-weight: 500; color: var(--text-secondary); }
+.sync-scroll-toggle {
+    display: flex; align-items: center; gap: 0.5rem; cursor: pointer;
+    -webkit-user-select: none; -ms-user-select: none; user-select: none;
 }
-#sidebar-toggle:hover {
-    background-color: var(--sidebar-hover-bg);
-    color: var(--sidebar-active-text);
+.sync-scroll-toggle .switch {
+    position: relative; display: inline-block; width: 34px; height: 20px;
+    background-color: #ccc; border-radius: 20px; transition: background-color 0.2s;
 }
-
-/* --- Minimized Sidebar Styles --- */
-.sidebar.minimized {
-    width: 80px;
+.sync-scroll-toggle .switch::before {
+    content: ''; position: absolute; width: 16px; height: 16px;
+    border-radius: 50%; background-color: white; top: 2px; left: 2px;
+    transition: transform 0.2s;
 }
-.sidebar.minimized .sidebar-header h2,
-.sidebar.minimized .sidebar-nav .nav-item span,
-.sidebar.minimized .nav-group-header span {
-    opacity: 0;
-    width: 0;
-    overflow: hidden;
-    white-space: nowrap;
+.sync-scroll-toggle input:checked + .switch { background-color: var(--primary-color); }
+.sync-scroll-toggle input:checked + .switch::before { transform: translateX(14px); }
+.adv-compare-main { display: flex; flex-grow: 1; gap: 1.5rem; padding: 1.5rem; overflow: hidden; }
+.pdf-viewer-area { display: flex; flex-grow: 1; gap: 1.5rem; width: 65%; }
+.pdf-viewer-pane {
+    flex: 1; display: flex; flex-direction: column; background-color: var(--card-bg);
+    border: 1px solid var(--card-border); border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08); overflow: hidden;
 }
-.sidebar.minimized .sidebar-header {
-    justify-content: center;
-    padding: 0.5rem;
+.pdf-page-wrapper {
+    position: relative; margin: 0 auto 1rem auto;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1); line-height: 0;
 }
-.sidebar.minimized .nav-item a {
-    justify-content: center;
-    padding: 1rem;
+.pdf-canvas,
+.highlight-layer { position: absolute; top: 0; left: 0; }
+.pdf-canvas { z-index: 1; }
+.highlight-layer { z-index: 2; pointer-events: none; }
+.highlight-area { position: absolute; }
+.highlight-area.removed { background-color: rgba(229, 62, 62, 0.5); }
+.highlight-area.added { background-color: rgba(56, 161, 105, 0.5); }
+.pdf-viewer-content {
+    flex-grow: 1; overflow: auto; background-color: #e9ecef;
+    position: relative; padding-top: 1rem;
 }
-.sidebar.minimized .nav-item.active a {
-    padding-left: calc(1rem - 3px);
+.pdf-viewer-content .upload-prompt {
+    display: flex; flex-direction: column; justify-content: center;
+    align-items: center; height: 100%; color: var(--text-secondary); cursor: pointer;
 }
-.sidebar.minimized .nav-group-header {
-    padding: 1rem 0;
-    text-align: center;
-    border-top: 1px solid #2d3748;
+.pdf-viewer-content .upload-prompt i { color: #ced4da; }
+.pane-footer {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0.5rem 1rem; background-color: #f8f9fa;
+    border-top: 1px solid var(--card-border); font-size: 0.85rem;
+    color: var(--text-secondary); flex-shrink: 0;
 }
-.sidebar.minimized .nav-group-header::before {
-    content: "...";
-    font-weight: bold;
-    color: var(--sidebar-text);
+.change-report-sidebar {
+    width: 380px; flex-shrink: 0; display: flex; flex-direction: column;
+    background-color: var(--card-bg); border: 1px solid var(--card-border);
+    border-radius: 8px;
 }
-.sidebar.minimized .sidebar-footer {
-    justify-content: center;
+.sidebar-header { padding: 1rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--card-border);}
+.sidebar-search { padding: 0.75rem 1rem; border-bottom: 1px solid var(--card-border); position: relative; }
+.sidebar-search input { width: 100%; padding: 0.5rem 0.5rem 0.5rem 2rem; border-radius: 6px; border: 1px solid var(--card-border); }
+.sidebar-search i { position: absolute; top: 50%; left: 1.5rem; transform: translateY(-50%); color: var(--text-secondary); }
+.sidebar-body { flex-grow: 1; overflow-y: auto; padding: 0.5rem; }
+.change-card {
+    border: 1px solid var(--card-border); border-radius: 6px; margin: 0.5rem;
+    font-size: 0.85rem; cursor: pointer; transition: box-shadow 0.2s;
 }
-
-.sidebar.minimized #sidebar-toggle i {
-    transform: rotate(180deg);
-}
+.change-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+.change-card-header { display: flex; justify-content: space-between; padding: 0.5rem 0.75rem; background-color: #f7fafc; border-bottom: 1px solid var(--card-border); color: var(--text-secondary); }
+.change-card-body .text-block { padding: 0.75rem; }
+.change-card-body .text-block span { font-weight: 600; display: block; margin-bottom: 0.25rem; }
+.change-card-body .text-block p { margin: 0; word-wrap: break-word; line-height: 1.4; }
+.text-block.old { background-color: #fff5f5; }
+.text-block.old span { color: #c53030; }
+.text-block.new { background-color: #f0fff4; }
+.text-block.new span { color: #2f855a; }
+.text-block.old .highlight-word { background-color: rgba(254, 178, 178, 0.7); border-radius: 3px; padding: 1px 0; font-weight: 600; }
+.text-block.new .highlight-word { background-color: rgba(154, 230, 180, 0.7); border-radius: 3px; padding: 1px 0; font-weight: 600; }
 
 /*
 ================================================================
@@ -608,33 +214,17 @@ body {
 *
 ================================================================
 */
-.table-container {
-    max-height: 45vh;
-    overflow-y: auto;
-}
-#original-data-head, #processed-data-head {
-    position: sticky;
-    top: 0;
-}
+.table-container { max-height: 45vh; overflow-y: auto; }
+#original-data-head, #processed-data-head { position: sticky; top: 0; }
 #original-data-head { background-color: #f7fafc; }
 #processed-data-head { background-color: #f0fff4; }
 .text-red-500 { color: var(--danger-color); }
 .font-semibold { font-weight: 600; }
-.lg-grid-cols-2 {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-.md-grid-cols-3 {
-     grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-.border {
-    border: 1px solid var(--card-border);
-}
-.rounded-lg {
-    border-radius: 8px;
-}
-.bg-gray-50 {
-    background-color: #f7fafc;
-}
+.lg-grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.md-grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.border { border: 1px solid var(--card-border); }
+.rounded-lg { border-radius: 8px; }
+.bg-gray-50 { background-color: #f7fafc; }
 .p-4 { padding: 1rem; }
 .mb-6 { margin-bottom: 1.5rem; }
 .gap-4 { gap: 1rem; }
@@ -646,115 +236,26 @@ body {
 .mb-3 { margin-bottom: 0.75rem; }
 /*
 ===============================================================
-SQL SCRIPT GENERATOR (OTOMATIS) STYLES
+*
+* 8. SQL SCRIPT GENERATOR (OTOMATIS) STYLES
 *
 ================================================================
 */
 #SqlScriptGeneratorOtomatis .detected-value {
-    max-width: 200px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    display: inline-block;
-    vertical-align: middle;
-    cursor: pointer;
+    max-width: 200px; overflow: hidden; text-overflow: ellipsis;
+    white-space: nowrap; display: inline-block; vertical-align: middle; cursor: pointer;
 }
-#SqlScriptGeneratorOtomatis .tooltip-cell {
-    position: relative;
-}
+#SqlScriptGeneratorOtomatis .tooltip-cell { position: relative; }
 #SqlScriptGeneratorOtomatis .tooltip-cell[data-full-value]:hover::after {
-    content: attr(data-full-value);
-    position: absolute;
-    background-color: #333;
-    color: white;
-    padding: 5px 10px;
-    border-radius: 6px;
-    z-index: 10;
-    white-space: pre-wrap;
-    max-width: 500px;
-    word-break: break-all;
-    left: 50%;
-    transform: translateX(-50%);
-    bottom: 125%;
+    content: attr(data-full-value); position: absolute; background-color: #333;
+    color: white; padding: 5px 10px; border-radius: 6px; z-index: 10;
+    white-space: pre-wrap; max-width: 500px; word-break: break-all;
+    left: 50%; transform: translateX(-50%); bottom: 125%;
 }
-#SqlScriptGeneratorOtomatis .json-subkey-row > td:first-child {
-    padding-left: 2.5rem;
-}
-#SqlScriptGeneratorOtomatis .json-key-code {
-    background-color: #f0fdf4;
-    color: #166534;
-}
-#SqlScriptGeneratorOtomatis .json-main-row {
-    background-color: #dcfce7;
-    font-weight: 600;
-}
-/* Mengatasi potensi konflik dengan Tailwind dari CDN */
-#SqlScriptGeneratorOtomatis .bg-white { background-color: #ffffff; }
-#SqlScriptGeneratorOtomatis .bg-gray-100 { background-color: #f7fafc; }
-#SqlScriptGeneratorOtomatis .p-6 { padding: 1.5rem; }
-#SqlScriptGeneratorOtomatis .md\:p-8 { padding: 2rem; }
-#SqlScriptGeneratorOtomatis .rounded-xl { border-radius: 0.75rem; }
-#SqlScriptGeneratorOtomatis .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); }
-#SqlScriptGeneratorOtomatis .text-3xl { font-size: 1.875rem; }
-#SqlScriptGeneratorOtomatis .font-bold { font-weight: 700; }
-#SqlScriptGeneratorOtomatis .text-gray-800 { color: var(--text-primary); }
-#SqlScriptGeneratorOtomatis .mb-6 { margin-bottom: 1.5rem; }
-#SqlScriptGeneratorOtomatis .text-center { text-align: center; }
-#SqlScriptGeneratorOtomatis .bg-blue-50 { background-color: #ebf8ff; }
-#SqlScriptGeneratorOtomatis .border-l-4 { border-left-width: 4px; }
-#SqlScriptGeneratorOtomatis .border-blue-400 { border-color: #63b3ed; }
-#SqlScriptGeneratorOtomatis .text-blue-800 { color: #2c5282; }
-#SqlScriptGeneratorOtomatis .list-decimal { list-style-type: decimal; }
-#SqlScriptGeneratorOtomatis .list-inside { list-style-position: inside; }
-#SqlScriptGeneratorOtomatis .text-sm { font-size: 0.875rem; }
-#SqlScriptGeneratorOtomatis .text-blue-700 { color: #2b6cb0; }
-#SqlScriptGeneratorOtomatis .mt-2 { margin-top: 0.5rem; }
-#SqlScriptGeneratorOtomatis .space-y-1 > :not([hidden]) ~ :not([hidden]) { margin-top: 0.25rem; }
-#SqlScriptGeneratorOtomatis .md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-#SqlScriptGeneratorOtomatis .gap-6 { gap: 1.5rem; }
-#SqlScriptGeneratorOtomatis .space-y-6 > :not([hidden]) ~ :not([hidden]) { margin-top: 1.5rem; }
-#SqlScriptGeneratorOtomatis .block { display: block; }
-#SqlScriptGeneratorOtomatis .text-lg { font-size: 1.125rem; }
-#SqlScriptGeneratorOtomatis .font-semibold { font-weight: 600; }
-#SqlScriptGeneratorOtomatis .text-gray-700 { color: #4a5568; }
-#SqlScriptGeneratorOtomatis .mb-2 { margin-bottom: 0.5rem; }
-#SqlScriptGeneratorOtomatis .w-full { width: 100%; }
-#SqlScriptGeneratorOtomatis .h-48 { height: 12rem; }
-#SqlScriptGeneratorOtomatis .p-3 { padding: 0.75rem; }
-#SqlScriptGeneratorOtomatis .font-mono { font-family: var(--monospace-font); }
-#SqlScriptGeneratorOtomatis .mt-3 { margin-top: 0.75rem; }
-#SqlScriptGeneratorOtomatis .bg-blue-600 { background-color: #3182ce; }
-#SqlScriptGeneratorOtomatis .text-white { color: #ffffff; }
-#SqlScriptGeneratorOtomatis .px-4 { padding-left: 1rem; padding-right: 1rem; }
-#SqlScriptGeneratorOtomatis .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
-#SqlScriptGeneratorOtomatis .hover\:bg-blue-700:hover { background-color: #2b6cb0; }
-#SqlScriptGeneratorOtomatis .transition { transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
-#SqlScriptGeneratorOtomatis .duration-200 { transition-duration: 200ms; }
-#SqlScriptGeneratorOtomatis .file\:mr-4 { margin-right: 1rem; }
-#SqlScriptGeneratorOtomatis .file\:py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
-#SqlScriptGeneratorOtomatis .file\:px-4 { padding-left: 1rem; padding-right: 1rem; }
-#SqlScriptGeneratorOtomatis .file\:border-0 { border-width: 0; }
-#SqlScriptGeneratorOtomatis .file\:bg-blue-50 { background-color: #ebf8ff; }
-#SqlScriptGeneratorOtomatis .file\:text-blue-700 { color: #2b6cb0; }
-#SqlScriptGeneratorOtomatis .hover\:file\:bg-blue-100:hover { background-color: #bee3f8; }
-#SqlScriptGeneratorOtomatis .cursor-pointer { cursor: pointer; }
-#SqlScriptGeneratorOtomatis .max-h-96 { max-height: 24rem; }
-#SqlScriptGeneratorOtomatis .overflow-y-auto { overflow-y: auto; }
-#SqlScriptGeneratorOtomatis .sticky { position: sticky; }
-#SqlScriptGeneratorOtomatis .top-0 { top: 0; }
-#SqlScriptGeneratorOtomatis .z-10 { z-index: 10; }
-#SqlScriptGeneratorOtomatis .bg-green-600 { background-color: #38a169; }
-#SqlScriptGeneratorOtomatis .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
-#SqlScriptGeneratorOtomatis .hover\:bg-green-700:hover { background-color: #2f855a; }
-#SqlScriptGeneratorOtomatis .mt-8 { margin-top: 2rem; }
-#SqlScriptGeneratorOtomatis .justify-between { justify-content: space-between; }
-#SqlScriptGeneratorOtomatis .items-center { align-items: center; }
-#SqlScriptGeneratorOtomatis .text-2xl { font-size: 1.5rem; }
-#SqlScriptGeneratorOtomatis .bg-gray-200 { background-color: #edf2f7; }
-#SqlScriptGeneratorOtomatis .hover\:bg-gray-300:hover { background-color: #e2e8f0; }
-#SqlScriptGeneratorOtomatis .h-80 { height: 20rem; }
-#SqlScriptGeneratorOtomatis .text-green-600 { color: var(--success-color); }
-#SqlScriptGeneratorOtomatis .hidden { display: none; }
+#SqlScriptGeneratorOtomatis .json-subkey-row > td:first-child { padding-left: 2.5rem; }
+#SqlScriptGeneratorOtomatis .json-key-code { background-color: #f0fdf4; color: #166534; }
+#SqlScriptGeneratorOtomatis .json-main-row { background-color: #dcfce7; font-weight: 600; }
+/* (Tailwind class overrides dihapus karena sudah dicakup oleh components.css) */
 
 /*
 ================================================================
@@ -763,157 +264,80 @@ SQL SCRIPT GENERATOR (OTOMATIS) STYLES
 *
 ================================================================
 */
-.custom-select-container {
-    position: relative;
-    width: 100%;
-}
+.custom-select-container { position: relative; width: 100%; }
 .custom-select-trigger {
-    width: 100%;
-    padding: 0.5rem 0.75rem;
-    border: 1px solid #d1d5db; /* border-gray-300 */
-    border-radius: 0.375rem; /* rounded-md */
-    background-color: white;
-    text-align: left;
-    cursor: pointer;
-    font-size: 0.875rem; /* text-sm */
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    position: relative;
-    padding-right: 2rem;
+    width: 100%; padding: 0.5rem 0.75rem; border: 1px solid #d1d5db;
+    border-radius: 0.375rem; background-color: white; text-align: left;
+    cursor: pointer; font-size: 0.875rem; white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis; position: relative; padding-right: 2rem;
 }
 .custom-select-trigger::after {
-    content: '▼';
-    position: absolute;
-    right: 0.75rem;
-    top: 50%;
-    transform: translateY(-50%) scale(0.8);
-    color: #6b7280; /* text-gray-500 */
+    content: '▼'; position: absolute; right: 0.75rem; top: 50%;
+    transform: translateY(-50%) scale(0.8); color: #6b7280;
 }
 .custom-select-panel {
-    position: absolute;
-    top: calc(100% + 4px);
-    left: 0;
-    width: 100%;
-    max-height: 250px;
-    overflow-y: auto;
-    background-color: white;
-    border: 1px solid #d1d5db;
-    border-radius: 0.375rem;
+    position: absolute; top: calc(100% + 4px); left: 0; width: 100%;
+    max-height: 250px; overflow-y: auto; background-color: white;
+    border: 1px solid #d1d5db; border-radius: 0.375rem;
     box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
     z-index: 50;
 }
 .custom-select-search {
-    width: 100%;
-    padding: 0.5rem 0.75rem;
-    border: none;
-    border-bottom: 1px solid #e5e7eb; /* border-gray-200 */
-    outline: none;
+    width: 100%; padding: 0.5rem 0.75rem; border: none;
+    border-bottom: 1px solid #e5e7eb; outline: none;
 }
-.custom-select-options {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
+.custom-select-options { list-style: none; padding: 0; margin: 0; }
 .custom-select-option {
-    padding: 0.5rem 0.75rem;
-    cursor: pointer;
-    font-size: 0.875rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    padding: 0.5rem 0.75rem; cursor: pointer; font-size: 0.875rem;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.custom-select-option:hover {
-    background-color: #f3f4f6; /* bg-gray-100 */
-}
+.custom-select-option:hover { background-color: #f3f4f6; }
 .custom-select-group {
-    padding: 0.5rem 0.75rem;
-    font-size: 0.75rem; /* text-xs */
-    font-weight: 600; /* font-semibold */
-    color: #4b5563; /* text-gray-600 */
-    background-color: #f9fafb; /* bg-gray-50 */
-    border-top: 1px solid #e5e7eb;
-    border-bottom: 1px solid #e5e7eb;
+    padding: 0.5rem 0.75rem; font-size: 0.75rem; font-weight: 600;
+    color: #4b5563; background-color: #f9fafb;
+    border-top: 1px solid #e5e7eb; border-bottom: 1px solid #e5e7eb;
 }
 
 /*
 ================================================================
 *
-* 9. ARCHIVE FILE FINDER STYLES (v2 Update)
+* 9. ARCHIVE FILE FINDER STYLES
 *
 ================================================================
 */
 .file-input-wrapper {
-    position: relative;
-    overflow: hidden;
-    display: inline-block;
-    cursor: pointer;
+    position: relative; overflow: hidden;
+    display: inline-block; cursor: pointer;
 }
 .file-input-wrapper input[type=file] {
-    font-size: 100px;
-    position: absolute;
-    left: 0;
-    top: 0;
-    opacity: 0;
-    cursor: pointer;
+    font-size: 100px; position: absolute; left: 0; top: 0;
+    opacity: 0; cursor: pointer;
 }
-.file-input-label {
-    cursor: pointer;
-}
-
-/* --- Style untuk Tampilan Daftar (Mode ZIP) --- */
+.file-input-label { cursor: pointer; }
 #ArchiveFileFinder .result-item {
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid var(--card-border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    padding: 0.75rem 1rem; border-bottom: 1px solid var(--card-border);
+    display: flex; align-items: center; justify-content: space-between;
 }
-#ArchiveFileFinder .result-item:last-child {
-    border-bottom: none;
-}
-#ArchiveFileFinder .result-item:hover {
-    background-color: #f7fafc;
-}
+#ArchiveFileFinder .result-item:last-child { border-bottom: none; }
+#ArchiveFileFinder .result-item:hover { background-color: #f7fafc; }
 #ArchiveFileFinder .result-item-label {
-    display: flex;
-    align-items: center;
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: var(--text-primary);
-    cursor: pointer;
-    flex: 1;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    display: flex; align-items: center; font-size: 0.9rem; font-weight: 500;
+    color: var(--text-primary); cursor: pointer; flex: 1; min-width: 0;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 #ArchiveFileFinder .result-item-label span {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-
-/* --- Style untuk Tampilan Tabel (Mode CSV) --- */
-/* Kita target #results-container table agar tidak bentrok 
-    dengan tabel lain di aplikasi (seperti DataCompare).
-*/
 #ArchiveFileFinder #results-container .results-table {
-    width: 100%;
-    border-collapse: collapse;
+    width: 100%; border-collapse: collapse;
 }
 #ArchiveFileFinder #results-container .results-table th,
 #ArchiveFileFinder #results-container .results-table td {
-    padding: 0.75rem 1rem;
-    border: 1px solid var(--card-border);
-    text-align: left;
-    font-size: 0.9rem;
-    white-space: nowrap; /* Penting untuk tabel data */
+    padding: 0.75rem 1rem; border: 1px solid var(--card-border);
+    text-align: left; font-size: 0.9rem; white-space: nowrap;
 }
 #ArchiveFileFinder #results-container .results-table thead {
-    background-color: #edf2f7;
-    position: sticky; /* Membuat header tabel menempel */
-    top: 0;
+    background-color: #edf2f7; position: sticky; top: 0;
 }
 #ArchiveFileFinder #results-container .results-table tbody tr:hover {
     background-color: #f7fafc;
@@ -921,64 +345,85 @@ SQL SCRIPT GENERATOR (OTOMATIS) STYLES
 #ArchiveFileFinder #results-container .results-table td:first-child {
     text-align: center;
 }
-#ArchiveFileFinder .result-checkbox {
-    height: 1.1rem;
-    width: 1.1rem;
-}
+#ArchiveFileFinder .result-checkbox { height: 1.1rem; width: 1.1rem; }
 
 /*
 ================================================================
 *
-* 10. API REQUESTOR STYLES (BARU DITAMBAHKAN)
+* 10. API REQUESTOR STYLES (SPESIFIK)
 *
 ================================================================
 */
-.api-request-grid {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    gap: 0.75rem;
-    align-items: center;
+#ApiRequestor {
+  display: flex; flex-direction: column; flex-grow: 1; min-height: 0;
+  background: var(--card-bg); border: 1px solid var(--card-border);
+  border-top: none; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px;
 }
-.api-tabs-nav {
-    display: flex;
-    border-bottom: 1px solid var(--card-border);
-    margin-bottom: 1rem;
+#ApiRequestor .tool-header {
+  flex-shrink: 0; padding: 1.25rem; padding-bottom: 1rem;
+  margin-bottom: 0; border-bottom: 1px solid var(--card-border);
 }
-.api-tab-btn {
-    padding: 0.75rem 1.25rem;
-    cursor: pointer;
-    background-color: transparent;
-    border: none;
-    border-bottom: 3px solid transparent;
-    font-weight: 500;
-    color: var(--text-secondary);
-    margin-bottom: -1px; /* Agar border bawah tumpang tindih */
+#ApiRequestor .tool-header h1 { font-size: 1.25rem; margin-bottom: 0.25rem; }
+#ApiRequestor .tool-header p { font-size: 0.85rem; color: var(--text-secondary); margin: 0; }
+#ApiRequestor .api-request-zone { flex-shrink: 0; padding: 1.25rem; }
+#ApiRequestor .card { padding: 0; border: none; box-shadow: none; border-radius: 0; }
+#ApiRequestor #api-curl-importer { margin-bottom: 1rem; padding-bottom: 1.25rem; }
+#ApiRequestor .cors-warning {
+  background-color: #fffbea; border-color: #fbd38d; margin-bottom: 1rem;
+  padding: 0.5rem 1rem; border: 1px solid #fbd38d; border-radius: 6px;
 }
-.api-tab-btn.active {
-    color: var(--primary-color);
-    border-bottom-color: var(--primary-color);
-    font-weight: 600;
+#ApiRequestor .cors-warning p { color: #744210; margin: 0; font-size: 0.8rem; }
+#ApiRequestor .cors-warning strong { color: #c05621; }
+#ApiRequestor .api-request-grid {
+    display: grid; grid-template-columns: auto 1fr auto;
+    gap: 0.5rem; align-items: center;
 }
-.api-tab-content {
-    display: none;
+#ApiRequestor #api-url {
+  font-family: var(--monospace-font); font-size: 0.9rem;
+  padding: 0.5rem 0.75rem; resize: vertical; min-height: 38px;
 }
-.api-tab-content.active {
-    display: block;
+#ApiRequestor .api-tabs-nav {
+    display: flex; border-bottom: 1px solid var(--card-border); margin-bottom: 1rem;
 }
-.api-header-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr auto;
-    gap: 0.75rem;
-    align-items: center;
+#ApiRequestor .api-tab-btn {
+    padding: 0.75rem 1.25rem; cursor: pointer; background-color: transparent;
+    border: none; border-bottom: 3px solid transparent; font-weight: 500;
+    color: var(--text-secondary); margin-bottom: -1px;
 }
-.api-header-row .remove-header-btn {
-    padding: 0.5rem 0.8rem;
-    background-color: #fff5f5;
-    color: var(--danger-color);
-    border-color: #fed7d7;
+#ApiRequestor .api-tab-btn.active {
+    color: var(--primary-color); border-bottom-color: var(--primary-color); font-weight: 600;
 }
-.api-header-row .remove-header-btn:hover {
-    background-color: #fed7d7;
+#ApiRequestor .api-tab-content { display: none; }
+#ApiRequestor .api-tab-content.active { display: block; }
+#ApiRequestor .api-header-row {
+    display: grid; grid-template-columns: 1fr 1fr auto;
+    gap: 0.75rem; align-items: center;
+}
+#ApiRequestor .api-header-row .input { font-size: 0.9rem; padding: 0.5rem 0.75rem; }
+#ApiRequestor .api-header-row .remove-header-btn {
+    padding: 0.4rem 0.7rem; background-color: #fff5f5;
+    color: var(--danger-color); border-color: #fed7d7;
+}
+#ApiRequestor .api-header-row .remove-header-btn:hover { background-color: #fed7d7; }
+#ApiRequestor #api-add-header-btn { font-size: 0.8rem; padding: 0.3rem 0.6rem; }
+#ApiRequestor .api-response-zone {
+  flex-grow: 1; display: flex; flex-direction: column; min-height: 200px;
+  margin-top: 1rem; border-top: 1px solid var(--card-border);
+  padding: 0 1.25rem 1.25rem 1.25rem;
+}
+#ApiRequestor .api-response-zone .card {
+  flex-grow: 1; display: flex; flex-direction: column; padding-top: 0.75rem;
+}
+#ApiRequestor .api-response-zone .api-tabs-container {
+  flex-grow: 1; display: flex; flex-direction: column;
+}
+#ApiRequestor .api-response-zone .api-tab-content {
+  flex-grow: 1; min-height: 0; display: flex;
+}
+#ApiRequestor .api-response-zone #api-response-body-output,
+#ApiRequestor .api-response-zone #api-response-headers-output {
+  height: 100%; min-height: 150px; max-height: none;
+  font-size: 0.875rem; flex-grow: 1; overflow: auto;
 }
 #api-response-body-output .json-key { color: #63b3ed; } 
 #api-response-body-output .json-string { color: #f6ad55; } 
@@ -986,549 +431,3 @@ SQL SCRIPT GENERATOR (OTOMATIS) STYLES
 #api-response-body-output .json-boolean { color: #f56565; } 
 #api-response-body-output .json-null { color: #b794f4; }
 #api-response-body-output .json-error { color: #fbd38d; font-weight: bold;}
-
-/* Style untuk cURL Importer */
-#api-curl-importer #api-curl-input {
-    background-color: #ffffff;
-    color: var(--text-primary);
-}
-
-/* [PERBAIKAN] Perkecil font di area respons */
-#api-response-body-output,
-#api-response-headers-output {
-    font-size: 0.875rem; /* 14px */
-    line-height: 1.5;
-}
-/* 1. Ini adalah logo horizontal Anda (nama class diubah) */
-.sidebar-header {
-  padding: 0;
-  margin: 0;
-  height: 90px;              /* atur tinggi header sesuai kebutuhan */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #161c27;
-  overflow: hidden;
-  position: relative;
-}
-
-.logo-wrapper {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  margin: 0;
-  overflow: hidden;
-  /* Tambahkan padding jika logo terlalu mepet ke tepi */
-  padding: 10px; 
-  box-sizing: border-box; /* Pastikan padding tidak menambah ukuran */
-}
-
-/* --- PERBAIKAN CSS UTAMA --- */
-.sidebar-logo-open {
-  width: 200px;               /* UBAH: dari 10% */
-  height: 130px;              /* UBAH: dari 10% */
-  object-fit: contain;       /* UBAH: 'contain' lebih aman untuk logo agar tidak terpotong */
-  display: block;
-  margin: 0;
-  padding: 0;
-  transform: rotate(90deg);
-
-}
-
-/* --- ATURAN CSS TAMBAHAN --- */
-/* Sembunyikan logo kecil (ikon) secara default */
-.sidebar-logo-minimized {
-  display: none;
-  width: 40px;
-  height: auto;
-  transform: rotate(90deg);
-}
-
-/* jika sidebar minimized — sembunyikan logo besar, tampilkan icon */
-.sidebar.minimized .sidebar-logo-open {
-  display: none;
-   
-}
-.sidebar.minimized .logo-wrapper {
-  display: none !important;         /* sembunyikan wrapper besar */
-}
-
-.sidebar.minimized .sidebar-header {
-  height: 90px;                     /* sama dengan tinggi original */
-  display: flex;
-  align-items: center;
-  justify-content: center;          /* center icon secara horizontal */
-}
-
-/* tampilkan icon kecil dan center */
-.sidebar.minimized .sidebar-logo-minimized {
-  display: block !important;
-  width: 40px;                      /* ukurannya bebas */
-  height: auto;
-  margin: 0 auto;
-}
-/*
-================================================================
-*
-* 11. API REQUESTOR - LAYOUT "POSTMAN" (REVISI FINAL V4 - DENGAN TABS)
-*
-================================================================
-*/
-
-/* Ini adalah manager/pembungkus utama, termasuk tab bar */
-#ApiRequestorManager {
-  display: flex;
-  flex-direction: column;
-  /* KUNCI: Paksa komponen manager ini untuk mengisi sisa ruang */
-  flex-grow: 1; 
-  /* Kita tidak butuh height: calc(...) lagi karena parent (.main-content) sudah di-flex */
-  min-height: 0; /* Mencegah flex overflow di dalam parent flex */
-}
-
-/* Ini adalah style untuk bar tab di atas */
-.api-tabs-bar {
-  display: flex;
-  flex-shrink: 0;
-  border-bottom: 1px solid var(--sidebar-active-bg);
-  background-color: var(--sidebar-bg); /* TEMA GELAP */
-  padding: 0.25rem 0.5rem 0 0.5rem;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
-}
-.api-tab {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.75rem;
-  border: 1px solid transparent;
-  border-bottom: none;
-  border-top-left-radius: 6px;
-  border-top-right-radius: 6px;
-  font-size: 0.85rem;
-  cursor: pointer;
-  position: relative;
-  bottom: -1px;
-  color: var(--sidebar-text); /* TEMA GELAP */
-}
-.api-tab:hover {
-  background-color: var(--sidebar-hover-bg); /* TEMA GELAP */
-}
-.api-tab.active {
-  background-color: var(--card-bg); /* KEMBALI TERANG SAAT AKTIF */
-  border-color: var(--card-border);
-  font-weight: 600;
-  color: var(--primary-color);
-}
-.close-tab-btn {
-  background: none;
-  border: none;
-  color: var(--sidebar-text); /* TEMA GELAP */
-  border-radius: 50%;
-  width: 18px;
-  height: 18px;
-  line-height: 18px;
-  padding: 0;
-  text-align: center;
-  font-size: 1rem;
-  cursor: pointer;
-}
-.close-tab-btn:disabled {
-  opacity: 0.2;
-  cursor: not-allowed;
-}
-.close-tab-btn:hover:not(:disabled) {
-  background-color: var(--sidebar-hover-bg); /* TEMA GELAP */
-  color: #fff;
-}
-.add-tab-btn {
-  background: none;
-  border: none;
-  color: var(--sidebar-text); /* TEMA GELAP */
-  width: 24px;
-  height: 24px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 1.25rem;
-  margin: 0.25rem 0.5rem;
-  padding: 0;
-}
-.add-tab-btn:hover {
-  background-color: var(--sidebar-hover-bg);
-}
-
-
-/* Ini adalah komponen ApiRequestor (child-nya) */
-#ApiRequestor {
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1; /* Komponen ini juga harus tumbuh */
-  min-height: 0; /* Mencegah flex overflow */
-  background: var(--card-bg); /* Beri background putih */
-  border: 1px solid var(--card-border);
-  border-top: none; /* Tab bar sudah punya border */
-  border-bottom-left-radius: 8px;
-  border-bottom-right-radius: 8px;
-}
-
-#ApiRequestor .tool-header {
-  flex-shrink: 0;
-  padding: 1.25rem;
-  padding-bottom: 1rem;
-  margin-bottom: 0;
-  border-bottom: 1px solid var(--card-border);
-}
-#ApiRequestor .tool-header h1 {
-  font-size: 1.25rem;
-  margin-bottom: 0.25rem;
-}
-#ApiRequestor .tool-header p {
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  margin: 0;
-}
-
-
-#ApiRequestor .api-request-zone {
-  flex-shrink: 0; /* Jangan biarkan bagian request menyusut */
-  padding: 1.25rem; /* Beri padding di sekeliling zona request */
-}
-
-/* Hapus .card di dalam ApiRequestor karena ApiRequestor sudah jadi card */
-#ApiRequestor .card {
-  padding: 0;
-  border: none;
-  box-shadow: none;
-  border-radius: 0;
-}
-
-/* Perkecil card cURL (yang sekarang sudah tidak ada, tapi ini untuk card lain) */
-#ApiRequestor #api-curl-importer {
-  margin-bottom: 1rem;
-  padding-bottom: 1.25rem;
-}
-
-/* Peringatan CORS */
-#ApiRequestor .cors-warning {
-  background-color: #fffbea; 
-  border-color: #fbd38d; 
-  margin-bottom: 1rem; 
-  padding: 0.5rem 1rem;
-  border: 1px solid #fbd38d;
-  border-radius: 6px;
-}
-#ApiRequestor .cors-warning p {
-  color: #744210; 
-  margin: 0; 
-  font-size: 0.8rem;
-}
-#ApiRequestor .cors-warning strong {
-  color: #c05621;
-}
-
-/* Perkecil grid input URL */
-#ApiRequestor .api-request-grid {
-  gap: 0.5rem;
-}
-
-/* Atur textarea URL agar tidak terlalu tinggi */
-#ApiRequestor #api-url {
-  font-family: var(--monospace-font);
-  font-size: 0.9rem;
-  padding: 0.5rem 0.75rem;
-  resize: vertical;
-  min-height: 38px;
-}
-
-/* Perkecil input header */
-#ApiRequestor .api-header-row .input {
-  font-size: 0.9rem;
-  padding: 0.5rem 0.75rem;
-}
-#ApiRequestor .api-header-row .remove-header-btn {
-  padding: 0.4rem 0.7rem;
-}
-#ApiRequestor #api-add-header-btn {
-  font-size: 0.8rem;
-  padding: 0.3rem 0.6rem;
-}
-
-/* Zona respons akan mengambil sisa ruang */
-#ApiRequestor .api-response-zone {
-  flex-grow: 1; 
-  display: flex;
-  flex-direction: column;
-  min-height: 200px;
-  margin-top: 1rem;
-  border-top: 1px solid var(--card-border);
-  padding: 0 1.25rem 1.25rem 1.25rem; /* Padding untuk zona response */
-}
-
-#ApiRequestor .api-response-zone .card {
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  padding-top: 0.75rem;
-}
-
-#ApiRequestor .api-response-zone .api-tabs-container {
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-#ApiRequestor .api-response-zone .api-tab-content {
-  flex-grow: 1;
-  min-height: 0; /* KUNCI SCROLLING */
-  display: flex; /* KUNCI SCROLLING */
-}
-
-/* Area teks respons akan mengisi sisa tinggi
-   dan memiliki scrollbar internal sendiri. */
-#ApiRequestor .api-response-zone #api-response-body-output,
-#ApiRequestor .api-response-zone #api-response-headers-output {
-  height: 100%; /* KUNCI SCROLLING */
-  min-height: 150px;
-  max-height: none;
-  font-size: 0.875rem;
-  flex-grow: 1; /* KUNCI SCROLLING */
-  overflow: auto; /* KUNCI SCROLLING */
-}
-
-/* ... (semua style sebelumnya) ... */
-
-/*
-================================================================
-*
-* 12. AGE CALCULATOR (KALKULATOR UMUR) - PERKECIL
-*
-================================================================
-*/
-.age-calculator-results {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1rem; /* Diperkecil dari 1.5rem */
-    margin-top: 1.5rem; /* Diperkecil dari 2rem */
-    text-align: center;
-}
-.age-result-box {
-    background-color: #f7fafc; 
-    padding: 1rem; /* Diperkecil dari 1.5rem */
-    border-radius: 8px;
-    border: 1px solid var(--card-border);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-}
-.age-result-value {
-    font-size: 2rem; /* Diperkecil dari 2.5rem */
-    font-weight: 700;
-    line-height: 1;
-    color: var(--primary-color);
-    display: block;
-}
-.age-result-label {
-    font-size: 0.8rem; /* Diperkecil dari 0.9rem */
-    font-weight: 500;
-    color: var(--text-secondary);
-    margin-top: 0.25rem; /* Diperkecil dari 0.5rem */
-    display: block;
-    text-transform: uppercase;
-}
-
-/*
-================================================================
-*
-* 13. CHARACTER COUNTER (PENGHITUNG KARAKTER) - PERKECIL
-*
-================================================================
-*/
-.char-counter-controls {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--card-border);
-}
-
-.char-counter-result {
-    margin-top: 1rem; /* Diperkecil dari 1.5rem */
-    padding: 1rem; /* Diperkecil dari 1.5rem */
-    background-color: var(--sidebar-bg);
-    color: var(--sidebar-active-text);
-    border-radius: 8px;
-    text-align: center;
-}
-
-.char-result-value {
-    font-size: 2.5rem; /* Diperkecil dari 3rem */
-    font-weight: 700;
-    line-height: 1;
-    display: block;
-    color: var(--success-color);
-}
-
-.char-result-label {
-    font-size: 0.9rem; /* Diperkecil dari 1rem */
-    font-weight: 500;
-    color: var(--sidebar-text);
-    margin-top: 0.5rem;
-    display: block;
-}
-
-/*
-================================================================
-*
-* 14. CALCULATION TOOLS (PENATAAN BARU)
-*
-================================================================
-*/
-.calculation-tool-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    padding-bottom: 1rem;
-    margin-bottom: 1.5rem;
-    border-bottom: 1px solid var(--card-border);
-    display: flex;
-    align-items: center;
-}
-
-.calculation-tool-title i {
-    color: var(--primary-color);
-}
-
-/*
-================================================================
-*
-* 15. STANDARD CALCULATOR (KALKULATOR BIASA) - PERKECIL
-*
-================================================================
-*/
-.standard-calculator {
-    background: #ffffff;
-    border-radius: 8px;
-    padding: 0.75rem; 
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-    border: 1px solid var(--card-border);
-    display: flex;
-    flex-direction: column; 
-}
-.standard-calculator:focus {
-    outline: 2px solid var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5);
-}
-
-.calc-display {
-    background-color: var(--sidebar-bg);
-    color: var(--sidebar-active-text);
-    font-family: var(--monospace-font);
-    font-size: 2.5rem; /* Kembalikan ke ukuran 2.5rem agar lebih besar */
-    text-align: right;
-    padding: 1rem 1.25rem; /* Beri padding yang lebih pas */
-    border-radius: 6px;
-    margin-bottom: 0.75rem; 
-    overflow-x: auto;
-    white-space: nowrap;
-    min-height: 2.5em; /* Set tinggi minimum jika display kosong */
-}
-
-.standard-calculator-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 0.5rem; 
-}
-
-.calc-button {
-    font-family: inherit;
-    font-size: 1.1rem; /* Diperkecil dari 1.25rem */
-    font-weight: 600;
-    padding: 0.75rem; /* Diperkecil dari 1rem */
-    border: 1px solid var(--card-border);
-    border-radius: 6px;
-    background-color: #f7fafc;
-    color: var(--text-primary);
-    cursor: pointer;
-    transition: all 0.1s ease;
-}
-
-.calc-button:hover {
-    background-color: #edf2f7;
-    border-color: #d2dae7;
-}
-
-.calc-button:active {
-    transform: scale(0.95);
-    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.calc-button.op {
-    background-color: #fffbea; /* Kuning muda */
-    color: #b7791f; /* Coklat tua */
-    border-color: #f7d87f;
-}
-.calc-button.op:hover {
-    background-color: #fef3c7;
-}
-
-.calc-button.zero {
-    grid-column: span 2;
-}
-/* ... (semua style sebelumnya) ... */
-
-/*
-================================================================
-*
-* 16. PERCENTAGE CALCULATOR (KALKULATOR PERSENTASE) - PERKECIL
-*
-================================================================
-*/
-.percentage-result-box {
-    margin-top: 1.5rem;
-    padding: 1.25rem; /* Diperkecil dari 1.5rem */
-    background-color: #f0fff4; /* Hijau muda */
-    border: 1px solid #c6f6d5;
-    border-radius: 8px;
-    text-align: center;
-}
-
-.percentage-result-label {
-    font-size: 0.9rem; /* Diperkecil dari 1rem */
-    font-weight: 500;
-    color: #2f855a; /* Hijau tua */
-    display: block;
-}
-
-.percentage-result-value {
-    font-size: 2rem; /* Diperkecil dari 2.5rem */
-    font-weight: 700;
-    line-height: 1.2;
-    color: #276749; /* Hijau sangat tua */
-    display: block;
-    margin-top: 0.5rem;
-    word-break: break-all;
-}
-
-/* ================================================================
-*
-* 17. DRAG AND DROP (DnD) STYLES
-*
-================================================================
-*/
-.draggable-card {
-    cursor: move; /* Menunjukkan bahwa item bisa dipindah */
-    transition: all 0.2s ease-out;
-}
-
-.draggable-card.dragging {
-    opacity: 0.5; /* Buat semi-transparan saat ditarik */
-    transform: scale(0.98);
-}
-
-.draggable-card.drag-over {
-    /* Style saat item lain melintas di atasnya */
-    border: 2px dashed var(--primary-color);
-    background-color: #ebf8ff; /* Biru muda */
-    box-shadow: 0 4px 12px rgba(66, 153, 225, 0.2);
-}

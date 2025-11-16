@@ -5,6 +5,9 @@ import CharacterCounter from './CharacterCounter';
 import StandardCalculator from './StandardCalculator';
 import PercentageCalculator from './PercentageCalculator';
 
+// --- PERUBAHAN DI SINI: Impor CSS Module ---
+import styles from './CalculationTools.module.css';
+
 // Objek untuk memetakan ID ke informasi & komponen
 const toolInfoMap = {
   age: { 
@@ -37,13 +40,11 @@ const LS_KEY = 'calcToolOrder';
 
 function CalculationTools() {
   // 1. State untuk Urutan Tool
-  // Membaca dari localStorage saat pertama kali load
   const [toolOrder, setToolOrder] = useState(() => {
     try {
       const savedOrder = localStorage.getItem(LS_KEY);
       if (savedOrder) {
         const parsedOrder = JSON.parse(savedOrder);
-        // Validasi jika tool di masa depan berubah
         const allKeys = Object.keys(toolInfoMap);
         if (parsedOrder.length === allKeys.length && parsedOrder.every(key => allKeys.includes(key))) {
           return parsedOrder;
@@ -52,7 +53,6 @@ function CalculationTools() {
     } catch (e) {
       console.error("Gagal mem-parse urutan tersimpan:", e);
     }
-    // Urutan default jika tidak ada simpanan
     return ['age', 'percentage', 'standard', 'character'];
   });
 
@@ -70,12 +70,10 @@ function CalculationTools() {
   const handleDragStart = (e, id) => {
     setDraggedItemId(id);
     e.dataTransfer.effectAllowed = 'move';
-    // Tambahkan style 'dragging' ke elemen
-    e.currentTarget.classList.add('dragging');
   };
 
   const handleDragOver = (e, id) => {
-    e.preventDefault(); // Diperlukan agar event onDrop bisa terpicu
+    e.preventDefault(); 
     if (id !== draggedItemId) {
       setDragOverItemId(id);
       e.dataTransfer.dropEffect = 'move';
@@ -83,32 +81,31 @@ function CalculationTools() {
   };
 
   const handleDragLeave = (e) => {
-    // Hanya hapus highlight jika kita meninggalkan elemen target
     if (e.currentTarget.contains(e.relatedTarget)) return;
     setDragOverItemId(null);
   };
 
   const handleDrop = (e, dropId) => {
     e.preventDefault();
-    if (draggedItemId === dropId) return; // Tidak drop di tempat yang sama
+    if (draggedItemId === dropId) return; 
 
     const draggedIndex = toolOrder.indexOf(draggedItemId);
     const dropIndex = toolOrder.indexOf(dropId);
 
     const newOrder = [...toolOrder];
-    // Ambil item yang di-drag
     const [draggedItem] = newOrder.splice(draggedIndex, 1);
-    // Masukkan ke posisi drop
     newOrder.splice(dropIndex, 0, draggedItem);
 
     setToolOrder(newOrder);
+    
+    // Reset state DnD setelah drop
+    setDraggedItemId(null);
+    setDragOverItemId(null);
   };
 
   const handleDragEnd = (e) => {
-    // Hapus semua state & style DnD
     setDraggedItemId(null);
     setDragOverItemId(null);
-    e.currentTarget.classList.remove('dragging');
   };
 
   return (
@@ -120,26 +117,31 @@ function CalculationTools() {
 
       <div className="grid grid-cols-1 lg-grid-cols-2" style={{ gap: '1.5rem', alignItems: 'stretch' }}>
         
-        {/* Render kartu kalkulator berdasarkan state 'toolOrder' */}
         {toolOrder.map(id => {
           const tool = toolInfoMap[id];
-          if (!tool) return null; // Jika ada id yang tidak valid
+          if (!tool) return null; 
 
-          // Tentukan apakah card ini adalah target drop
           const isDragOver = dragOverItemId === tool.id;
+          // Tentukan kelas secara dinamis
+          const cardClasses = [
+            'card',
+            styles.draggableCard,
+            isDragOver ? styles.dragOver : '',
+            draggedItemId === tool.id ? styles.dragging : ''
+          ].join(' ');
 
           return (
             <div 
               key={tool.id}
-              draggable="true" // Aktifkan drag
+              draggable="true" 
               onDragStart={(e) => handleDragStart(e, tool.id)}
               onDragOver={(e) => handleDragOver(e, tool.id)}
               onDragLeave={handleDragLeave}
               onDrop={(e) => handleDrop(e, tool.id)}
               onDragEnd={handleDragEnd}
-              className={`card draggable-card ${isDragOver ? 'drag-over' : ''}`}
+              className={cardClasses} // Gunakan className dinamis
             >
-              <h2 className="calculation-tool-title">
+              <h2 className={styles.calculationToolTitle}>
                 <i className={`fas ${tool.icon}`} style={{ marginRight: '0.75rem' }}></i>
                 {tool.title}
               </h2>

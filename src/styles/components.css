@@ -1,0 +1,57 @@
+/*
+================================================================
+*
+* 3. GENERAL COMPONENTS
+*
+================================================================
+*/
+.card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); padding: 2rem; }
+.tool-header { margin-bottom: 2rem; }
+.tool-header h1 { font-size: 2rem; font-weight: 700; color: var(--text-primary); }
+.tool-header p { font-size: 1.1rem; color: var(--text-secondary); }
+.grid { display: grid; gap: 1.5rem; }
+.grid-cols-1 { grid-template-columns: repeat(1, 1fr); }
+.grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+.grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+.grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+.flex { display: flex; gap: 1rem; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.text-center { text-align: center; }
+.button { display: inline-flex; align-items: center; justify-content: center; padding: 0.75rem 1.25rem; border: 1px solid transparent; border-radius: 6px; font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: all 0.2s ease; text-align: center; text-decoration: none; }
+.button.primary { background-color: var(--primary-color); color: white; border-color: var(--primary-color);}
+.button.primary:hover { background-color: var(--primary-hover); border-color: var(--primary-hover); }
+.button.secondary { background-color: #edf2f7; color: var(--text-primary); border-color: #d2dae7;}
+.button.secondary:hover { background-color: #e2e8f0; }
+.button.success { background-color: var(--success-color); color: white; border-color: var(--success-color); }
+.button:disabled { opacity: 0.6; cursor: not-allowed; }
+.button:focus, .button:active {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.5);
+}
+.textarea, .select, .input { width: 100%; padding: 0.75rem; border: 1px solid var(--card-border); border-radius: 6px; font-size: 1rem; font-family: inherit; background-color: #fff; color: var(--text-primary); }
+.textarea:focus, .select:focus, .input:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.5); }
+.label { font-weight: 600; margin-bottom: 0.5rem; display: block;}
+.textarea-editor { font-family: var(--monospace-font); }
+
+/*
+================================================================
+*
+* 4.3. Universal Tool Styles (Table, Image Upload, etc.)
+*
+================================================================
+*/
+.results-table-wrapper { overflow-x: auto; }
+.results-table { width: 100%; border-collapse: collapse; }
+.results-table th, .results-table td { padding: 0.75rem 1rem; border: 1px solid var(--card-border); text-align: left; font-size: 0.9rem;}
+.results-table thead { background-color: #edf2f7; }
+.image-upload-box { border: 2px dashed var(--card-border); border-radius: 8px; min-height: 300px; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: all 0.3s; cursor: pointer; color: var(--text-secondary); }
+.image-upload-box:hover { border-color: var(--primary-color); background-color: #ebf8ff; }
+.image-upload-box.has-image img { display: block; max-height: 250px; border-radius: 4px;}
+.image-upload-box.has-image .upload-area { display: none; }
+.image-comparison-view { position: relative; width: 100%; padding-top: 56.25%; background-color: #2d3748; border-radius: 8px; }
+.image-comparison-view img { position: absolute; top: 50%; left: 50%; width: 100%; height: 100%; object-fit: contain; transform: translate(-50%, -50%);}
+.pdf-viewer-wrapper { height: 75vh; overflow: auto; background-color: #edf2f7; border-radius: 8px; padding: 1rem; cursor: pointer; border: 1px solid var(--card-border); }
+.upload-prompt { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; color: var(--text-secondary); }
