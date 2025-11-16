@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ReusableAceEditor from '../components/ReusableAceEditor'; // <-- DITAMBAHKAN
 
 function JsonCompare() {
   const [input1, setInput1] = useState('');
@@ -126,25 +127,33 @@ function JsonCompare() {
       <div className="card">
         <div className="grid grid-cols-2">
           <div>
-            <h3 style={{ fontWeight: 600, marginBottom: '0.5rem' }}>JSON Asli (Kiri)</h3>
-            <textarea 
-              id="json-compare-input1" 
-              className="textarea textarea-editor" 
-              style={{ height: '25vh' }} 
-              placeholder="Tempel JSON pertama..."
+            <h3 style={{ fontWeight: 600, marginBottom: '0.5rem' }}>JSON Asli</h3>
+            {/* --- DIGANTI DARI TEXTAREA --- */}
+            <ReusableAceEditor
+              mode="json"
+              theme="textmate"
+              onChange={setInput1} // Ace Editor mengembalikan string
               value={input1}
-              onChange={(e) => setInput1(e.target.value)}
+              height="25vh"
+              width="100%"
+              name="json-compare-input1"
+              placeholder="Tempel JSON pertama..."
+              wrapEnabled={true}
             />
           </div>
           <div>
-            <h3 style={{ fontWeight: 600, marginBottom: '0.5rem' }}>JSON Revisi (Kanan)</h3>
-            <textarea 
-              id="json-compare-input2" 
-              className="textarea textarea-editor" 
-              style={{ height: '25vh' }} 
-              placeholder="Tempel JSON kedua..."
+            <h3 style={{ fontWeight: 600, marginBottom: '0.5rem' }}>JSON Revisi</h3>
+            {/* --- DIGANTI DARI TEXTAREA --- */}
+            <ReusableAceEditor
+              mode="json"
+              theme="textmate"
+              onChange={setInput2} // Ace Editor mengembalikan string
               value={input2}
-              onChange={(e) => setInput2(e.target.value)}
+              height="25vh"
+              width="100%"
+              name="json-compare-input2"
+              placeholder="Tempel JSON kedua..."
+              wrapEnabled={true}
             />
           </div>
         </div>

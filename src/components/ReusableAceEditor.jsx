@@ -3,6 +3,7 @@ import React, { useMemo, forwardRef } from 'react';
 // 1. Impor semua dependensi Ace Editor di SATU TEMPAT
 import AceEditor from 'react-ace';
 import 'ace-builds/src-noconflict/mode-json';
+import 'ace-builds/src-noconflict/mode-sql'; // <-- DITAMBAHKAN
 import 'ace-builds/src-noconflict/theme-textmate';      // Tema terang (untuk JSON Formatter)
 import 'ace-builds/src-noconflict/theme-tomorrow_night'; // Tema gelap (untuk API Requestor)
 import 'ace-builds/src-noconflict/ext-language_tools';

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import ToolHeader from '../components/ToolHeader';
+import ReusableAceEditor from '../components/ReusableAceEditor'; // <-- Impor Ace Editor
 
 // Komponen kecil untuk status message
 const StatusMessage = ({ message, type }) => {
@@ -138,16 +139,21 @@ function JsonValueExtractor() {
       />
       <div className="card">
         <div className="grid grid-cols-2">
+          {/* Kolom Kiri */}
           <div className="flex flex-col" style={{ gap: '1.5rem' }}>
             <div>
               <label htmlFor="json-input" className="label">1. Tempelkan JSON Anda di sini</label>
-              <textarea 
-                id="json-input" 
-                rows="12" 
-                className="textarea textarea-editor" 
-                placeholder='[{"id": "abc"}, {"id": "def"}]'
+              {/* --- DIGANTI DARI TEXTAREA --- */}
+              <ReusableAceEditor
+                mode="json"
+                theme="textmate"
+                onChange={setJsonInput} // Mengirim fungsi update state langsung
                 value={jsonInput}
-                onChange={(e) => setJsonInput(e.target.value)}
+                height="30vh"
+                width="100%"
+                name="json-input-editor"
+                placeholder='[{"id": "abc"}, {"id": "def"}]'
+                wrapEnabled={true}
               />
             </div>
             <div>
@@ -187,16 +193,21 @@ function JsonValueExtractor() {
             </button>
           </div>
 
-          <div className="flex flex-col">
+          {/* Kolom Kanan */}
+          <div className="flex flex-col" style={{ height: '100%' }}>
             <label htmlFor="result-output" className="label">4. Hasil dalam Format SQL</label>
-            <div style={{ position: 'relative', flexGrow: 1 }}>
-              <textarea 
-                id="result-output" 
-                rows="18" 
-                className="textarea textarea-editor" 
-                readOnly 
-                placeholder="'nilai1',..."
+            <div style={{ position: 'relative', flexGrow: 1, minHeight: '300px' }}>
+              {/* --- DIGANTI DARI TEXTAREA --- */}
+              <ReusableAceEditor
+                mode="sql" // Outputnya adalah SQL
+                theme="textmate"
                 value={resultOutput}
+                height="100%" // Biarkan flexbox mengatur tinggi
+                width="100%"
+                name="result-output-editor"
+                placeholder="'nilai1',..."
+                readOnly={true}
+                wrapEnabled={true}
               />
               <button 
                 id="copy-btn" 

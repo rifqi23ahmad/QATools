@@ -45,8 +45,10 @@ export const toolGroups = [
     title: 'SQL & Data Tools',
     tools: [
       { id: 'DataCompare', path: '/data-compare', name: 'Data Compare', icon: 'fa-table-list' },
-      { id: 'SqlCompare', path: '/sql-compare', name: 'SQL Compare', icon: 'fa-file-contract' }, // <--- BARU
-      { id: 'SqlFormatter', path: '/sql-formatter', name: 'SQL Formatter', icon: 'fa-database' },
+      { id: 'SqlCompare', path: '/sql-compare', name: 'SQL Compare', icon: 'fa-file-contract' }, 
+      // --- PERUBAHAN DI SINI ---
+      { id: 'SqlFormatter', path: '/sql-formatter', name: 'Value SQL Formatter', icon: 'fa-database' },
+      // --- AKHIR PERUBAHAN ---
       { id: 'SqlInjector', path: '/sql-injector', name: 'SQL Injector', icon: 'fa-syringe' },
       { id: 'SqlScriptGeneratorOtomatis', path: '/sql-gen-otomatis', name: 'SQL Gen (Otomatis)', icon: 'fa-magic' },
       { id: 'ArchiveFileFinder', path: '/archive-finder', name: 'Archive Finder', icon: 'fa-file-archive' },
@@ -81,7 +83,7 @@ export const toolComponentMap = {
 
   // SQL & Data Tools
   DataCompare: DataCompare,
-  SqlCompare: SqlCompare, // <--- BARU
+  SqlCompare: SqlCompare, 
   SqlFormatter: SqlFormatter,
   SqlInjector: SqlInjector,
   SqlScriptGeneratorOtomatis: SqlScriptGeneratorOtomatis,
