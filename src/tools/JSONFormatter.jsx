@@ -1,92 +1,99 @@
-// src/tools/JSONFormatter.jsx
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import ReusableAceEditor from '../components/ReusableAceEditor'; 
+
 
 function JsonFormatter() {
-  // --- State & DOM Elements (Tidak berubah) ---
+  const [inputText, setInputText] = useState(''); 
+  const [outputText, setOutputText] = useState('');
+  
   const [message, setMessage] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [showConvertMenu, setShowConvertMenu] = useState(false);
   const [fileLabel, setFileLabel] = useState('Pilih File...');
 
-  const inputRef = useRef(null);
-  const outputRef = useRef(null);
-  const inputLnRef = useRef(null);
-  const outputLnRef = useRef(null);
+  const [isSyncing, setIsSyncing] = useState(false);
+  
+  // Ref untuk Ace Editor, sekarang kita dapat mengakses .editor dan .session
+  const inputEditorRef = useRef(null);
+  const outputEditorRef = useRef(null);
+  
+  // Ref untuk mengunci sync scroll agar tidak terjadi infinite loop
+  const isScrollUpdatingRef = useRef(false);
+
   const urlInputRef = useRef(null);
   const spacesRef = useRef(null);
   const fileInputRef = useRef(null);
 
-  const inputLineTimer = useRef(null);
-  const outputLineTimer = useRef(null);
-  const lastInputLines = useRef(0);
-  const lastOutputLines = useRef(0);
   const savTimer = useRef(null);
   const LS_KEY = 'jsonformatter.last';
 
-  // --- [PERBAIKAN 3] Optimasi updateLineNumbers (Tidak berubah) ---
-  const updateLineNumbers = useCallback((element, container, cacheRef, forceUpdate = false) => {
-    if (!element || !container) return;
-    const text = element.textContent || '';
+  const getInputRawText = useCallback(() => inputText, [inputText]);
+
+  // --- LOGIKA SCROLL SYNC UTAMA ---
+  const handleScrollSync = useCallback((sourceRef, targetRef) => {
+    // Jika sync tidak aktif atau sedang dalam proses programatik scroll, ABAIKAN
+    if (!isSyncing || isScrollUpdatingRef.current) return;
+
+    const sourceEditor = sourceRef.current?.editor;
+    const targetEditor = targetRef.current?.editor;
+
+    if (sourceEditor && targetEditor) {
+      isScrollUpdatingRef.current = true; // Kunci
+
+      const scrollTop = sourceEditor.session.getScrollTop();
+      const scrollLeft = sourceEditor.session.getScrollLeft();
+
+      targetEditor.session.setScrollTop(scrollTop);
+      targetEditor.session.setScrollLeft(scrollLeft);
+
+      // Buka kunci setelah siklus scroll selesai (gunakan timeout yang pendek)
+      setTimeout(() => {
+        isScrollUpdatingRef.current = false;
+      }, 50); 
+    }
+  }, [isSyncing]);
+
+
+  // --- useEffect untuk Memasang Listener Scroll ---
+  useEffect(() => {
+    const inputEditor = inputEditorRef.current?.editor;
+    const outputEditor = outputEditorRef.current?.editor;
+
+    if (!inputEditor || !outputEditor) return;
     
-    const matches = text.match(/\n/g);
-    const lines = matches ? matches.length + 1 : 1;
-    
-    const cache = cacheRef.current;
-    
-    if (lines === cache && !forceUpdate) {
-      return;
+    // Matikan sync jika isSyncing false
+    if (!isSyncing) {
+        isScrollUpdatingRef.current = false;
+        return;
     }
     
-    cacheRef.current = lines;
+    // Handler yang memanggil logika sync
+    const syncInputToOutput = () => handleScrollSync(inputEditorRef, outputEditorRef);
+    const syncOutputToInput = () => handleScrollSync(outputEditorRef, inputEditorRef);
     
-    const LINE_LIMIT = 20000;
-    let actualLines = lines;
-    if (lines > LINE_LIMIT) {
-      actualLines = LINE_LIMIT;
-    }
-
-    const arr = new Array(actualLines);
-    for (let i = 0; i < actualLines; i++) {
-      arr[i] = `<span>${i + 1}</span>`;
-    }
-
-    let lineHtml = arr.join('\n');
-
-    if (lines > LINE_LIMIT) {
-      lineHtml += `\n<span>...</span>\n<span>${lines}</span>`;
-    }
+    // Pasang listener pada kedua editor
+    inputEditor.session.on('changeScrollTop', syncInputToOutput);
+    inputEditor.session.on('changeScrollLeft', syncInputToOutput);
+    outputEditor.session.on('changeScrollTop', syncOutputToInput);
+    outputEditor.session.on('changeScrollLeft', syncOutputToInput);
     
-    container.innerHTML = lineHtml;
-  }, []);
+    // Jalankan sync satu kali saat diaktifkan
+    syncInputToOutput(); 
 
-  // --- Fungsi Helper Utama (Tidak berubah) ---
-  const getInputRawText = useCallback(() => {
-    return inputRef.current?.textContent || '';
-  }, []);
+    // Cleanup: Hapus listener saat komponen unmount atau isSyncing berubah
+    return () => {
+        inputEditor.session.off('changeScrollTop', syncInputToOutput);
+        inputEditor.session.off('changeScrollLeft', syncInputToOutput);
+        outputEditor.session.off('changeScrollTop', syncOutputToInput);
+        outputEditor.session.off('changeScrollLeft', syncOutputToInput);
+    };
 
-  const getOutputRawText = useCallback(() => {
-    return outputRef.current?.textContent || '';
-  }, []);
-
-  const highlightJsonSyntax = useCallback((jsonString) => {
-    if (!jsonString) return '';
-    jsonString = jsonString.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    return jsonString.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, (match) => {
-      let cls = 'json-number';
-      if (/^"/.test(match)) {
-        cls = /:$/.test(match) ? 'json-key' : 'json-string';
-      } else if (/true|false/.test(match)) {
-        cls = 'json-boolean';
-      } else if (/null/.test(match)) {
-        cls = 'json-null';
-      }
-      return `<span class="${cls}">${match}</span>`;
-    });
-  }, []);
+  }, [isSyncing, handleScrollSync]); 
+  // --- AKHIR LOGIKA SCROLL SYNC ---
 
   const formatText = useCallback((rawText, sp) => {
     try {
-      const obj = JSON.parse(rawText);
+      const obj = JSON.parse(rawText.trim());
       setMessage('✅ JSON valid');
       return sp === 0 ? JSON.stringify(obj) : JSON.stringify(obj, null, sp);
     } catch (e) {
@@ -95,56 +102,36 @@ function JsonFormatter() {
     }
   }, []);
 
-  // --- Fungsi Tombol (Tidak berubah) ---
   const validateJSON = useCallback(() => {
     const txt = getInputRawText();
-    try {
-      JSON.parse(txt);
-      setMessage('✅ JSON valid');
-      return true;
-    } catch (e) {
-      setMessage('❌ ' + e.message);
-      return false;
-    }
+    if (!txt) { setMessage('❌ Input kosong.'); return false; }
+    try { JSON.parse(txt.trim()); setMessage('✅ JSON valid'); return true; } catch (e) { setMessage('❌ ' + e.message); return false; }
   }, [getInputRawText]);
 
   const beautifyJSON = useCallback(() => {
     const txt = getInputRawText();
+    if (!txt) return setMessage('❌ Input kosong.');
     const sp = +(spacesRef.current?.value || '4');
     const prettyJson = formatText(txt, sp);
-    
-    if (prettyJson === null || !inputRef.current || !outputRef.current) return;
-        
-    const highlightedJson = highlightJsonSyntax(prettyJson);
-    
-    outputRef.current.innerHTML = highlightedJson;
-    inputRef.current.innerHTML = highlightedJson;
-    
-    updateLineNumbers(outputRef.current, outputLnRef.current, lastOutputLines, true);
-    updateLineNumbers(inputRef.current, inputLnRef.current, lastInputLines, true);
-    
+    if (prettyJson === null) return;
+    setOutputText(prettyJson);
     setMessage('Beautified — shown in Output');
     localStorage.setItem(LS_KEY, prettyJson);
-  }, [getInputRawText, formatText, highlightJsonSyntax, updateLineNumbers]);
+  }, [getInputRawText, formatText, setOutputText]);
 
   const minifyJSON = useCallback(() => {
     const txt = getInputRawText();
+     if (!txt) return setMessage('❌ Input kosong.');
     const minifiedJson = formatText(txt, 0);
-
-    if (minifiedJson === null || !inputRef.current || !outputRef.current) return;
-
-    outputRef.current.textContent = minifiedJson;
-    inputRef.current.textContent = minifiedJson;
-    
-    updateLineNumbers(outputRef.current, outputLnRef.current, lastOutputLines, true);
-    updateLineNumbers(inputRef.current, inputLnRef.current, lastInputLines, true);
-    
+    if (minifiedJson === null) return;
+    setOutputText(minifiedJson);
     setMessage('Minified — shown in Output');
     localStorage.setItem(LS_KEY, minifiedJson);
-  }, [getInputRawText, formatText, updateLineNumbers]);
+  }, [getInputRawText, formatText, setOutputText]);
 
   const downloadOutput = useCallback(() => {
-    const content = getOutputRawText() || getInputRawText();
+    const content = outputText || inputText; 
+    if (!content) return setMessage('❌ Tidak ada output untuk diunduh.');
     const blob = new Blob([content], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
@@ -153,15 +140,17 @@ function JsonFormatter() {
     a.click();
     a.remove();
     URL.revokeObjectURL(a.href);
-  }, [getOutputRawText, getInputRawText]);
+  }, [outputText, inputText]);
 
   const copyOutput = useCallback(() => {
-    const txt = getOutputRawText() || getInputRawText();
+    const txt = outputText || inputText;
+    if (!txt) return setMessage('❌ Tidak ada output untuk disalin.');
     navigator.clipboard.writeText(txt)
       .then(() => setMessage('Copied to clipboard ✅'))
       .catch(e => setMessage('Copy failed: ' + e));
-  }, [getOutputRawText, getInputRawText]);
+  }, [outputText, inputText]);
 
+  // (Logika konverter disingkat)
   const escapeCsv = (val) => {
     if (val == null) return '';
     const s = String(val);
@@ -171,7 +160,7 @@ function JsonFormatter() {
   const jsonToCsv = (json) => {
     let arr;
     if (Array.isArray(json)) arr = json;
-    else if (typeof json === 'object') {
+    else if (typeof json === 'object' && json !== null) {
       const firstArray = Object.values(json).find(v => Array.isArray(v));
       if (firstArray) arr = firstArray;
       else throw new Error('Root is not an array; cannot convert to CSV');
@@ -201,227 +190,53 @@ function JsonFormatter() {
     }).join('\n');
     return String(obj);
   };
-
   const handleConvert = (type) => {
     (e) => e.preventDefault();
     setShowConvertMenu(false);
     try {
       const obj = JSON.parse(getInputRawText());
       let result = '';
-      if (type === 'xml') {
-        result = jsonToXml(obj);
-        setMessage('Converted to XML');
-      } else if (type === 'csv') {
-        result = jsonToCsv(obj);
-        setMessage('Converted to CSV');
-      } else if (type === 'yaml') {
-        result = jsonToYaml(obj);
-        setMessage('Converted to YAML');
-      }
-      if (outputRef.current) {
-        outputRef.current.textContent = result;
-        updateLineNumbers(outputRef.current, outputLnRef.current, lastOutputLines, true);
-      }
+      if (type === 'xml') result = jsonToXml(obj), setMessage('Converted to XML');
+      else if (type === 'csv') result = jsonToCsv(obj), setMessage('Converted to CSV');
+      else if (type === 'yaml') result = jsonToYaml(obj), setMessage('Converted to YAML');
+      setOutputText(result); 
     } catch (err) {
       setMessage('❌ ' + err.message);
     }
   };
-
   const handleFileChange = useCallback((e) => {
     const f = e.target.files[0];
     if (!f) return;
     setFileLabel(f.name);
     const r = new FileReader();
-    r.onload = () => {
-      if (inputRef.current) {
-        inputRef.current.textContent = r.result;
-        updateLineNumbers(inputRef.current, inputLnRef.current, lastInputLines, true);
-        setMessage('File loaded');
-      }
-    };
+    r.onload = () => { setInputText(r.result); setMessage('File loaded'); };
     r.readAsText(f);
     if (fileInputRef.current) fileInputRef.current.value = '';
-  }, [updateLineNumbers]);
-
+  }, []);
   const handleLoadUrl = useCallback(() => {
     const url = urlInputRef.current?.value.trim();
     if (!url) return setMessage('Please enter URL');
-    
     fetch(url)
-      .then(r => {
-        if (!r.ok) throw new Error(`HTTP error! status: ${r.status}`);
-        return r.text();
-      })
-      .then(txt => {
-        if (inputRef.current) {
-          inputRef.current.textContent = txt;
-          updateLineNumbers(inputRef.current, inputLnRef.current, lastInputLines, true);
-        }
-        setShowModal(false);
-        setMessage('Loaded from URL');
-      })
+      .then(r => { if (!r.ok) throw new Error(`HTTP error! status: ${r.status}`); return r.text(); })
+      .then(txt => { setInputText(txt); setShowModal(false); setMessage('Loaded from URL'); })
       .catch(e => setMessage('Load failed: ' + e.message));
-  }, [updateLineNumbers]);
-
-
-  // --- [PERBAIKAN 1 & 2] Event Handlers (didefinisikan dengan useCallback) ---
-
-  // ##################################################
-  // ### PERUBAHAN DI SINI ###
-  // ##################################################
-  const handlePlainTextPaste = useCallback((e) => {
-    e.preventDefault();
-    const text = e.clipboardData.getData('text/plain');
-    
-    // MENGGANTI: document.execCommand('insertText', false, text);
-    // DENGAN:
-    if (e.target) {
-      e.target.textContent = text;
-    }
-    // Ini akan mengganti seluruh konten, yang jauh lebih cepat
-    // dan merupakan perilaku yang diinginkan untuk formatter.
-
-  }, []); // dependensi kosong karena tidak bergantung pada state/props
-  // ##################################################
-  // ### AKHIR PERUBAHAN ###
-  // ##################################################
-
-  const handlePlainTextCopyCut = useCallback((e) => {
-    e.preventDefault();
-    const selection = window.getSelection();
-    if (!selection) return;
-    const plainText = selection.toString();
-    e.clipboardData.setData('text/plain', plainText);
-
-    if (e.type === 'cut') {
-      document.execCommand('delete');
-    }
   }, []);
-
-  const handleKeyDown = useCallback((e) => {
-    const isCtrl = e.ctrlKey || e.metaKey;
-    const target = e.target;
-
-    if (isCtrl && e.key === 'a') {
-      e.preventDefault();
-      const selection = window.getSelection();
-      if (!selection) return;
-      selection.selectAllChildren(target);
-    } else if (isCtrl && (e.key === 'Enter' || e.key === 'enter')) {
-      e.preventDefault();
-      beautifyJSON();
-    } else if (e.key === 'Delete' || e.key === 'Backspace') {
-      const selection = window.getSelection();
-      if (selection && !selection.isCollapsed) {
-        e.preventDefault();
-        const isSelectAll = (selection.toString().length === (target.textContent || '').length);
-        
-        if (isSelectAll) {
-          target.textContent = '';
-        } else {
-          document.execCommand('insertText', false, '');
-        }
-        
-        if (target.id === 'json-input') {
-          clearTimeout(inputLineTimer.current);
-          inputLineTimer.current = setTimeout(() => updateLineNumbers(inputRef.current, inputLnRef.current, lastInputLines, true), 50);
-        } else {
-          clearTimeout(outputLineTimer.current);
-          outputLineTimer.current = setTimeout(() => updateLineNumbers(outputRef.current, outputLnRef.current, lastOutputLines, true), 50);
-        }
-      }
-    }
-  }, [beautifyJSON, updateLineNumbers]);
-
-  const syncInputScroll = useCallback(() => {
-    if (inputRef.current && inputLnRef.current) {
-      inputLnRef.current.scrollTop = inputRef.current.scrollTop;
-    }
-  }, []);
-
-  const syncOutputScroll = useCallback(() => {
-    if (outputRef.current && outputLnRef.current) {
-      outputLnRef.current.scrollTop = outputRef.current.scrollTop;
-    }
-  }, []);
-
-  const handleInput = useCallback(() => {
-    clearTimeout(inputLineTimer.current);
-    inputLineTimer.current = setTimeout(() => updateLineNumbers(inputRef.current, inputLnRef.current, lastInputLines), 200);
-    
-    clearTimeout(savTimer.current);
-    savTimer.current = setTimeout(() => {
-      if (inputRef.current) localStorage.setItem(LS_KEY, inputRef.current.textContent || '');
-    }, 800);
-  }, [updateLineNumbers]);
-
-  const handleOutputInput = useCallback(() => {
-    clearTimeout(outputLineTimer.current);
-    outputLineTimer.current = setTimeout(() => updateLineNumbers(outputRef.current, outputLnRef.current, lastOutputLines), 200);
-  }, [updateLineNumbers]);
 
   
-  // --- useEffect untuk Mount Logic (Tidak berubah) ---
+  // useEffect untuk menyimpan state inputText ke localStorage (Tidak berubah)
   useEffect(() => {
     const last = localStorage.getItem(LS_KEY);
-    const inputEl = inputRef.current;
-    const outputEl = outputRef.current;
-    const inputLnEl = inputLnRef.current;
-    const outputLnEl = outputLnRef.current;
-
-    if (!inputEl || !outputEl || !inputLnEl || !outputLnEl) return;
-
-    if (last) {
-      inputEl.textContent = last;
-    }
-    updateLineNumbers(inputEl, inputLnEl, lastInputLines, true);
-    updateLineNumbers(outputEl, outputLnEl, lastOutputLines, true);
-
-    // --- Pasang Event Listener NATIVE ---
-    inputEl.addEventListener('paste', handlePlainTextPaste);
-    inputEl.addEventListener('copy', handlePlainTextCopyCut);
-    inputEl.addEventListener('cut', handlePlainTextCopyCut);
-    inputEl.addEventListener('keydown', handleKeyDown);
-    inputEl.addEventListener('scroll', syncInputScroll);
-    inputEl.addEventListener('input', handleInput);
-
-    outputEl.addEventListener('paste', handlePlainTextPaste);
-    outputEl.addEventListener('copy', handlePlainTextCopyCut);
-    outputEl.addEventListener('cut', handlePlainTextCopyCut);
-    outputEl.addEventListener('keydown', handleKeyDown);
-    outputEl.addEventListener('scroll', syncOutputScroll);
-    outputEl.addEventListener('input', handleOutputInput);
-
-    // --- Fungsi Cleanup ---
-    return () => {
-      inputEl.removeEventListener('paste', handlePlainTextPaste);
-      inputEl.removeEventListener('copy', handlePlainTextCopyCut);
-      inputEl.removeEventListener('cut', handlePlainTextCopyCut);
-      inputEl.removeEventListener('keydown', handleKeyDown);
-      inputEl.removeEventListener('scroll', syncInputScroll);
-      inputEl.removeEventListener('input', handleInput);
-
-      outputEl.removeEventListener('paste', handlePlainTextPaste);
-      outputEl.removeEventListener('copy', handlePlainTextCopyCut);
-      outputEl.removeEventListener('cut', handlePlainTextCopyCut);
-      outputEl.removeEventListener('keydown', handleKeyDown);
-      outputEl.removeEventListener('scroll', syncOutputScroll);
-      outputEl.removeEventListener('input', handleOutputInput);
-    };
-  }, [ 
-      handlePlainTextPaste, 
-      handlePlainTextCopyCut, 
-      handleKeyDown, 
-      syncInputScroll, 
-      handleInput, 
-      syncOutputScroll, 
-      handleOutputInput,
-      updateLineNumbers
-  ]);
+    if (last) setInputText(last);
+  }, []);
+  useEffect(() => {
+    clearTimeout(savTimer.current);
+    savTimer.current = setTimeout(() => {
+      localStorage.setItem(LS_KEY, inputText || '');
+    }, 800);
+  }, [inputText]);
   
 
   return (
-    // --- JSX (Render) tidak berubah ---
     <div id="JsonFormatter">
       <div className="tool-header">
         <h1>JSON Formatter</h1>
@@ -430,16 +245,23 @@ function JsonFormatter() {
       <div className="card">
         <div className="grid" style={{ gridTemplateColumns: '1fr 220px 1fr', alignItems: 'start' }}>
           
-          <div className="editor-wrapper">
-            <div className="line-numbers" id="input-line-numbers" ref={inputLnRef}><span>1</span></div>
-            <div 
-              id="json-input" 
-              className="textarea-editor" 
-              contentEditable={true} 
-              spellCheck={false} 
-              tabIndex="0"
-              ref={inputRef}
-            ></div>
+          {/* --- SISI INPUT (Ace Editor) --- */}
+          <div className="editor-wrapper" style={{ border: '1px solid var(--primary-color)' }}>
+            <ReusableAceEditor
+                ref={inputEditorRef} // <--- Ref untuk Ace Input
+                mode="json"
+                theme="textmate" // Tema terang
+                onChange={setInputText} // Input utama
+                value={inputText}
+                name="json-input-editor"
+                height="70vh"
+                wrapEnabled={true} // FIX: Mencegah scroll horizontal
+                onLoad={(editor) => {
+                  // Pasang listener di onLoad
+                  editor.session.on('changeScrollTop', () => handleScrollSync(inputEditorRef, outputEditorRef));
+                  editor.session.on('changeScrollLeft', () => handleScrollSync(inputEditorRef, outputEditorRef));
+                }}
+            />
           </div>
           
           <div className="controls flex flex-col" style={{ gap: '0.75rem', padding: '10px 0' }}>
@@ -466,6 +288,18 @@ function JsonFormatter() {
             />
             
             <button id="btn-load-url" className="button secondary" onClick={() => setShowModal(true)}>Load from URL</button>
+            
+            {/* --- SCROLL SYNC BUTTON --- */}
+            <button 
+              id="btn-sync-scroll" 
+              className={`button ${isSyncing ? 'primary' : 'secondary'}`} 
+              onClick={() => setIsSyncing(s => !s)}
+            >
+              <i className={`fas ${isSyncing ? 'fa-link' : 'fa-unlink'}`} style={{ marginRight: '0.5rem' }}></i>
+              Scroll Sync
+            </button>
+            {/* --- END SCROLL SYNC BUTTON --- */}
+            
             <button id="btn-download" className="button secondary" onClick={downloadOutput}>Download</button>
             <button id="btn-copy" className="button secondary" onClick={copyOutput}>Copy Output</button>
             <div className="dropdown">
@@ -478,16 +312,24 @@ function JsonFormatter() {
             </div>
           </div>
 
+          {/* --- SISI OUTPUT (Ace Editor Editable) --- */}
           <div className="editor-wrapper">
-            <div className="line-numbers" id="output-line-numbers" ref={outputLnRef}><span>1</span></div>
-            <div 
-              id="json-output" 
-              className="textarea-editor pre-output" 
-              contentEditable={true} 
-              spellCheck={false} 
-              tabIndex="0"
-              ref={outputRef}
-            ></div>
+            <ReusableAceEditor
+                ref={outputEditorRef} // <--- Ref untuk Ace Output
+                mode="json" 
+                theme="textmate"
+                onChange={setOutputText} // Output bisa diedit, update state outputText
+                value={outputText}
+                readOnly={false} // Sekarang Editable
+                name="json-output-editor"
+                height="70vh"
+                wrapEnabled={true} // FIX: Mencegah scroll horizontal
+                onLoad={(editor) => {
+                  // Pasang listener di onLoad
+                  editor.session.on('changeScrollTop', () => handleScrollSync(outputEditorRef, inputEditorRef));
+                  editor.session.on('changeScrollLeft', () => handleScrollSync(outputEditorRef, inputEditorRef));
+                }}
+            />
           </div>
         </div>
         <div id="message" style={{ padding: '10px', color: '#333' }}>{message}</div>

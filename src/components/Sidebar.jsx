@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { toolGroups } from '../toolConfig';
 
+// Hapus props isDarkMode dan toggleTheme
 function Sidebar() {
   const [isMinimized, setIsMinimized] = useState(
     localStorage.getItem('sidebarMinimized') === 'true'
@@ -11,22 +12,22 @@ function Sidebar() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Persist isMinimized ke localStorage
+  // Persist isMinimized ke localStorage (Tidak berubah)
   useEffect(() => {
     localStorage.setItem('sidebarMinimized', isMinimized);
   }, [isMinimized]);
 
-  // Inject GNRCounter
+  // Inject GNRCounter (Tidak berubah)
   useEffect(() => {
     const container = counterContainerRef.current;
-    if (!container) return; // Guard clause
+    if (!container) return; 
 
     const counterUrl = 'https://gnrcounter.com/counter.php?accId=f4cdd2f47d0878be22ec2c9252b1ea67';
     let fallbackTimeout;
 
     if (isMinimized) {
       container.innerHTML = '';
-      return; // Jangan render jika minimize
+      return; 
     }
 
     container.innerHTML = '';
@@ -97,7 +98,7 @@ function Sidebar() {
                   <li
                     key={tool.id}
                     className="nav-item" 
-                    title={tool.name} // Tooltip dikembalikan
+                    title={tool.name} 
                   >
                     <div 
                       role="link"
@@ -116,8 +117,8 @@ function Sidebar() {
           ))}
         </ul>
       </nav>
-
       <div className="sidebar-footer">
+        {/* Kontainer untuk Counter (Hanya tampil jika tidak minimized) */}
         {!isMinimized && (
           <div
             ref={counterContainerRef}
@@ -128,13 +129,19 @@ function Sidebar() {
             }}
           />
         )}
+
+        {/* Tombol Sidebar Toggle */}
         <button
           id="sidebar-toggle"
           title={isMinimized ? "Expand Sidebar" : "Minimize Sidebar"}
           onClick={() => setIsMinimized(prev => !prev)}
           style={{
             transform: isMinimized ? 'rotate(180deg)' : 'none',
-            transition: 'transform 0.15s ease'
+            transition: 'transform 0.15s ease',
+            // Margin disesuaikan
+            marginLeft: isMinimized ? '0' : '0', 
+            backgroundColor: 'var(--sidebar-active-bg)',
+            color: 'var(--sidebar-text)',
           }}
         >
           <i className="fas fa-chevron-left" />

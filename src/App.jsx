@@ -1,20 +1,17 @@
 import React from 'react';
-import { Outlet } from 'react-router-dom'; // <-- Impor Outlet
+import { Outlet } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 
-// Hapus semua impor tool, state, dan fungsi renderTool
-
 function App() {
+  // Semua logika Dark Mode telah dihapus
+
   return (
-    <div className="app-layout">
-      {/* Sidebar tidak lagi memerlukan props activeTool atau setActiveTool */}
-      <Sidebar />
+    // Class 'dark-mode' dihapus dari div utama
+    <div className={`app-layout`}> 
+      {/* Props isDarkMode dan toggleTheme dihapus */}
+      <Sidebar /> 
       
-      {/* PERUBAHAN DI SINI */}
       <main className="main-content" style={{ display: 'flex', flexDirection: 'column' }}>
-        {/* Outlet adalah placeholder di mana React Router akan 
-          merender komponen rute yang cocok (tool Anda).
-        */}
         <Outlet />
       </main>
     </div>

@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-// Impor CSS Module
 import styles from './StandardCalculator.module.css';
 
 // kalkulasi dasar
@@ -154,7 +153,6 @@ function StandardCalculator() {
       return;
     }
 
-    // Jika operand1 ada dan operand2 sudah diketik -> hitung dulu, lalu set operand1=result dan tampilkan operator simbol
     if (operator && operand2 !== '') {
       const a = operand1;
       const b = parseFloat(operand2) || 0;
@@ -176,9 +174,6 @@ function StandardCalculator() {
   const handleEquals = () => {
     // tidak ada operator -> tidak ada aksi
     if (!operator || operand1 == null) return;
-
-    // jika user menekan = saat layar hanya menampilkan operator (tidak mengetik operand2),
-    // treat operand2 = operand1 (sesuai implementasi sebelumnya)
     const right = (waitingForOperand2 || operand2 === '') ? operand1 : parseFloat(operand2 || '0');
 
     const result = calculate(operand1, right, operator);

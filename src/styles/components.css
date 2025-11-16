@@ -1,8 +1,6 @@
 /*
 ================================================================
-*
-* 3. GENERAL COMPONENTS
-*
+GENERAL COMPONENTS
 ================================================================
 */
 .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); padding: 2rem; }
@@ -38,9 +36,7 @@
 
 /*
 ================================================================
-*
-* 4.3. Universal Tool Styles (Table, Image Upload, etc.)
-*
+Universal Tool Styles (Table, Image Upload, etc.)
 ================================================================
 */
 .results-table-wrapper { overflow-x: auto; }

@@ -175,12 +175,8 @@ async function createAccurateSizeBlob(targetKB, format) {
     }
 
     const paddingSize = Math.max(0, targetBytes - header.length);
-
-    // Jangan pakai crypto.getRandomValues untuk buffer sangat besar (QuotaExceeded).
-    // Untuk tes ukuran file kita cukup mengisi padding dengan pola berulang yang tidak bergantung pada entropy.
     const paddingBuffer = new Uint8Array(paddingSize);
     if (paddingSize > 0) {
-        // Gunakan pola 0xAA agar tidak mudah dikompresi ke nilai kecil seperti 0x00
         paddingBuffer.fill(0xAA);
     }
 

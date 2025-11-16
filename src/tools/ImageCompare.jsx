@@ -33,9 +33,6 @@ function ImageCompare() {
   // --- Event Handlers untuk Upload ---
 
   const handlePaste = (e) => {
-    // Cek apakah tool ini aktif (opsional, tapi bagus)
-    // const toolPage = document.getElementById('ImageCompare');
-    // if (!toolPage || !toolPage.classList.contains('active')) return;
         
     const items = (e.clipboardData || window.clipboardData).items;
     for (const item of items) {

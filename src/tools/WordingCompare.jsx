@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 
 // --- Algoritma Diff (LCS) dari file asli ---
-// Diperlukan untuk perbandingan teks
 function findLongestCommonSubsequence(seq1, seq2) {
     const m = seq1.length, n = seq2.length;
     const dp = Array(m + 1).fill(null).map(() => Array(n + 1).fill(0));
@@ -30,19 +29,13 @@ function findLongestCommonSubsequence(seq1, seq2) {
 }
 // --- Akhir Algoritma Diff ---
 
-// --- Komponen Sub: PdfPage ---
-// Komponen ini mengurus rendering satu halaman PDF ke canvas
-// DAN menggambar highlight di atasnya
+// --- Komponen Sub: PdfPage (Rendering Canvas Kustom) ---
 const PdfPage = ({ page, highlights }) => {
   const canvasRef = useRef(null);
   const [renderTask, setRenderTask] = useState(null);
 
   useEffect(() => {
-    if (renderTask) {
-      // Batalkan render sebelumnya jika ada
-      renderTask.cancel();
-    }
-
+    if (renderTask) { renderTask.cancel(); }
     if (page && canvasRef.current) {
       const viewport = page.getViewport({ scale: 1.5 });
       const canvas = canvasRef.current;
@@ -60,14 +53,11 @@ const PdfPage = ({ page, highlights }) => {
     }
     
     return () => {
-      if (renderTask) {
-        renderTask.cancel();
-      }
+      if (renderTask) { renderTask.cancel(); }
     };
-  }, [page]); // Render ulang hanya jika 'page' berubah
+  }, [page]);
 
   if (!page) return null;
-
   const viewport = page.getViewport({ scale: 1.5 });
 
   return (
@@ -85,7 +75,7 @@ const PdfPage = ({ page, highlights }) => {
               width: h.width,
               height: h.height,
             }}
-            title={h.text} // Tampilkan teks saat hover
+            title={h.text}
           />
         ))}
       </div>
@@ -93,9 +83,8 @@ const PdfPage = ({ page, highlights }) => {
   );
 };
 
-// --- Komponen Utama: WordingCompare ---
+
 function WordingCompare() {
-  // HAPUS state file1 dan file2, kita akan cek langsung dari doc1 dan doc2
   const [doc1, setDoc1] = useState({ name: 'Belum ada file', pages: [], tokens: [] });
   const [doc2, setDoc2] = useState({ name: 'Belum ada file', pages: [], tokens: [] });
   
@@ -109,6 +98,7 @@ function WordingCompare() {
   const viewer2Ref = useRef(null);
   const isSyncingScroll = useRef(false);
   
+  // --- Logika Scroll Sync Kustom ---
   const handleScroll = (sourceRef, targetRef) => {
     if (!syncScroll || isSyncingScroll.current) return;
     
@@ -121,11 +111,10 @@ function WordingCompare() {
       target.scrollTop = percentage * (target.scrollHeight - target.clientHeight);
     }
     
-    setTimeout(() => {
-      isSyncingScroll.current = false;
-    }, 50); 
+    setTimeout(() => { isSyncingScroll.current = false; }, 50); 
   };
   
+  // --- Logika Memuat PDF Kustom (Perlu dipastikan versi 3.11.174 sudah dimuat di index.html) ---
   const loadPdf = async (file, setDocState) => {
     if (!file) return;
     setIsLoading(true);
@@ -135,7 +124,8 @@ function WordingCompare() {
     
     try {
       const fileData = await file.arrayBuffer();
-      window.pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js`;
+      // Gunakan worker 3.11.174 yang sinkron
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
       const pdf = await window.pdfjsLib.getDocument({ data: fileData }).promise;
       
       let allTokens = [];
@@ -143,8 +133,8 @@ function WordingCompare() {
       for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
         pagePromises.push(pdf.getPage(pageNum));
       }
-      const pages = await Promise.all(pagePromises);
-
+      const pages = await Promise.all(pagePromises); 
+      
       for (let i = 0; i < pages.length; i++) {
         const page = pages[i];
         const pageNum = i + 1;
@@ -157,11 +147,7 @@ function WordingCompare() {
             const x = tx[4];
             const y = tx[5] - item.height; 
             allTokens.push({ 
-              str: item.str, 
-              pageNum, 
-              x, y, 
-              width: item.width, 
-              height: item.height 
+              str: item.str, pageNum, x, y, width: item.width, height: item.height 
             });
           }
         });
@@ -176,7 +162,8 @@ function WordingCompare() {
       setDocState({ name: file.name, pages: pages, tokens: allTokens });
       setStatusText(`Selesai memuat ${file.name}.`);
     } catch (err) {
-      setDocState({ name: `Gagal memuat ${file.name}`, pages: [], tokens: [] });
+      console.error("Error loading PDF tokens:", err);
+      setDocState({ name: `Gagal memuat token: ${err.message}`, pages: [], tokens: [] });
       setStatusText(`Gagal memuat file: ${err.message}`);
     } finally {
       setIsLoading(false);
@@ -192,10 +179,9 @@ function WordingCompare() {
     }
   };
 
+  // --- Logika Perbandingan dan Highlight (Digunakan oleh PdfPage) ---
   const handleCompare = () => {
-    // --- PERBAIKAN BUG DI SINI ---
-    // Cek apakah 'tokens' sudah terisi
-    if (!doc1.tokens || doc1.tokens.length === 0 || !doc2.tokens || doc2.tokens.length === 0) {
+    if (!doc1.tokens.length || !doc2.tokens.length) {
       return setStatusText('Harap muat kedua dokumen PDF dan tunggu proses ekstrak teks selesai.');
     }
     
@@ -241,7 +227,7 @@ function WordingCompare() {
     setStatusText(`Perbandingan selesai. Ditemukan ${finalGroups.length} grup perbedaan.`);
     setIsLoading(false);
   };
-  
+
   const getHighlightsForDoc = (docId) => {
     const highlights = [];
     changeGroups.forEach(group => {
@@ -271,26 +257,22 @@ function WordingCompare() {
     (g.oldWords.map(w=>w.word).join(' ') + g.newWords.map(w=>w.word).join(' ')).toLowerCase().includes(searchFilter.toLowerCase())
   );
   
-  // --- PERBAIKAN BUG DI SINI ---
-  // Tombol "Bandingkan" sekarang dinonaktifkan jika:
-  // 1. Sedang loading
-  // 2. Doc 1 belum selesai diekstrak (tokens.length === 0)
-  // 3. Doc 2 belum selesai diekstrak (tokens.length === 0)
-  const isCompareDisabled = isLoading || doc1.tokens.length === 0 || doc2.tokens.length === 0;
+  const isCompareDisabled = isLoading || doc1.pages.length === 0 || doc2.pages.length === 0;
 
   return (
     <div className="adv-compare-container">
       <div className="adv-compare-toolbar">
         <div className="toolbar-title">{statusText}</div>
         <label className="sync-scroll-toggle" title="Toggle scroll synchronization">
-          <span>Scroll Sync</span>
+          <span>Sync Scroll</span>
           <input type="checkbox" className="is-hidden" checked={syncScroll} onChange={() => setSyncScroll(!syncScroll)} />
           <div className="switch"></div>
         </label>
       </div>
       <div className="adv-compare-main">
         <div className="pdf-viewer-area">
-          {/* Viewer 1 */}
+          
+          {/* Viewer 1: Menggunakan logika render kustom */}
           <div className="pdf-viewer-pane">
             <div 
               className="pdf-viewer-content" 
@@ -309,7 +291,8 @@ function WordingCompare() {
             </div>
             <div className="pane-footer"><span className="file-name">{doc1.name}</span></div>
           </div>
-          {/* Viewer 2 */}
+          
+          {/* Viewer 2: Menggunakan logika render kustom */}
           <div className="pdf-viewer-pane">
             <div 
               className="pdf-viewer-content" 
@@ -328,13 +311,13 @@ function WordingCompare() {
             </div>
             <div className="pane-footer"><span className="file-name">{doc2.name}</span></div>
           </div>
+          
         </div>
         
         {/* Sidebar Perubahan */}
         <div className="change-report-sidebar">
           <div className="sidebar-header">
             <h3>Laporan Perubahan ({filteredChangeGroups.length})</h3>
-            {/* Menggunakan state isCompareDisabled */}
             <button id="compare-wording-btn" className="button primary" onClick={handleCompare} disabled={isCompareDisabled}>
               {isLoading ? 'Memproses...' : 'Bandingkan'}
             </button>
