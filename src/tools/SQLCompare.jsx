@@ -261,7 +261,7 @@ function SqlCompare() {
           
           {/* Kolom 1: Input Kiri */}
           <div>
-            <h3 style={{ fontWeight: 600, marginBottom: '0.5rem' }}>Script SQL Asli (Kiri)</h3>
+            <h3 style={{ fontWeight: 600, marginBottom: '0.5rem' }}>Script SQL Asli</h3>
             <ReusableAceEditor
               ref={input1EditorRef} // <-- Tambahkan ref
               mode="sql"
@@ -300,7 +300,7 @@ function SqlCompare() {
           
           {/* Kolom 3: Input Kanan */}
           <div>
-            <h3 style={{ fontWeight: 600, marginBottom: '0.5rem' }}>Script SQL Revisi (Kanan)</h3>
+            <h3 style={{ fontWeight: 600, marginBottom: '0.5rem' }}>Script SQL Revisi</h3>
             <ReusableAceEditor
               ref={input2EditorRef} // <-- Tambahkan ref
               mode="sql"

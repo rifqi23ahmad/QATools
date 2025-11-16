@@ -13,13 +13,11 @@ import JsonFormatter from './tools/JSONFormatter';
 import ArchiveFileFinder from './tools/ArchiveFileFinder';
 import ImageCompare from './tools/ImageCompare';
 import DummyImageGenerator from './tools/DummyImageGenerator';
-// Impor ulang WordingCompare
 import WordingCompare from './tools/WordingCompare.jsx';
 import SqlScriptGeneratorOtomatis from './tools/SqlScriptGeneratorOtomatis';
 import SqlScriptGenerator from './tools/SQLScriptGenerator';
 import CalculationTools from './tools/CalculationTools.jsx';
-// Import SQLCompare BARU
-import SqlCompare from './tools/SQLCompare'; // <--- BARU
+import SqlCompare from './tools/SQLCompare'; //
 
 
 /**
@@ -28,9 +26,9 @@ import SqlCompare from './tools/SQLCompare'; // <--- BARU
  */
 export const toolGroups = [
   {
-    title: 'Kalkulasi',
+    title: 'Calculation Tools',
     tools: [
-      { id: 'CalculationTools', path: '/kalkulasi', name: 'Kalkulasi', icon: 'fa-calculator' },
+      { id: 'CalculationTools', path: '/kalkulasi', name: 'AIO Calculation', icon: 'fa-calculator' },
     ]
   },
   {
@@ -46,9 +44,7 @@ export const toolGroups = [
     tools: [
       { id: 'DataCompare', path: '/data-compare', name: 'Data Compare', icon: 'fa-table-list' },
       { id: 'SqlCompare', path: '/sql-compare', name: 'SQL Compare', icon: 'fa-file-contract' }, 
-      // --- PERUBAHAN DI SINI ---
       { id: 'SqlFormatter', path: '/sql-formatter', name: 'Value SQL Formatter', icon: 'fa-database' },
-      // --- AKHIR PERUBAHAN ---
       { id: 'SqlInjector', path: '/sql-injector', name: 'SQL Injector', icon: 'fa-syringe' },
       { id: 'SqlScriptGeneratorOtomatis', path: '/sql-gen-otomatis', name: 'SQL Gen (Otomatis)', icon: 'fa-magic' },
       { id: 'ArchiveFileFinder', path: '/archive-finder', name: 'Archive Finder', icon: 'fa-file-archive' },
@@ -60,8 +56,7 @@ export const toolGroups = [
     title: 'File & Document Tools',
     tools: [
       { id: 'FileSplitter', path: '/file-splitter', name: 'File Splitter', icon: 'fa-file-zipper' },
-      // GANTI KEMBALI
-      { id: 'WordingCompare', path: '/doc-compare', name: 'PDF Compare (Visual)', icon: 'fa-file-pdf' },
+      { id: 'WordingCompare', path: '/doc-compare', name: 'PDF Compare', icon: 'fa-file-pdf' },
       { id: 'ImageCompare', path: '/image-compare', name: 'Image Compare', icon: 'fa-images' },
       { id: 'DummyImageGenerator', path: '/dummy-file-gen', name: 'Dummy File Gen', icon: 'fa-file-image' },
       { id: 'BranchDataProcessor', path: '/branch-data-processor', name: 'Branch Data Processor', icon: 'fa-file-excel' },
