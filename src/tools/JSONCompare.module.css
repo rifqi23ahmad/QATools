@@ -1,0 +1,5 @@
+.textareaEditor { 
+  background-color: #fdfdfd; 
+  border: 1px solid var(--card-border); 
+  color: var(--text-primary); 
+}

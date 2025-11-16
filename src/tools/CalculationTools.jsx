@@ -2,8 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import ToolHeader from '../components/ToolHeader';
 import AgeCalculator from './AgeCalculator';
 import CharacterCounter from './CharacterCounter';
-import StandardCalculator from './StandardCalculator';
 import PercentageCalculator from './PercentageCalculator';
+import StandardCalculator from './StandardCalculator';
 
 // --- PERUBAHAN DI SINI: Impor CSS Module ---
 import styles from './CalculationTools.module.css';

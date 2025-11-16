@@ -22,7 +22,6 @@ GLOBAL & RESET STYLES
     --text-secondary: #718096;
     --monospace-font: 'Fira Code', 'Courier New', monospace;
 }
-/* HAPUS: Blok .dark-mode */
 
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -57,5 +56,3 @@ HELPER & MISCELLANEOUS STYLES
 .toast { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); padding: 12px 24px; border-radius: 8px; background-color: var(--success-color); color: white; font-weight: 500; opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s, bottom 0.3s; z-index: 1000; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
 .toast.error { background-color: var(--danger-color); }
 .toast.show { opacity: 1; visibility: visible; bottom: 40px; }
-
-/* ... (Sisa style.css Anda, termasuk perbaikan layout/sidebar/komponen yang sudah direfaktor, tetap tidak berubah di bawah ini) ... */

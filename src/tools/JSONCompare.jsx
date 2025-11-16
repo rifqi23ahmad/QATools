@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import ReusableAceEditor from '../components/ReusableAceEditor'; // <-- DITAMBAHKAN
+import ReusableAceEditor from '../components/ReusableAceEditor';
+import compareStyles from './CompareView.module.css'; 
+import styles from './JSONCompare.module.css'; 
+import CompareResultView from '../components/CompareResultView.jsx'; // <-- PERBAIKAN: Tambahkan .jsx
 
 function JsonCompare() {
   const [input1, setInput1] = useState('');
   const [input2, setInput2] = useState('');
   
-  // State untuk menyimpan hasil
   const [outputLeft, setOutputLeft] = useState('');
   const [outputRight, setOutputRight] = useState('');
   const [summary, setSummary] = useState([]);
@@ -13,11 +15,13 @@ function JsonCompare() {
 
   const escapeHtml = (text) => text ? text.replace(/</g, '&lt;').replace(/>/g, '&gt;') : '';
 
+  // createLineHtml logic tetap di sini
   const createLineHtml = (pane, lineNumber, content, type, isPreformatted = false) => {
     const finalContent = isPreformatted ? content : escapeHtml(content);
-    return `<div class="diff-line ${type}" id="diff-${pane}-line-${lineNumber}">` +
-           `<div class="line-number">${lineNumber}</div>` +
-           `<div class="line-content">${finalContent || '&nbsp;'}</div>` +
+    const typeClass = compareStyles[type] || ''; 
+    return `<div class="${compareStyles.diffLine} ${typeClass}" id="diff-${pane}-line-${lineNumber}">` +
+           `<div class="${compareStyles.lineNumber}">${lineNumber}</div>` +
+           `<div class="${compareStyles.lineContent}">${finalContent || '&nbsp;'}</div>` +
            `</div>`;
   };
 
@@ -26,17 +30,11 @@ function JsonCompare() {
     try { json1 = JSON.parse(input1); } catch (e) { alert(`Error pada JSON Asli: ${e.message}`); return; }
     try { json2 = JSON.parse(input2); } catch (e) { alert(`Error pada JSON Revisi: ${e.message}`); return; }
 
-    // Format kedua JSON (auto-beauty)
     const str1 = JSON.stringify(json1, null, 2);
     const str2 = JSON.stringify(json2, null, 2);
-
-    // --- PERBAIKAN DI SINI ---
-    // Perbarui state textarea dengan versi yang sudah di-beautify
     setInput1(str1);
     setInput2(str2);
-    // --- AKHIR PERBAIKAN ---
 
-    // Pastikan 'diff_match_patch' sudah dimuat dari index.html
     if (typeof diff_match_patch === 'undefined') {
       alert('Error: Pustaka diff_match_patch tidak dimuat.');
       return;
@@ -53,17 +51,26 @@ function JsonCompare() {
 
     for (let i = 0; i < diffs.length; i++) {
         const [op, data] = diffs[i];
-        const lines = data.split('\n').filter(l => l);
+        
+        const lines = data.split('\n');
+        if (lines.length > 0 && lines[lines.length - 1] === '') {
+            lines.pop(); 
+        }
+        
         const nextDiff = (i + 1 < diffs.length) ? diffs[i+1] : null;
 
         if (op === -1 && nextDiff && nextDiff[0] === 1) {
             const data2 = nextDiff[1];
-            const lines2 = data2.split('\n').filter(l => l);
+            const lines2 = data2.split('\n');
+            if (lines2.length > 0 && lines2[lines2.length - 1] === '') {
+                lines2.pop();
+            }
+
             if (lines.length === 1 && lines2.length === 1) {
                 const wordDiffs = dmp.diff_main(lines[0], lines2[0]);
                 dmp.diff_cleanupSemantic(wordDiffs);
-                const leftContent = wordDiffs.map(([op, text]) => op !== 1 ? `<span class="${op === -1 ? 'highlight' : ''}">${escapeHtml(text)}</span>` : '').join('');
-                const rightContent = wordDiffs.map(([op, text]) => op !== -1 ? `<span class="${op === 1 ? 'highlight' : ''}">${escapeHtml(text)}</span>` : '').join('');
+                const leftContent = wordDiffs.map(([op, text]) => op !== 1 ? `<span class="${op === -1 ? compareStyles.highlight : ''}">${escapeHtml(text)}</span>` : '').join('');
+                const rightContent = wordDiffs.map(([op, text]) => op !== -1 ? `<span class="${op === 1 ? compareStyles.highlight : ''}">${escapeHtml(text)}</span>` : '').join('');
                 
                 changes.push({ type: 'changed', lineLeft: lineNumLeft, lineRight: lineNumRight, text: lines[0] });
                 htmlLeft += createLineHtml('left', lineNumLeft++, leftContent, 'changed', true);
@@ -79,7 +86,7 @@ function JsonCompare() {
                 htmlRight += createLineHtml('right', lineNumRight++, line, 'context');
             });
         } else if (op === -1) {
-            lines.forEach(line => {
+             lines.forEach(line => {
                 changes.push({ type: 'removed', lineLeft: lineNumLeft, lineRight: lineNumRight, text: line });
                 htmlLeft += createLineHtml('left', lineNumLeft++, line, 'removed');
                 htmlRight += createLineHtml('right', lineNumRight++, '&nbsp;', 'placeholder');
@@ -99,7 +106,7 @@ function JsonCompare() {
     setShowResults(true);
   };
 
-  // Handler untuk meng-highlight dan scroll
+  // handleSummaryClick logic tetap di sini
   const handleSummaryClick = (lineLeft, lineRight) => {
     const targetLeft = document.getElementById(`diff-left-line-${lineLeft}`);
     const targetRight = document.getElementById(`diff-right-line-${lineRight}`);
@@ -107,9 +114,9 @@ function JsonCompare() {
     const highlightElement = (element) => {
       if (element) {
         element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        element.classList.add('line-highlighted');
+        element.classList.add(compareStyles.lineHighlighted);
         setTimeout(() => {
-          element.classList.remove('line-highlighted');
+          element.classList.remove(compareStyles.lineHighlighted);
         }, 2500);
       }
     };
@@ -119,7 +126,7 @@ function JsonCompare() {
   };
 
   return (
-    <div id="JsonCompare"> 
+    <div> 
       <div className="tool-header">
         <h1>JSON Compare</h1>
         <p>Bandingkan dua objek JSON untuk menemukan perbedaan properti dan nilai secara visual.</p>
@@ -128,11 +135,11 @@ function JsonCompare() {
         <div className="grid grid-cols-2">
           <div>
             <h3 style={{ fontWeight: 600, marginBottom: '0.5rem' }}>JSON Asli</h3>
-            {/* --- DIGANTI DARI TEXTAREA --- */}
             <ReusableAceEditor
+              className={styles.textareaEditor} 
               mode="json"
               theme="textmate"
-              onChange={setInput1} // Ace Editor mengembalikan string
+              onChange={setInput1}
               value={input1}
               height="25vh"
               width="100%"
@@ -143,11 +150,11 @@ function JsonCompare() {
           </div>
           <div>
             <h3 style={{ fontWeight: 600, marginBottom: '0.5rem' }}>JSON Revisi</h3>
-            {/* --- DIGANTI DARI TEXTAREA --- */}
             <ReusableAceEditor
+              className={styles.textareaEditor}
               mode="json"
               theme="textmate"
-              onChange={setInput2} // Ace Editor mengembalikan string
+              onChange={setInput2}
               value={input2}
               height="25vh"
               width="100%"
@@ -164,49 +171,16 @@ function JsonCompare() {
         </div>
       </div>
 
-      {/* Bagian Hasil - Tampil jika showResults adalah true */}
+      {/* --- RENDER KOMPONEN BARU --- */}
       {showResults && (
-        <div id="compare-results-section" style={{ marginTop: '2rem' }}>
-          <div className="diff-layout">
-            <div className="diff-view">
-              <div className="diff-pane">
-                <div className="diff-pane-header">JSON Asli</div>
-                <pre 
-                  id="json-compare-output-left" 
-                  className="diff-output"
-                  dangerouslySetInnerHTML={{ __html: outputLeft }}
-                />
-              </div>
-              <div className="diff-pane">
-                <div className="diff-pane-header">JSON Revisi</div>
-                <pre 
-                  id="json-compare-output-right" 
-                  className="diff-output"
-                  dangerouslySetInnerHTML={{ __html: outputRight }}
-                />
-              </div>
-            </div>
-            <div className="diff-summary-sidebar">
-              <h3 id="summary-header">Ditemukan {summary.length} perbedaan</h3>
-              <div id="summary-list" className="summary-list">
-                {summary.map((c, index) => {
-                  const cleanText = escapeHtml(c.text.trim().substring(0, 50));
-                  const lineDisplay = c.type === 'added' ? c.lineRight : c.lineLeft;
-                  return (
-                    <div 
-                      key={index}
-                      className={`summary-list-item item-${c.type} clickable-summary`} 
-                      onClick={() => handleSummaryClick(c.lineLeft, c.lineRight)}
-                    >
-                      <strong>{c.type.charAt(0).toUpperCase() + c.type.slice(1)}</strong> pada baris {lineDisplay}
-                      <code>...{cleanText}...</code>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </div>
+        <CompareResultView
+          outputLeft={outputLeft}
+          outputRight={outputRight}
+          summary={summary}
+          onSummaryClick={handleSummaryClick}
+          titleLeft="JSON Asli"
+          titleRight="JSON Revisi"
+        />
       )}
     </div>
   );

@@ -2,16 +2,9 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import App from './App.jsx'
-
-// Impor CSS Global yang sudah dipecah
 import './styles/global.css'
 import './styles/layout.css'
 import './styles/components.css'
-
-// Impor file style.css (yang sekarang sudah bersih)
-import './style.css' 
-
-// Impor konfigurasi tool yang sudah kita buat
 import { allTools, toolComponentMap } from './toolConfig.jsx'
 
 // Default redirect path (pakai path pertama kalau ada)

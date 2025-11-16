@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 
-// --- Helper & Data (dari file asli) ---
-// Pindahkan mapping dan helper ke luar komponen agar tidak dibuat ulang
 const branchMapping = { "ACEH": { "code": "5600", "id": 319 }, "ALUE BILIE": { "code": "5613", "id": 323 }, /* ... (salin sisa branchMapping Anda di sini) ... */ "YOGYAKARTA": { "code": "3000", "id": 218 } };
 
 function generateUUID() { return crypto.randomUUID(); }

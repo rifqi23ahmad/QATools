@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import ApiRequestor from './ApiRequestor'; // Kita impor komponen UI
+import styles from './ApiRequestorManager.module.css'; // <-- IMPOR BARU
 
 // State default untuk tab baru
 const createNewTab = (id) => ({
@@ -134,8 +135,8 @@ function ApiRequestorManager() {
   };
   
   return (
-    // ID baru untuk styling layout
-    <div id="ApiRequestorManager">
+    // ID diubah menjadi className dari module
+    <div className={styles.apiRequestorManager}>
       <div className="tool-header" style={{ marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '1px solid var(--card-border)' }}>
         <h1 style={{ fontSize: '1.5rem', marginBottom: '0.25rem' }}>API Requestor (cURL Runner)</h1>
         <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', margin: 0 }}>
@@ -143,16 +144,17 @@ function ApiRequestorManager() {
         </p>
       </div>
       
-      <div className="api-tabs-bar">
+      <div className={styles.apiTabsBar}> {/* <-- GANTI CLASS */}
         {tabs.map(tab => (
           <div 
             key={tab.id}
-            className={`api-tab ${tab.id === activeTabId ? 'active' : ''}`}
+            // Kelas diganti menggunakan styles
+            className={`${styles.apiTab} ${tab.id === activeTabId ? styles.active : ''}`}
             onClick={() => setActiveTabId(tab.id)}
           >
             <span>{tab.name}</span>
             <button 
-              className="close-tab-btn" 
+              className={styles.closeTabBtn} // <-- GANTI CLASS
               onClick={(e) => handleRemoveTab(e, tab.id)}
               disabled={tabs.length === 1}
             >
@@ -160,20 +162,18 @@ function ApiRequestorManager() {
             </button>
           </div>
         ))}
-        <button className="add-tab-btn" onClick={handleAddTab}>+</button>
+        <button className={styles.addTabBtn} onClick={handleAddTab}>+</button> {/* <-- GANTI CLASS */}
       </div>
 
-      {/* Render HANYA komponen ApiRequestor yang aktif.
-        Kita berikan `key` unik agar React me-remount komponen saat ganti tab.
-      */}
+      {/* Render HANYA komponen ApiRequestor yang aktif. */}
       {activeTab && (
         <ApiRequestor
           key={activeTab.id}
           requestState={activeTab.request}
           responseState={activeTab.response}
           isLoading={activeTab.isLoading}
-          responseTab={activeTab.responseTab} // Kirim state tab dari manager
-          onResponseTabChange={(value) => handleStateChange('responseTab', value)} // Kirim fungsi updater
+          responseTab={activeTab.responseTab} 
+          onResponseTabChange={(value) => handleStateChange('responseTab', value)}
           onRequestChange={handleRequestChange}
           onSendRequest={handleSendRequest}
         />

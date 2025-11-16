@@ -1,0 +1,85 @@
+.advCompareContainer {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 5rem);
+    background-color: #f0f2f5;
+}
+.advCompareToolbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.75rem 1.5rem; background-color: #f8f9fa;
+    border-bottom: 1px solid var(--card-border); flex-shrink: 0;
+}
+.toolbarTitle { font-weight: 500; color: var(--text-secondary); }
+.syncScrollToggle {
+    display: flex; align-items: center; gap: 0.5rem; cursor: pointer;
+    -webkit-user-select: none; -ms-user-select: none; user-select: none;
+}
+.syncScrollToggle .switch {
+    position: relative; display: inline-block; width: 34px; height: 20px;
+    background-color: #ccc; border-radius: 20px; transition: background-color 0.2s;
+}
+.syncScrollToggle .switch::before {
+    content: ''; position: absolute; width: 16px; height: 16px;
+    border-radius: 50%; background-color: white; top: 2px; left: 2px;
+    transition: transform 0.2s;
+}
+.syncScrollToggle input:checked + .switch { background-color: var(--primary-color); }
+.syncScrollToggle input:checked + .switch::before { transform: translateX(14px); }
+.advCompareMain { display: flex; flex-grow: 1; gap: 1.5rem; padding: 1.5rem; overflow: hidden; }
+.pdfViewerArea { display: flex; flex-grow: 1; gap: 1.5rem; width: 65%; }
+.pdfViewerPane {
+    flex: 1; display: flex; flex-direction: column; background-color: var(--card-bg);
+    border: 1px solid var(--card-border); border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08); overflow: hidden;
+}
+.pdfPageWrapper {
+    position: relative; margin: 0 auto 1rem auto;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1); line-height: 0;
+}
+.pdfCanvas,
+.highlightLayer { position: absolute; top: 0; left: 0; }
+.pdfCanvas { z-index: 1; }
+.highlightLayer { z-index: 2; pointer-events: none; }
+.highlightArea { position: absolute; }
+.highlightArea.removed { background-color: rgba(229, 62, 62, 0.5); }
+.highlightArea.added { background-color: rgba(56, 161, 105, 0.5); }
+.pdfViewerContent {
+    flex-grow: 1; overflow: auto; background-color: #e9ecef;
+    position: relative; padding-top: 1rem;
+}
+.pdfViewerContent .uploadPrompt {
+    display: flex; flex-direction: column; justify-content: center;
+    align-items: center; height: 100%; color: var(--text-secondary); cursor: pointer;
+}
+.pdfViewerContent .uploadPrompt i { color: #ced4da; }
+.paneFooter {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0.5rem 1rem; background-color: #f8f9fa;
+    border-top: 1px solid var(--card-border); font-size: 0.85rem;
+    color: var(--text-secondary); flex-shrink: 0;
+}
+.changeReportSidebar {
+    width: 380px; flex-shrink: 0; display: flex; flex-direction: column;
+    background-color: var(--card-bg); border: 1px solid var(--card-border);
+    border-radius: 8px;
+}
+.sidebarHeader { padding: 1rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--card-border);}
+.sidebarSearch { padding: 0.75rem 1rem; border-bottom: 1px solid var(--card-border); position: relative; }
+.sidebarSearch input { width: 100%; padding: 0.5rem 0.5rem 0.5rem 2rem; border-radius: 6px; border: 1px solid var(--card-border); }
+.sidebarSearch i { position: absolute; top: 50%; left: 1.5rem; transform: translateY(-50%); color: var(--text-secondary); }
+.sidebarBody { flex-grow: 1; overflow-y: auto; padding: 0.5rem; }
+.changeCard {
+    border: 1px solid var(--card-border); border-radius: 6px; margin: 0.5rem;
+    font-size: 0.85rem; cursor: pointer; transition: box-shadow 0.2s;
+}
+.changeCard:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+.changeCardHeader { display: flex; justify-content: space-between; padding: 0.5rem 0.75rem; background-color: #f7fafc; border-bottom: 1px solid var(--card-border); color: var(--text-secondary); }
+.changeCardBody .textBlock { padding: 0.75rem; }
+.changeCardBody .textBlock span { font-weight: 600; display: block; margin-bottom: 0.25rem; }
+.changeCardBody .textBlock p { margin: 0; word-wrap: break-word; line-height: 1.4; }
+.textBlock.old { background-color: #fff5f5; }
+.textBlock.old span { color: #c53030; }
+.textBlock.new { background-color: #f0fff4; }
+.textBlock.new span { color: #2f855a; }
+.textBlock.old .highlightWord { background-color: rgba(254, 178, 178, 0.7); border-radius: 3px; padding: 1px 0; font-weight: 600; }
+.textBlock.new .highlightWord { background-color: rgba(154, 230, 180, 0.7); border-radius: 3px; padding: 1px 0; font-weight: 600; }

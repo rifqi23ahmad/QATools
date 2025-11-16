@@ -1,9 +1,5 @@
 import React from 'react';
 
-/**
- * Komponen header yang dapat digunakan ulang untuk setiap tool.
- * Ia menerima 'title' dan 'description' sebagai props.
- */
 function ToolHeader({ title, description }) {
   return (
     <div className="tool-header">

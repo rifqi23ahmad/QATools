@@ -1,0 +1,145 @@
+.apiRequestor {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  min-height: 0;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-top: none;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+.apiRequestor .toolHeader {
+  flex-shrink: 0;
+  padding: 1.25rem;
+  padding-bottom: 1rem;
+  margin-bottom: 0;
+  border-bottom: 1px solid var(--card-border);
+}
+.apiRequestor .toolHeader h1 {
+  font-size: 1.25rem;
+  margin-bottom: 0.25rem;
+}
+.apiRequestor .toolHeader p {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+.apiRequestZone {
+  flex-shrink: 0;
+  padding: 1.25rem;
+}
+.apiRequestor .card {
+  padding: 0;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+}
+.corsWarning {
+  background-color: #fffbea;
+  border-color: #fbd38d;
+  margin-bottom: 1rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid #fbd38d;
+  border-radius: 6px;
+}
+.corsWarning p {
+  color: #744210;
+  margin: 0;
+  font-size: 0.8rem;
+}
+.corsWarning strong {
+  color: #c05621;
+}
+.apiRequestGrid {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.5rem;
+  align-items: center;
+}
+.apiTabsNav {
+  display: flex;
+  border-bottom: 1px solid var(--card-border);
+  margin-bottom: 1rem;
+}
+.apiTabBtn {
+  padding: 0.75rem 1.25rem;
+  cursor: pointer;
+  background-color: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: -1px;
+}
+.apiTabBtn.active {
+  color: var(--primary-color);
+  border-bottom-color: var(--primary-color);
+  font-weight: 600;
+}
+.apiTabContent {
+  display: none;
+}
+.apiTabContent.active {
+  display: block;
+}
+.apiHeaderRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 0.75rem;
+  align-items: center;
+}
+.apiHeaderRow .input {
+  font-size: 0.9rem;
+  padding: 0.5rem 0.75rem;
+}
+.apiHeaderRow .removeHeaderBtn {
+  padding: 0.4rem 0.7rem;
+  background-color: #fff5f5;
+  color: var(--danger-color);
+  border-color: #fed7d7;
+}
+.apiHeaderRow .removeHeaderBtn:hover {
+  background-color: #fed7d7;
+}
+.apiResponseZone {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 200px;
+  margin-top: 1rem;
+  border-top: 1px solid var(--card-border);
+  padding: 0 1.25rem 1.25rem 1.25rem;
+}
+.apiResponseZone .card {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  padding-top: 0.75rem;
+}
+.apiResponseZone .apiTabsContainer {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+.apiResponseZone .apiTabContent {
+  flex-grow: 1;
+  min-height: 0;
+  display: flex;
+}
+.apiResponseZone .responseOutput {
+  height: 100%;
+  min-height: 150px;
+  max-height: none;
+  font-size: 0.875rem;
+  flex-grow: 1;
+  overflow: auto;
+}
+
+/* Kelas untuk syntax highlighting */
+.jsonKey { color: #63b3ed; }
+.jsonString { color: #f6ad55; }
+.jsonNumber { color: #d53f8c; }
+.jsonBoolean { color: #f56565; }
+.jsonNull { color: #b794f4; }
+.jsonError { color: #fbd38d; font-weight: bold;}

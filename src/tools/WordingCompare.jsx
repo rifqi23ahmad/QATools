@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import styles from './WordingCompare.module.css'; // <-- IMPOR BARU
 
 // --- Algoritma Diff (LCS) dari file asli ---
 function findLongestCommonSubsequence(seq1, seq2) {
@@ -61,13 +62,14 @@ const PdfPage = ({ page, highlights }) => {
   const viewport = page.getViewport({ scale: 1.5 });
 
   return (
-    <div className="pdf-page-wrapper" style={{ position: 'relative', width: viewport.width, height: viewport.height }}>
-      <canvas ref={canvasRef} className="pdf-canvas" />
-      <div className="highlight-layer">
+    <div className={styles.pdfPageWrapper} style={{ position: 'relative', width: viewport.width, height: viewport.height }}>
+      <canvas ref={canvasRef} className={styles.pdfCanvas} />
+      <div className={styles.highlightLayer}>
         {highlights.map((h, i) => (
           <div 
             key={i}
-            className={`highlight-area ${h.type}`}
+            // --- PERUBAHAN CLASS DI SINI ---
+            className={`${styles.highlightArea} ${styles[h.type] || ''}`}
             style={{
               position: 'absolute',
               left: h.x,
@@ -227,7 +229,10 @@ function WordingCompare() {
     setStatusText(`Perbandingan selesai. Ditemukan ${finalGroups.length} grup perbedaan.`);
     setIsLoading(false);
   };
-
+  
+  // =================================================================
+  // --- PERBAIKAN: Fungsi ini dipindahkan ke *sebelum* dipanggil ---
+  // =================================================================
   const getHighlightsForDoc = (docId) => {
     const highlights = [];
     changeGroups.forEach(group => {
@@ -250,8 +255,8 @@ function WordingCompare() {
     return highlights;
   };
   
-  const highlights1 = getHighlightsForDoc(1);
-  const highlights2 = getHighlightsForDoc(2);
+  const highlights1 = getHighlightsForDoc(1); // <-- Sekarang aman untuk dipanggil
+  const highlights2 = getHighlightsForDoc(2); // <-- Sekarang aman untuk dipanggil
   
   const filteredChangeGroups = changeGroups.filter(g => 
     (g.oldWords.map(w=>w.word).join(' ') + g.newWords.map(w=>w.word).join(' ')).toLowerCase().includes(searchFilter.toLowerCase())
@@ -260,26 +265,26 @@ function WordingCompare() {
   const isCompareDisabled = isLoading || doc1.pages.length === 0 || doc2.pages.length === 0;
 
   return (
-    <div className="adv-compare-container">
-      <div className="adv-compare-toolbar">
-        <div className="toolbar-title">{statusText}</div>
-        <label className="sync-scroll-toggle" title="Toggle scroll synchronization">
+    <div className={styles.advCompareContainer}> {/* <-- GANTI CLASS */}
+      <div className={styles.advCompareToolbar}> {/* <-- GANTI CLASS */}
+        <div className={styles.toolbarTitle}>{statusText}</div> {/* <-- GANTI CLASS */}
+        <label className={styles.syncScrollToggle} title="Toggle scroll synchronization"> {/* <-- GANTI CLASS */}
           <span>Sync Scroll</span>
           <input type="checkbox" className="is-hidden" checked={syncScroll} onChange={() => setSyncScroll(!syncScroll)} />
-          <div className="switch"></div>
+          <div className={styles.switch}></div> {/* <-- GANTI CLASS */}
         </label>
       </div>
-      <div className="adv-compare-main">
-        <div className="pdf-viewer-area">
+      <div className={styles.advCompareMain}> {/* <-- GANTI CLASS */}
+        <div className={styles.pdfViewerArea}> {/* <-- GANTI CLASS */}
           
           {/* Viewer 1: Menggunakan logika render kustom */}
-          <div className="pdf-viewer-pane">
+          <div className={styles.pdfViewerPane}> {/* <-- GANTI CLASS */}
             <div 
-              className="pdf-viewer-content" 
+              className={styles.pdfViewerContent} // <-- GANTI CLASS
               ref={viewer1Ref} 
               onScroll={() => handleScroll(viewer1Ref, viewer2Ref)}
             >
-              <label className="upload-prompt" style={{display: doc1.pages.length ? 'none' : 'flex'}}>
+              <label className={styles.uploadPrompt} style={{display: doc1.pages.length ? 'none' : 'flex'}}> {/* <-- GANTI CLASS */}
                  <i className="fas fa-file-pdf fa-4x"></i>
                  <h3>Dokumen Asli</h3>
                  <p>Drop file atau klik untuk memilih</p>
@@ -289,17 +294,17 @@ function WordingCompare() {
                 <PdfPage key={i} page={page} highlights={highlights1.filter(h => h.pageNum === (i+1))} />
               ))}
             </div>
-            <div className="pane-footer"><span className="file-name">{doc1.name}</span></div>
+            <div className={styles.paneFooter}><span className="file-name">{doc1.name}</span></div> {/* <-- GANTI CLASS */}
           </div>
           
           {/* Viewer 2: Menggunakan logika render kustom */}
-          <div className="pdf-viewer-pane">
+          <div className={styles.pdfViewerPane}> {/* <-- GANTI CLASS */}
             <div 
-              className="pdf-viewer-content" 
+              className={styles.pdfViewerContent} // <-- GANTI CLASS
               ref={viewer2Ref}
               onScroll={() => handleScroll(viewer2Ref, viewer1Ref)}
             >
-              <label className="upload-prompt" style={{display: doc2.pages.length ? 'none' : 'flex'}}>
+              <label className={styles.uploadPrompt} style={{display: doc2.pages.length ? 'none' : 'flex'}}> {/* <-- GANTI CLASS */}
                  <i className="fas fa-file-pdf fa-4x"></i>
                  <h3>Dokumen Revisi</h3>
                  <p>Drop file atau klik untuk memilih</p>
@@ -309,35 +314,35 @@ function WordingCompare() {
                 <PdfPage key={i} page={page} highlights={highlights2.filter(h => h.pageNum === (i+1))} />
               ))}
             </div>
-            <div className="pane-footer"><span className="file-name">{doc2.name}</span></div>
+            <div className={styles.paneFooter}><span className="file-name">{doc2.name}</span></div> {/* <-- GANTI CLASS */}
           </div>
           
         </div>
         
         {/* Sidebar Perubahan */}
-        <div className="change-report-sidebar">
-          <div className="sidebar-header">
+        <div className={styles.changeReportSidebar}> {/* <-- GANTI CLASS */}
+          <div className={styles.sidebarHeader}> {/* <-- GANTI CLASS */}
             <h3>Laporan Perubahan ({filteredChangeGroups.length})</h3>
             <button id="compare-wording-btn" className="button primary" onClick={handleCompare} disabled={isCompareDisabled}>
               {isLoading ? 'Memproses...' : 'Bandingkan'}
             </button>
           </div>
-          <div className="sidebar-search">
+          <div className={styles.sidebarSearch}> {/* <-- GANTI CLASS */}
             <i className="fas fa-search"></i>
             <input type="text" placeholder="Cari teks..." value={searchFilter} onChange={(e) => setSearchFilter(e.target.value)} />
           </div>
-          <div className="sidebar-body" id="changes-list">
-            {changeGroups.length === 0 && !isLoading && <p className="no-changes-yet">Muat dua dokumen lalu klik "Bandingkan".</p>}
+          <div className={styles.sidebarBody} id="changes-list"> {/* <-- GANTI CLASS */}
+            {changeGroups.length === 0 && !isLoading && <p className={styles.noChangesYet}>Muat dua dokumen lalu klik "Bandingkan".</p>}
             {filteredChangeGroups.map((group, i) => {
               const oldText = group.oldWords.map(w => w.word).join(' ').trim();
               const newText = group.newWords.map(w => w.word).join(' ').trim();
               const firstToken = (group.oldWords[0] || group.newWords[0])?.token;
               return (
-                <div className="change-card" key={i}>
-                  <div className="change-card-header"><span>Hal {firstToken ? firstToken.pageNum : 'N/A'}</span></div>
-                  <div className="change-card-body">
-                    {oldText && <div className="text-block old"><span>Dihapus</span><p><span className="highlight-word">{oldText}</span></p></div>}
-                    {newText && <div className="text-block new"><span>Ditambah</span><p><span className="highlight-word">{newText}</span></p></div>}
+                <div className={styles.changeCard} key={i}> {/* <-- GANTI CLASS */}
+                  <div className={styles.changeCardHeader}><span>Hal {firstToken ? firstToken.pageNum : 'N/A'}</span></div> {/* <-- GANTI CLASS */}
+                  <div className={styles.changeCardBody}> {/* <-- GANTI CLASS */}
+                    {oldText && <div className={`${styles.textBlock} ${styles.old}`}><span>Dihapus</span><p><span className={styles.highlightWord}>{oldText}</span></p></div>}
+                    {newText && <div className={`${styles.textBlock} ${styles.new}`}><span>Ditambah</span><p><span className={styles.highlightWord}>{newText}</span></p></div>}
                   </div>
                 </div>
               );

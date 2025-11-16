@@ -1,0 +1,41 @@
+.fileInputWrapper {
+    position: relative; overflow: hidden;
+    display: inline-block; cursor: pointer;
+}
+.fileInputWrapper input[type=file] {
+    font-size: 100px; position: absolute; left: 0; top: 0;
+    opacity: 0; cursor: pointer;
+}
+.fileInputLabel { cursor: pointer; }
+.resultItem {
+    padding: 0.75rem 1rem; border-bottom: 1px solid var(--card-border);
+    display: flex; align-items: center; justify-content: space-between;
+}
+.resultItem:last-child { border-bottom: none; }
+.resultItem:hover { background-color: #f7fafc; }
+.resultItemLabel {
+    display: flex; align-items: center; font-size: 0.9rem; font-weight: 500;
+    color: var(--text-primary); cursor: pointer; flex: 1; min-width: 0;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.resultItemLabel span {
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.resultsContainer .resultsTable {
+    width: 100%; border-collapse: collapse;
+}
+.resultsContainer .resultsTable th,
+.resultsContainer .resultsTable td {
+    padding: 0.75rem 1rem; border: 1px solid var(--card-border);
+    text-align: left; font-size: 0.9rem; white-space: nowrap;
+}
+.resultsContainer .resultsTable thead {
+    background-color: #edf2f7; position: sticky; top: 0;
+}
+.resultsContainer .resultsTable tbody tr:hover {
+    background-color: #f7fafc;
+}
+.resultsContainer .resultsTable td:first-child {
+    text-align: center;
+}
+.resultCheckbox { height: 1.1rem; width: 1.1rem; }

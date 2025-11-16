@@ -1,8 +1,3 @@
-/*
-================================================================
-APP LAYOUT & NAVIGATION
-================================================================
-*/
 .app-layout { display: flex; min-height: 100vh; }
 .sidebar { 
     width: 230px; 
@@ -112,41 +107,3 @@ APP LAYOUT & NAVIGATION
 .tool-page { display: none; }
 .tool-page.active { display: block; animation: fadeIn 0.5s ease; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-/*
-================================================================
-API REQUESTOR LAYOUT (Komponen Level Atas)
-================================================================
-*/
-#ApiRequestorManager {
-  display: flex; flex-direction: column; flex-grow: 1; min-height: 0;
-}
-.api-tabs-bar {
-  display: flex; flex-shrink: 0; border-bottom: 1px solid var(--sidebar-active-bg);
-  background-color: var(--sidebar-bg); padding: 0.25rem 0.5rem 0 0.5rem;
-  border-top-left-radius: 8px; border-top-right-radius: 8px;
-}
-.api-tab {
-  display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.75rem;
-  border: 1px solid transparent; border-bottom: none; border-top-left-radius: 6px;
-  border-top-right-radius: 6px; font-size: 0.85rem; cursor: pointer;
-  position: relative; bottom: -1px; color: var(--sidebar-text);
-}
-.api-tab:hover { background-color: var(--sidebar-hover-bg); }
-.api-tab.active {
-  background-color: var(--card-bg); border-color: var(--card-border);
-  font-weight: 600; color: var(--primary-color);
-}
-.close-tab-btn {
-  background: none; border: none; color: var(--sidebar-text); border-radius: 50%;
-  width: 18px; height: 18px; line-height: 18px; padding: 0;
-  text-align: center; font-size: 1rem; cursor: pointer;
-}
-.close-tab-btn:disabled { opacity: 0.2; cursor: not-allowed; }
-.close-tab-btn:hover:not(:disabled) { background-color: var(--sidebar-hover-bg); color: #fff; }
-.add-tab-btn {
-  background: none; border: none; color: var(--sidebar-text); width: 24px;
-  height: 24px; border-radius: 4px; cursor: pointer; font-size: 1.25rem;
-  margin: 0.25rem 0.5rem; padding: 0;
-}
-.add-tab-btn:hover { background-color: var(--sidebar-hover-bg); }

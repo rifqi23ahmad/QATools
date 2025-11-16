@@ -1,0 +1,14 @@
+.tableContainer {
+  max-height: 45vh;
+  overflow-y: auto;
+}
+.originalDataHead {
+  position: sticky;
+  top: 0;
+  background-color: #f7fafc;
+}
+.processedDataHead {
+  position: sticky;
+  top: 0;
+  background-color: #f0fff4;
+}
