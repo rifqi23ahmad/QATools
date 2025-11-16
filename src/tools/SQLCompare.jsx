@@ -1,22 +1,21 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import ReusableAceEditor from '../components/ReusableAceEditor'; // Diperlukan untuk editor
+import CompareResultView from '../components/CompareResultView.jsx';
+import compareStyles from './CompareView.module.css';
 
 // Helper untuk membersihkan dan menormalkan SQL sebelum diff.
 function normalizeSql(sql) {
     if (!sql) return '';
-    // 1. Hapus komentar (-- single line atau /* multi-line */)
+    // ... (fungsi normalizeSql tidak berubah) ...
     let cleaned = sql.replace(/--.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '');
-    // 2. Normalisasi spasi: ganti newline, tab dengan spasi, lalu kompres spasi berulang
     cleaned = cleaned.replace(/[\r\n\t]/g, ' ').replace(/\s+/g, ' ').trim();
-    // 3. Tambahkan newline setelah beberapa karakter kunci untuk membuatnya lebih mudah dibaca/diff.
     cleaned = cleaned.replace(/; /g, ';\n').replace(/, /g, ',\n');
     cleaned = cleaned.replace(/FROM|WHERE|JOIN|SELECT|INSERT|UPDATE|DELETE|SET|VALUES|AND|OR|GROUP BY|ORDER BY/gi, '\n$& ');
     cleaned = cleaned.replace(/\s+/g, ' ').trim();
-
     return cleaned;
 }
 
-// --- FUNGSI MINIFY SQL (BARU) ---
+// --- FUNGSI MINIFY SQL (Tidak berubah) ---
 function minifySql(sql) {
     if (!sql) return '';
     return sql.replace(/--.*$/gm, '') // Hapus komentar single-line
@@ -26,8 +25,9 @@ function minifySql(sql) {
               .trim();
 }
 
-// --- Helper Parser (Baru) ---
+// --- Helper Parser (Tidak berubah) ---
 function parseSqlValues(valueStr) {
+  // ... (fungsi parseSqlValues tidak berubah) ...
   const values = []; let currentVal = ''; let inString = false; let pLevel = 0; let strDelim = '';
   for (let i = 0; i < valueStr.length; i++) {
     const char = valueStr[i];
@@ -46,61 +46,50 @@ function parseSqlValues(valueStr) {
   return values.map(v => v.trim()).filter(v => v);
 }
 
-// --- FUNGSI BEAUTIFY SQL (BARU) ---
+// --- FUNGSI BEAUTIFY SQL (Tidak berubah) ---
 function beautifySql(sql) {
+    // ... (fungsi beautifySql tidak berubah) ...
     if (!sql) return '';
-
-    // 1. Hapus komentar
     let cleaned = sql.replace(/--.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '');
-
-    // 2. Normalisasi spasi dasar (ganti newline/tab jadi spasi, kompres spasi)
     cleaned = cleaned.replace(/[\r\n\t]/g, ' ').replace(/\s+/g, ' ').trim();
-
-    // 3. Coba format sebagai INSERT statement (sesuai contoh user)
     const insertMatch = cleaned.match(/^(INSERT INTO\s+.*?\s*\()([\s\S]+?)(\)\s*VALUES\s*\()([\s\S]+?)(\)\s*;?)$/i);
-    
     if (insertMatch) {
         try {
-            const intro = insertMatch[1]; // "INSERT INTO table ("
-            let cols = insertMatch[2];   // "col1, col2, col3"
-            const mid = insertMatch[3];  // ") VALUES ("
-            let vals = insertMatch[4];   // "val1, 'val,2', val3"
-            const end = insertMatch[5];  // ");"
-            
+            const intro = insertMatch[1];
+            let cols = insertMatch[2];
+            const mid = insertMatch[3];
+            let vals = insertMatch[4];
+            const end = insertMatch[5];
             const formattedCols = cols.split(',')
                                      .map(c => c.trim())
                                      .filter(c => c)
                                      .join(',\n  ');
-                                     
             const parsedVals = parseSqlValues(vals);
             const formattedVals = parsedVals.join(',\n  ');
-
             cleaned = `${intro}\n  ${formattedCols}\n${mid}\n  ${formattedVals}\n${end}`;
-            
             return cleaned.replace(/\s*\n\s*/g, '\n').trim();
-        
         } catch (e) {
            console.warn("Gagal parsing INSERT, menggunakan fallback formatter:", e);
         }
     }
-
-    // --- Fallback Formatter (untuk SELECT, UPDATE, dll) ---
     cleaned = cleaned.replace(/\b(SELECT|FROM|WHERE|GROUP BY|ORDER BY|HAVING|VALUES|SET|LEFT JOIN|RIGHT JOIN|INNER JOIN|ON|UPDATE|INSERT INTO|DELETE FROM)\b/gi, '\n$&');
     cleaned = cleaned.replace(/, /g, ',\n  ');
     cleaned = cleaned.replace(/\b(AND|OR)\b/gi, '\n  $&');
     cleaned = cleaned.replace(/\s*\n\s*/g, '\n').trim();
-    
     return cleaned;
 }
 
 // --- Helper untuk Diff (Sama seperti JSONCompare) ---
 const escapeHtml = (text) => text ? text.replace(/</g, '&lt;').replace(/>/g, '&gt;') : '';
 
+// --- PERUBAHAN 2: Update createLineHtml untuk menggunakan CSS Modules ---
 const createLineHtml = (pane, lineNumber, content, type, isPreformatted = false) => {
   const finalContent = isPreformatted ? content : escapeHtml(content);
-  return `<div class="diff-line ${type}" id="diff-${pane}-line-${lineNumber}">` +
-         `<div class="line-number">${lineNumber}</div>` +
-         `<div class="line-content">${finalContent || '&nbsp;'}</div>` +
+  // Gunakan kelas dari CSS Module
+  const typeClass = compareStyles[type] || ''; 
+  return `<div class="${compareStyles.diffLine} ${typeClass}" id="diff-${pane}-line-${lineNumber}">` +
+         `<div class="${compareStyles.lineNumber}">${lineNumber}</div>` +
+         `<div class="${compareStyles.lineContent}">${finalContent || '&nbsp;'}</div>` +
          `</div>`;
 };
 // --- Akhir Helper Diff ---
@@ -115,7 +104,7 @@ function SqlCompare() {
   const [summary, setSummary] = useState([]);
   const [showResults, setShowResults] = useState(false);
   
-  // --- STATE DAN REF UNTUK SYNC SCROLL ---
+  // --- STATE DAN REF UNTUK SYNC SCROLL (Tidak berubah) ---
   const [isSyncing, setIsSyncing] = useState(false);
   const input1EditorRef = useRef(null);
   const input2EditorRef = useRef(null);
@@ -132,7 +121,7 @@ function SqlCompare() {
     setInput2(minifySql(input2));
   };
 
-  // --- LOGIKA SCROLL SYNC UTAMA ---
+  // --- LOGIKA SCROLL SYNC UTAMA (Tidak berubah) ---
   const handleScrollSync = useCallback((sourceRef, targetRef) => {
     if (!isSyncing || isScrollUpdatingRef.current) return;
 
@@ -149,7 +138,7 @@ function SqlCompare() {
     }
   }, [isSyncing]);
 
-  // --- useEffect untuk Memasang Listener Scroll ---
+  // --- useEffect untuk Memasang Listener Scroll (Tidak berubah) ---
   useEffect(() => {
     const editor1 = input1EditorRef.current?.editor;
     const editor2 = input2EditorRef.current?.editor;
@@ -217,8 +206,10 @@ function SqlCompare() {
             if (lines.length === 1 && lines2.length === 1) {
                 const wordDiffs = dmp.diff_main(lines[0], lines2[0]);
                 dmp.diff_cleanupSemantic(wordDiffs);
-                const leftContent = wordDiffs.map(([op, text]) => op !== 1 ? `<span class="${op === -1 ? 'highlight' : ''}">${escapeHtml(text)}</span>` : '').join('');
-                const rightContent = wordDiffs.map(([op, text]) => op !== -1 ? `<span class="${op === 1 ? 'highlight' : ''}">${escapeHtml(text)}</span>` : '').join('');
+                
+                // --- PERUBAHAN 3: Gunakan compareStyles.highlight ---
+                const leftContent = wordDiffs.map(([op, text]) => op !== 1 ? `<span class="${op === -1 ? compareStyles.highlight : ''}">${escapeHtml(text)}</span>` : '').join('');
+                const rightContent = wordDiffs.map(([op, text]) => op !== -1 ? `<span class="${op === 1 ? compareStyles.highlight : ''}">${escapeHtml(text)}</span>` : '').join('');
                 
                 changes.push({ type: 'changed', lineLeft: lineNumLeft, lineRight: lineNumRight, text: lines[0] });
                 htmlLeft += createLineHtml('left', lineNumLeft++, leftContent, 'changed', true);
@@ -247,8 +238,9 @@ function SqlCompare() {
     const highlightElement = (element) => {
       if (element) {
         element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        element.classList.add('line-highlighted');
-        setTimeout(() => { element.classList.remove('line-highlighted'); }, 2500);
+        // --- PERUBAHAN 4: Gunakan compareStyles.lineHighlighted ---
+        element.classList.add(compareStyles.lineHighlighted);
+        setTimeout(() => { element.classList.remove(compareStyles.lineHighlighted); }, 2500);
       }
     };
     highlightElement(targetLeft);
@@ -256,13 +248,14 @@ function SqlCompare() {
   };
 
   return (
-    <div id="SqlCompare"> 
+    // ID "SqlCompare" tidak lagi diperlukan untuk styling
+    <div> 
       <div className="tool-header">
         <h1>SQL Compare</h1>
         <p>Bandingkan dua script SQL (Normalisasi dilakukan sebelum perbandingan).</p>
       </div>
       
-      {/* --- Layout Input Model JSON Formatter --- */}
+      {/* --- Layout Input Model JSON Formatter (Tidak berubah) --- */}
       <div className="card">
         <div className="grid" style={{ gridTemplateColumns: '1fr 220px 1fr', alignItems: 'start', gap: '1rem' }}>
           
@@ -326,50 +319,16 @@ function SqlCompare() {
       {/* --- Akhir Layout Input --- */}
 
 
-      {/* --- Hasil (Gaya diambil dari style.css) --- */}
+      {/* --- PERUBAHAN 5: Ganti rendering manual dengan CompareResultView --- */}
       {showResults && (
-        <div id="compare-results-section" style={{ marginTop: '2rem' }}>
-          {/* Kelas 'diff-layout' sekarang akan mengambil style dari style.css */}
-          <div className="diff-layout">
-            <div className="diff-view">
-              <div className="diff-pane">
-                <div className="diff-pane-header">SQL Asli</div>
-                <pre 
-                  id="sql-compare-output-left" 
-                  className="diff-output"
-                  dangerouslySetInnerHTML={{ __html: outputLeft }}
-                />
-              </div>
-              <div className="diff-pane">
-                <div className="diff-pane-header">SQL Revisi</div>
-                <pre 
-                  id="sql-compare-output-right" 
-                  className="diff-output"
-                  dangerouslySetInnerHTML={{ __html: outputRight }}
-                />
-              </div>
-            </div>
-            <div className="diff-summary-sidebar">
-              <h3 id="summary-header">Ditemukan {summary.length} perbedaan</h3>
-              <div id="summary-list" className="summary-list">
-                {summary.map((c, index) => {
-                  const cleanText = escapeHtml(c.text.trim().substring(0, 50));
-                  const lineDisplay = c.type === 'added' ? c.lineRight : c.lineLeft;
-                  return (
-                    <div 
-                      key={index}
-                      className={`summary-list-item item-${c.type} clickable-summary`} 
-                      onClick={() => handleSummaryClick(c.lineLeft, c.lineRight)}
-                    >
-                      <strong>{c.type.charAt(0).toUpperCase() + c.type.slice(1)}</strong> pada baris {lineDisplay}
-                      <code>...{cleanText}...</code>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </div>
+        <CompareResultView
+          outputLeft={outputLeft}
+          outputRight={outputRight}
+          summary={summary}
+          onSummaryClick={handleSummaryClick}
+          titleLeft="SQL Asli"
+          titleRight="SQL Revisi"
+        />
       )}
     </div>
   );

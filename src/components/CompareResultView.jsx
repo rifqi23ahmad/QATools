@@ -1,5 +1,4 @@
 import React from 'react';
-// Impor CSS Module bersama. Path-nya '../tools/' karena file ini ada di /components
 import compareStyles from '../tools/CompareView.module.css';
 
 // Helper kecil untuk escape HTML, dipakai di ringkasan
