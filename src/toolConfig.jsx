@@ -18,8 +18,8 @@ import WordingCompare from './tools/WordingCompare.jsx';
 import SqlScriptGeneratorOtomatis from './tools/SqlScriptGeneratorOtomatis';
 import SqlScriptGenerator from './tools/SQLScriptGenerator';
 import CalculationTools from './tools/CalculationTools.jsx';
-
-// HAPUS: import DocumentCompare from './tools/DocumentCompare.jsx';
+// Import SQLCompare BARU
+import SqlCompare from './tools/SQLCompare'; // <--- BARU
 
 
 /**
@@ -45,6 +45,7 @@ export const toolGroups = [
     title: 'SQL & Data Tools',
     tools: [
       { id: 'DataCompare', path: '/data-compare', name: 'Data Compare', icon: 'fa-table-list' },
+      { id: 'SqlCompare', path: '/sql-compare', name: 'SQL Compare', icon: 'fa-file-contract' }, // <--- BARU
       { id: 'SqlFormatter', path: '/sql-formatter', name: 'SQL Formatter', icon: 'fa-database' },
       { id: 'SqlInjector', path: '/sql-injector', name: 'SQL Injector', icon: 'fa-syringe' },
       { id: 'SqlScriptGeneratorOtomatis', path: '/sql-gen-otomatis', name: 'SQL Gen (Otomatis)', icon: 'fa-magic' },
@@ -80,6 +81,7 @@ export const toolComponentMap = {
 
   // SQL & Data Tools
   DataCompare: DataCompare,
+  SqlCompare: SqlCompare, // <--- BARU
   SqlFormatter: SqlFormatter,
   SqlInjector: SqlInjector,
   SqlScriptGeneratorOtomatis: SqlScriptGeneratorOtomatis,
