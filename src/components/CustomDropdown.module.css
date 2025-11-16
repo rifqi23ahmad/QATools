@@ -1,34 +1,146 @@
-/* src/components/CustomDropdown.module.css */
-.customSelectContainer { position: relative; width: 100%; }
+.customSelectContainer { 
+  position: relative; 
+  width: 100%; 
+}
+
+/* Tombol trigger sekarang meniru style input global */
 .customSelectTrigger {
-    width: 100%; padding: 0.5rem 0.75rem; border: 1px solid #d1d5db;
-    border-radius: 0.375rem; background-color: white; text-align: left;
-    cursor: pointer; font-size: 0.875rem; white-space: nowrap;
-    overflow: hidden; text-overflow: ellipsis; position: relative; padding-right: 2rem;
+    width: 100%; 
+    padding: 0.75rem; 
+    border: 1px solid var(--card-border); 
+    border-radius: 6px; 
+    font-size: 1rem; 
+    font-family: inherit; 
+    background-color: #fff; 
+    color: var(--text-primary);
+    text-align: left;
+    cursor: pointer; 
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
+
+.customSelectTrigger:focus {
+    outline: none; 
+    border-color: var(--primary-color); 
+    box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.5);
+}
+
+.triggerText {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .customSelectTrigger::after {
-    content: '▼'; position: absolute; right: 0.75rem; top: 50%;
-    transform: translateY(-50%) scale(0.8); color: #6b7280;
+    content: '▼'; 
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    margin-left: 0.5rem;
+    flex-shrink: 0;
 }
+
+/* Panel sekarang menggunakan flex-direction agar search bar bisa 'sticky' */
 .customSelectPanel {
-    position: absolute; top: calc(100% + 4px); left: 0; width: 100%;
-    max-height: 250px; overflow-y: auto; background-color: white;
-    border: 1px solid #d1d5db; border-radius: 0.375rem;
-    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+    position: absolute; 
+    top: calc(100% + 4px); 
+    left: 0; 
+    width: 100%;
+    max-height: 280px; /* Sedikit lebih tinggi */
+    background-color: white;
+    border: 1px solid var(--card-border); 
+    border-radius: 8px; /* Radius lebih besar */
+    box-shadow: 0 10px 20px -5px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.07); /* Shadow lebih modern */
     z-index: 50;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Sembunyikan overflow utama */
 }
+
+/* Wrapper untuk search bar + icon */
+.customSelectSearchWrapper {
+    position: relative;
+    padding: 0.5rem;
+    border-bottom: 1px solid var(--card-border);
+    flex-shrink: 0; /* Mencegah search bar ikut ter-compress */
+}
+
+.customSelectSearchWrapper > i {
+    position: absolute;
+    top: 50%;
+    left: 1.25rem;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    pointer-events: none; /* Agar bisa klik input di atasnya */
+}
+
 .customSelectSearch {
-    width: 100%; padding: 0.5rem 0.75rem; border: none;
-    border-bottom: 1px solid #e5e7eb; outline: none;
+    width: 100%; 
+    padding: 0.5rem 0.75rem 0.5rem 2.25rem; /* Beri ruang untuk icon */
+    border: 1px solid var(--card-border);
+    border-radius: 6px;
+    outline: none;
+    font-size: 0.9rem;
 }
-.customSelectOptions { list-style: none; padding: 0; margin: 0; }
+
+.customSelectSearch:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.5);
+}
+
+/* List Opsi sekarang adalah bagian yang bisa di-scroll */
+.customSelectOptions { 
+    list-style: none; 
+    padding: 0.5rem 0; /* Padding atas/bawah untuk list */
+    margin: 0; 
+    overflow-y: auto; /* HANYA list ini yang scroll */
+    flex: 1; /* Mengisi sisa ruang */
+}
+
 .customSelectOption {
-    padding: 0.5rem 0.75rem; cursor: pointer; font-size: 0.875rem;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    padding: 0.6rem 1rem; /* Padding lebih besar */
+    cursor: pointer; 
+    font-size: 0.9rem;
+    white-space: nowrap; 
+    overflow: hidden; 
+    text-overflow: ellipsis;
+    transition: background-color 0.1s ease;
 }
-.customSelectOption:hover { background-color: #f3f4f6; }
+
+.customSelectOption:hover { 
+    background-color: #ebf8ff; /* Hover biru muda */
+    color: var(--primary-color);
+}
+
+/* Style untuk opsi yang sedang dipilih */
+.customSelectOption.selected {
+    background-color: var(--primary-color);
+    color: white;
+    font-weight: 500;
+}
+
 .customSelectGroup {
-    padding: 0.5rem 0.75rem; font-size: 0.75rem; font-weight: 600;
-    color: #4b5563; background-color: #f9fafb;
-    border-top: 1px solid #e5e7eb; border-bottom: 1px solid #e5e7eb;
+    padding: 0.75rem 1rem 0.25rem 1rem;
+    font-size: 0.8rem; 
+    font-weight: 600;
+    color: var(--text-secondary); 
+    text-transform: uppercase;
+    border-top: 1px solid var(--card-border);
+    margin-top: 0.5rem;
+}
+
+/* Hilangkan border-top untuk grup pertama */
+.customSelectGroup:first-child,
+.customSelectOptions > .customSelectGroup:first-of-type {
+    border-top: none;
+    margin-top: 0;
+}
+
+/* Feedback jika tidak ada hasil */
+.customSelectNoResult {
+    padding: 1rem;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
 }
