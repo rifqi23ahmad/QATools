@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import ApiRequestor from './ApiRequestor'; // Kita impor komponen UI
+import styles from './ApiRequestorManager.module.css'; // <-- Mengimpor file CSS yang benar
 
 // State default untuk tab baru
 const createNewTab = (id) => ({
@@ -134,8 +135,10 @@ function ApiRequestorManager() {
   };
   
   return (
-    // ID baru untuk styling layout
-    <div id="ApiRequestorManager">
+    <div 
+      id="ApiRequestorManager" 
+      style={{ display: 'flex', flexDirection: 'column', flexGrow: 1, minHeight: 0 }}
+    >
       <div className="tool-header" style={{ marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '1px solid var(--card-border)' }}>
         <h1 style={{ fontSize: '1.5rem', marginBottom: '0.25rem' }}>API Requestor (cURL Runner)</h1>
         <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', margin: 0 }}>
@@ -143,37 +146,61 @@ function ApiRequestorManager() {
         </p>
       </div>
       
-      <div className="api-tabs-bar">
+      <div className={styles.apiTabsNav} style={{ marginBottom: 0, borderBottom: 'none' }}>
         {tabs.map(tab => (
           <div 
             key={tab.id}
-            className={`api-tab ${tab.id === activeTabId ? 'active' : ''}`}
+            className={`${styles.apiTabBtn} ${tab.id === activeTabId ? styles.active : ''}`}
             onClick={() => setActiveTabId(tab.id)}
+            style={{ 
+              borderBottom: '1px solid var(--card-border)', 
+              borderTopLeftRadius: '6px', 
+              borderTopRightRadius: '6px',
+              ...(tab.id === activeTabId && { 
+                borderColor: 'var(--card-border)', 
+                borderBottomColor: 'var(--card-bg)' 
+              })
+            }}
           >
             <span>{tab.name}</span>
             <button 
               className="close-tab-btn" 
               onClick={(e) => handleRemoveTab(e, tab.id)}
               disabled={tabs.length === 1}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                marginLeft: '0.5rem',
+                cursor: 'pointer',
+                color: 'var(--text-secondary)'
+              }}
             >
               &times;
             </button>
           </div>
         ))}
-        <button className="add-tab-btn" onClick={handleAddTab}>+</button>
+        <button 
+          className="add-tab-btn" 
+          onClick={handleAddTab}
+          style={{
+            background: '#f0f2f5',
+            border: '1px solid var(--card-border)',
+            borderBottom: '1px solid var(--card-border)',
+            padding: '0.5rem 0.75rem',
+            borderTopRightRadius: '6px',
+            cursor: 'pointer'
+          }}
+        >+</button>
       </div>
 
-      {/* Render HANYA komponen ApiRequestor yang aktif.
-        Kita berikan `key` unik agar React me-remount komponen saat ganti tab.
-      */}
       {activeTab && (
         <ApiRequestor
           key={activeTab.id}
           requestState={activeTab.request}
           responseState={activeTab.response}
           isLoading={activeTab.isLoading}
-          responseTab={activeTab.responseTab} // Kirim state tab dari manager
-          onResponseTabChange={(value) => handleStateChange('responseTab', value)} // Kirim fungsi updater
+          responseTab={activeTab.responseTab} 
+          onResponseTabChange={(value) => handleStateChange('responseTab', value)} 
           onRequestChange={handleRequestChange}
           onSendRequest={handleSendRequest}
         />

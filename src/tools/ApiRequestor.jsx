@@ -1,4 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
+// --- PERBAIKAN: Impor file CSS yang lengkap ---
+import styles from './ApiRequestorManager.module.css'; 
 
 // --- IMPORT ACE (langsung, tanpa Suspense/lazy) ---
 import AceEditor from 'react-ace';
@@ -39,7 +41,7 @@ function ApiRequestor({
     setEditorHeight(calcEditorHeight(body, { lineHeight: 18, verticalPadding: 24, minHeight: 150, maxHeight: 480 }));
   }, [body]);
 
-  // --- Syntax highlight yang aman (menerima object atau string) ---
+  // --- PERBAIKAN: Fungsi ini sekarang menggunakan objek styles ---
   function highlightJsonSyntax(jsonInput) {
     if (jsonInput === undefined || jsonInput === null) return '';
     let jsonString = typeof jsonInput === 'string' ? jsonInput : JSON.stringify(jsonInput, null, 2);
@@ -48,14 +50,15 @@ function ApiRequestor({
     return jsonString.replace(
       /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,
       (match) => {
-        let cls = 'json-number';
-        if (/^"/.test(match)) { cls = /:$/.test(match) ? 'json-key' : 'json-string'; }
-        else if (/true|false/.test(match)) { cls = 'json-boolean'; }
-        else if (/null/.test(match)) { cls = 'json-null'; }
+        let cls = styles.jsonNumber; // Default
+        if (/^"/.test(match)) { cls = /:$/.test(match) ? styles.jsonKey : styles.jsonString; }
+        else if (/true|false/.test(match)) { cls = styles.jsonBoolean; }
+        else if (/null/.test(match)) { cls = styles.jsonNull; }
         return `<span class="${cls}">${match}</span>`;
       }
     );
   }
+  // --- AKHIR PERBAIKAN ---
 
   // --- Header helper handlers ---
   const handleHeaderChange = (id, field, value) => {
@@ -264,15 +267,16 @@ function ApiRequestor({
 
   // --- Render ---
   return (
-    <div id="ApiRequestor">
-      <div className="api-request-zone">
-        <div className="cors-warning">
+    <div className={styles.apiRequestor}>
+      
+      <div className={styles.apiRequestZone}>
+        <div className={styles.corsWarning}>
           <p>
-            <strong>Jika kamu dapat response Peringatan CORS:</strong> Gunakan <strong>"Allow CORS"</strong> extension  agar bisa berjalan di browser kamu.
+            <strong>Jika kamu dapat response Peringatan CORS:</strong> Gunakan <strong>"Allow CORS"</strong> extension agar bisa berjalan di browser kamu.
           </p>
         </div>
 
-        <div className="api-request-grid">
+        <div className={styles.apiRequestGrid}>
           <select
             id="api-method"
             className="select"
@@ -310,11 +314,11 @@ function ApiRequestor({
           </button>
         </div>
 
-        <div className="api-tabs-container" style={{ marginTop: '1rem' }}>
-          <div className="api-tabs-nav" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+        <div className={styles.apiTabsContainer} style={{ marginTop: '1rem' }}>
+          <div className={styles.apiTabsNav} style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <button className={`api-tab-btn ${requestTab === 'headers' ? 'active' : ''}`} onClick={() => setRequestTab('headers')}>Headers</button>
-              <button className={`api-tab-btn ${requestTab === 'body' ? 'active' : ''}`} onClick={() => setRequestTab('body')}>Body (JSON)</button>
+              <button className={`${styles.apiTabBtn} ${requestTab === 'headers' ? styles.active : ''}`} onClick={() => setRequestTab('headers')}>Headers</button>
+              <button className={`${styles.apiTabBtn} ${requestTab === 'body' ? styles.active : ''}`} onClick={() => setRequestTab('body')}>Body (JSON)</button>
             </div>
 
             {/* Beautify button visible when body tab selected */}
@@ -332,13 +336,13 @@ function ApiRequestor({
             </div>
           </div>
 
-          <div id="tab-headers" className={`api-tab-content ${requestTab === 'headers' ? 'active' : ''}`}>
+          <div id="tab-headers" className={`${styles.apiTabContent} ${requestTab === 'headers' ? styles.active : ''}`}>
             <div id="api-headers-list" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1rem', maxHeight: '150px', overflowY: 'auto', paddingRight: '0.5rem' }}>
               {(headers || []).map(h => (
-                <div key={h.id} className="api-header-row" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <div key={h.id} className={styles.apiHeaderRow} style={{ alignItems: 'center' }}>
                   <input type="text" className="input header-key" placeholder="Key" value={h.key || ''} onChange={(e) => handleHeaderChange(h.id, 'key', e.target.value)} />
                   <input type="text" className="input header-value" placeholder="Value" value={h.value || ''} onChange={(e) => handleHeaderChange(h.id, 'value', e.target.value)} />
-                  <button className="button secondary remove-header-btn" title="Hapus header" onClick={() => removeHeaderRow(h.id)}><i className="fas fa-trash-alt" /></button>
+                  <button className={`button secondary ${styles.removeHeaderBtn}`} title="Hapus header" onClick={() => removeHeaderRow(h.id)}><i className="fas fa-trash-alt" /></button>
                 </div>
               ))}
             </div>
@@ -348,7 +352,7 @@ function ApiRequestor({
           </div>
 
           {/* --- Body tab dengan guarded AceEditor (fallback textarea jika import tidak valid) --- */}
-          <div id="tab-body" className={`api-tab-content ${requestTab === 'body' ? 'active' : ''}`}>
+          <div id="tab-body" className={`${styles.apiTabContent} ${requestTab === 'body' ? styles.active : ''}`}>
 
             {/* Render editor with dynamic height (editorHeight state) */}
             {isValidAce ? (
@@ -411,7 +415,7 @@ function ApiRequestor({
         </div>
       </div>
 
-      <div className="api-response-zone">
+      <div className={styles.apiResponseZone}>
         <div className="card" id="api-response-section">
           {response ? (
             <>
@@ -424,11 +428,11 @@ function ApiRequestor({
                 </div>
               </div>
 
-              <div className="api-tabs-container">
+              <div className={styles.apiTabsContainer}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--card-border)', marginBottom: '1rem', flexShrink: 0 }}>
-                  <div className="api-tabs-nav" style={{ marginBottom: '-1px', borderBottom: 'none' }}>
-                    <button className={`api-tab-btn ${responseTab === 'response-body' ? 'active' : ''}`} onClick={() => onResponseTabChange('response-body')}>Body</button>
-                    <button className={`api-tab-btn ${responseTab === 'response-headers' ? 'active' : ''}`} onClick={() => onResponseTabChange('response-headers')}>Headers</button>
+                  <div className={styles.apiTabsNav} style={{ marginBottom: '-1px', borderBottom: 'none' }}>
+                    <button className={`${styles.apiTabBtn} ${responseTab === 'response-body' ? styles.active : ''}`} onClick={() => onResponseTabChange('response-body')}>Body</button>
+                    <button className={`${styles.apiTabBtn} ${responseTab === 'response-headers' ? styles.active : ''}`} onClick={() => onResponseTabChange('response-headers')}>Headers</button>
                   </div>
                   <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                     <button
@@ -443,19 +447,17 @@ function ApiRequestor({
                   </div>
                 </div>
 
-                {/* --- PERBAIKAN SCROLL, WARNA, DAN TAB --- */}
+                {/* --- PERBAIKAN: Menghapus style inline maxHeight & overflow --- */}
                 {responseTab === 'response-body' && (
-                  <div id="tab-response-body" className="api-tab-content active">
+                  <div id="tab-response-body" className={`${styles.apiTabContent} ${styles.active}`}>
                     <pre
                       id="api-response-body-output"
-                      className="textarea textarea-editor"
+                      className={`textarea textarea-editor ${styles.responseOutput}`}
                       style={{
                         backgroundColor: '#2d3748',
                         color: '#e2e8f0',
                         whiteSpace: 'pre-wrap',
                         padding: '1rem',
-                        maxHeight: '40vh',
-                        overflow: 'auto'
                       }}
                       dangerouslySetInnerHTML={{ __html: highlightJsonSyntax(response.body) }}
                     />
@@ -463,16 +465,14 @@ function ApiRequestor({
                 )}
 
                 {responseTab === 'response-headers' && (
-                  <div id="tab-response-headers" className="api-tab-content active">
+                  <div id="tab-response-headers" className={`${styles.apiTabContent} ${styles.active}`}>
                     <pre
                       id="api-response-headers-output"
-                      className="textarea textarea-editor"
+                      className={`textarea textarea-editor ${styles.responseOutput}`}
                       style={{
                         backgroundColor: '#f7fafc',
                         padding: '1rem',
                         whiteSpace: 'pre-wrap',
-                        maxHeight: '40vh',
-                        overflow: 'auto'
                       }}
                     >
                       {renderResponseHeaders(response.headers)}
