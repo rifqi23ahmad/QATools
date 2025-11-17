@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { toolGroups } from '../toolConfig';
 
-// Hapus props isDarkMode dan toggleTheme
 function Sidebar() {
   const [isMinimized, setIsMinimized] = useState(
     localStorage.getItem('sidebarMinimized') === 'true'
@@ -12,12 +11,11 @@ function Sidebar() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Persist isMinimized ke localStorage (Tidak berubah)
   useEffect(() => {
     localStorage.setItem('sidebarMinimized', isMinimized);
   }, [isMinimized]);
 
-  // --- PERUBAHAN DI SINI: Menggunakan CounterAPI ---
+  // --- PERBAIKAN DI SINI ---
   useEffect(() => {
     const container = counterContainerRef.current;
     if (!container) return; 
@@ -31,15 +29,16 @@ function Sidebar() {
 
     container.innerHTML = '';
     const iframe = document.createElement('iframe');
+    
+    // 1. Tambahkan tinggi iframe
     iframe.style.width = '100%';
-    iframe.style.height = '44px'; // Sesuaikan tinggi agar pas
+    iframe.style.height = '150px'; // <-- DIUBAH DARI 105px
     iframe.style.border = '0';
     iframe.style.overflow = 'hidden';
     iframe.setAttribute('aria-hidden', 'true');
-    iframe.setAttribute('scrolling', 'no'); // Mencegah scroll
+    iframe.setAttribute('scrolling', 'no'); 
 
-    // Menggunakan srcdoc untuk memuat widget CounterAPI dalam iframe
-    // Ini menjaga isolasi yang sama seperti metode sebelumnya.
+    // Konten srcdoc (tidak berubah dari sebelumnya)
     iframe.srcdoc = `
       <!doctype html>
       <html>
@@ -47,23 +46,31 @@ function Sidebar() {
           <meta charset="utf-8"/>
           <meta name="viewport" content="width=device-width,initial-scale=1"/>
           <style>
-            /* Atur body agar sesuai dengan tema sidebar, 
-              karena widget akan menggunakan background transparan.
-            */
             body { 
               margin: 0; 
-              padding: 0; 
+              padding: 0.5rem 0 0 1rem; 
               display: flex; 
-              align-items: center; 
-              justify-content: center; 
-              background-color: #1a202c; /* <-- Warna sidebar-bg */
+              flex-direction: column; 
+              align-items: flex-start; 
+              justify-content: flex-start; 
+              background-color: #1a202c; 
+              gap: 4px;
+            }
+            .counterapi {
+              min-height: 28px !important;
+            }
+            .counterapi a, 
+            .counterapi a:visited {
+              text-decoration: none !important;
+              pointer-events: none !important;
+              cursor: default !important;
             }
           </style>
         </head>
         <body>
+          
           <div 
             class="counterapi" 
-            style="min-height:44px"
             color="#a0aec0"
             iconColor="#4299e1"
             bg="transparent"
@@ -71,11 +78,31 @@ function Sidebar() {
             label="views"
             abbreviate="true"
           ></div>
+
+          <div 
+            class="counterapi" 
+            color="#a0aec0"
+            iconColor="#48bb78"
+            bg="transparent"
+            ns="qah-tools-v1-visits"
+            label="visits"
+            abbreviate="true"
+          ></div>
+
+          <div 
+            class="counterapi" 
+            color="#a0aec0"
+            iconColor="#ecc94b"
+            bg="transparent"
+            ns="qah-tools-v1-online"
+            label="online"
+            abbreviate="true"
+          ></div>
           
           <script src="https://counterapi.com/c.js" async></script>
           
           <noscript>
-            <div style="font-size:12px;padding:6px;text-align:center;color:#a0aec0;">
+            <div style="font-size:12px;padding:6px;text-align:left;color:#a0aec0;">
               Enable JavaScript to see the counter.
             </div>
           </noscript>
@@ -87,8 +114,6 @@ function Sidebar() {
 
     // Fallback dan error handling (Tidak berubah)
     fallbackTimeout = setTimeout(() => {
-      // (Logika fallback ini mungkin tidak berfungsi sempurna, 
-      // tapi kita pertahankan dari kode asli)
       if (container && container.childElementCount === 0) {
         container.innerHTML = '<div style="font-size:12px;text-align:center;">Counter gagal dimuat — cek adblock / CSP.</div>';
       }
@@ -104,7 +129,7 @@ function Sidebar() {
       if (container) container.innerHTML = '';
     };
   }, [isMinimized]); 
-  // --- AKHIR PERUBAHAN ---
+  // --- AKHIR BLOK useEffect ---
 
   return (
     <aside className={`sidebar ${isMinimized ? 'minimized' : ''}`}>
@@ -154,17 +179,18 @@ function Sidebar() {
         </ul>
       </nav>
       <div className="sidebar-footer">
-        {/* --- PERUBAHAN DI SINI: Menghapus 'pointerEvents' --- */}
+        
+        {/* --- PERBAIKAN DI SINI --- */}
         {!isMinimized && (
           <div
             ref={counterContainerRef}
             style={{
-              flex: 1,
-              textAlign: "center",
-              // pointerEvents: "none" // <-- DIHAPUS agar link bisa diklik
+              flex: 1, 
+              minHeight: '110px' // <-- DIUBAH DARI 105px
             }}
           />
         )}
+        {/* --- AKHIR PERBAIKAN --- */}
 
         {/* Tombol Sidebar Toggle */}
         <button
@@ -177,6 +203,7 @@ function Sidebar() {
             marginLeft: isMinimized ? '0' : '0', 
             backgroundColor: 'var(--sidebar-active-bg)',
             color: 'var(--sidebar-text)',
+            alignSelf: 'center' 
           }}
         >
           <i className="fas fa-chevron-left" />
