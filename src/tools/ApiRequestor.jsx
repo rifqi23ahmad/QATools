@@ -6,6 +6,7 @@ import styles from './ApiRequestorManager.module.css';
 import AceEditor from 'react-ace';
 import 'ace-builds/src-noconflict/mode-json';
 import 'ace-builds/src-noconflict/theme-tomorrow_night';
+import 'ace-builds/src-noconflict/theme-textmate'; // <-- Tema terang untuk header
 import 'ace-builds/src-noconflict/ext-language_tools';
 
 // Utility: hitung tinggi editor berdasarkan jumlah baris
@@ -41,7 +42,7 @@ function ApiRequestor({
     setEditorHeight(calcEditorHeight(body, { lineHeight: 18, verticalPadding: 24, minHeight: 150, maxHeight: 480 }));
   }, [body]);
 
-  // --- PERBAIKAN: Fungsi ini sekarang menggunakan objek styles ---
+  // --- Fungsi ini sekarang menggunakan objek styles ---
   function highlightJsonSyntax(jsonInput) {
     if (jsonInput === undefined || jsonInput === null) return '';
     let jsonString = typeof jsonInput === 'string' ? jsonInput : JSON.stringify(jsonInput, null, 2);
@@ -58,7 +59,6 @@ function ApiRequestor({
       }
     );
   }
-  // --- AKHIR PERBAIKAN ---
 
   // --- Header helper handlers ---
   const handleHeaderChange = (id, field, value) => {
@@ -447,36 +447,70 @@ function ApiRequestor({
                   </div>
                 </div>
 
-                {/* --- PERBAIKAN: Menghapus style inline maxHeight & overflow --- */}
+                {/* --- PERBAIKAN: Menggunakan Ace Editor untuk Output --- */}
                 {responseTab === 'response-body' && (
                   <div id="tab-response-body" className={`${styles.apiTabContent} ${styles.active}`}>
-                    <pre
-                      id="api-response-body-output"
-                      className={`textarea textarea-editor ${styles.responseOutput}`}
-                      style={{
-                        backgroundColor: '#2d3748',
-                        color: '#e2e8f0',
-                        whiteSpace: 'pre-wrap',
-                        padding: '1rem',
+                    <AceComp
+                      mode="json"
+                      theme="tomorrow_night" // Tema gelap untuk body
+                      value={
+                        (() => {
+                          try {
+                            // Coba format jika ini objek/string JSON
+                            const parsed = JSON.parse(response.body);
+                            return JSON.stringify(parsed, null, 2);
+                          } catch (e) {
+                            // Jika gagal (cth: plain text), kembalikan apa adanya
+                            return String(response.body || '');
+                          }
+                        })()
+                      }
+                      name="api-response-body-editor"
+                      readOnly={true}
+                      editorProps={{ $blockScrolling: true }}
+                      width="100%"
+                      /* --- PERBAIKAN KUNCI: HAPUS prop 'height' --- */
+                      /* height="100%" <-- DIHAPUS */
+                      fontSize={14}
+                      showPrintMargin={false}
+                      showGutter={true}
+                      highlightActiveLine={false}
+                      wrapEnabled={true} 
+                      setOptions={{
+                        useWorker: true,
                       }}
-                      dangerouslySetInnerHTML={{ __html: highlightJsonSyntax(response.body) }}
+                      className={styles.responseOutput} // Kelas CSS akan mengatur tinggi
+                      style={{ lineHeight: 1.5 }}
                     />
                   </div>
                 )}
 
                 {responseTab === 'response-headers' && (
                   <div id="tab-response-headers" className={`${styles.apiTabContent} ${styles.active}`}>
-                    <pre
-                      id="api-response-headers-output"
-                      className={`textarea textarea-editor ${styles.responseOutput}`}
-                      style={{
-                        backgroundColor: '#f7fafc',
-                        padding: '1rem',
-                        whiteSpace: 'pre-wrap',
+                    <AceComp
+                      mode="text" // Mode teks biasa untuk headers
+                      theme="textmate" // Tema terang
+                      value={renderResponseHeaders(response.headers)}
+                      name="api-response-headers-editor"
+                      readOnly={true}
+                      editorProps={{ $blockScrolling: true }}
+                      width="100%"
+                      /* --- PERBAIKAN KUNCI: HAPUS prop 'height' --- */
+                      /* height="100%" <-- DIHAPUS */
+                      fontSize={14}
+                      showPrintMargin={false}
+                      showGutter={true}
+                      highlightActiveLine={false}
+                      wrapEnabled={true}
+                      setOptions={{
+                        useWorker: false, 
                       }}
-                    >
-                      {renderResponseHeaders(response.headers)}
-                    </pre>
+                      className={styles.responseOutput} // Kelas CSS akan mengatur tinggi
+                      style={{ 
+                        lineHeight: 1.5,
+                        backgroundColor: '#f7fafc' // Samakan style <pre> sebelumnya
+                      }}
+                    />
                   </div>
                 )}
                 {/* --- AKHIR PERBAIKAN --- */}

@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
-import ApiRequestor from './ApiRequestor'; // Kita impor komponen UI
-import styles from './ApiRequestorManager.module.css'; // <-- Mengimpor file CSS yang benar
+import React, { useState, useEffect } from 'react'; 
+import ApiRequestor from './ApiRequestor'; 
+import styles from './ApiRequestorManager.module.css'; 
+
+const TABS_LS_KEY = 'apiRequestorTabs';
+const ACTIVE_TAB_LS_KEY = 'apiRequestorActiveTabId';
 
 // State default untuk tab baru
 const createNewTab = (id) => ({
   id: id,
-  name: `Request ${Math.floor(id / 1000)}`, // Beri nama unik
+  name: `Request ${Math.floor(id / 1000)}`, 
   request: {
     method: 'GET',
     url: '',
@@ -17,12 +20,75 @@ const createNewTab = (id) => ({
   },
   response: null,
   isLoading: false,
-  responseTab: 'response-body', // State tab respons sekarang ada di SINI
+  responseTab: 'response-body', 
 });
 
 function ApiRequestorManager() {
-  const [tabs, setTabs] = useState([createNewTab(Date.now())]); // Mulai dengan satu tab
-  const [activeTabId, setActiveTabId] = useState(tabs[0].id);
+  // Muat 'tabs' dari localStorage saat inisialisasi
+  const [tabs, setTabs] = useState(() => {
+    try {
+      const savedTabs = localStorage.getItem(TABS_LS_KEY);
+      if (savedTabs) {
+        const parsedTabs = JSON.parse(savedTabs);
+        if (Array.isArray(parsedTabs) && parsedTabs.length > 0) {
+          // --- PERUBAHAN 1 DI SINI: Hapus 'response: null' ---
+          // Kita ingin mempertahankan respons yang tersimpan
+          return parsedTabs.map(tab => ({ ...tab, isLoading: false })); 
+        }
+      }
+    } catch (e) {
+      console.error("Gagal memuat tabs dari localStorage:", e);
+      localStorage.removeItem(TABS_LS_KEY); // Hapus data korup
+    }
+    // Fallback jika tidak ada data
+    return [createNewTab(Date.now())];
+  });
+
+  // Muat 'activeTabId' dari localStorage
+  const [activeTabId, setActiveTabId] = useState(() => {
+    try {
+      const savedActiveId = localStorage.getItem(ACTIVE_TAB_LS_KEY);
+      if (savedActiveId) {
+        const parsedId = JSON.parse(savedActiveId);
+        // Cek apakah 'tabs' (dari baris di atas) masih mengandung ID ini
+        const tabsList = JSON.parse(localStorage.getItem(TABS_LS_KEY) || '[]');
+        if (tabsList.find(t => t.id === parsedId)) {
+          return parsedId;
+        }
+      }
+    } catch (e) {
+      console.error("Gagal memuat activeTabId dari localStorage:", e);
+      localStorage.removeItem(ACTIVE_TAB_LS_KEY);
+    }
+    // Fallback ke tab pertama (jika tabs masih kosong, ambil dari default)
+    const fallbackTabs = JSON.parse(localStorage.getItem(TABS_LS_KEY) || '[{"id": 0}]');
+    return fallbackTabs[0]?.id || 0;
+  });
+
+  // useEffect untuk MENYIMPAN 'tabs' ke localStorage
+  useEffect(() => {
+    try {
+      // --- PERUBAHAN 2 DI SINI: Hanya hapus 'isLoading' ---
+      // Kita ingin 'response' tetap tersimpan
+      const tabsToSave = tabs.map(tab => {
+        const { isLoading, ...rest } = tab; // <-- HANYA 'isLoading' yang dihapus
+        return rest; // 'response' akan ikut tersimpan di 'rest'
+      });
+      localStorage.setItem(TABS_LS_KEY, JSON.stringify(tabsToSave));
+    } catch (e) {
+      console.error("Gagal menyimpan tabs ke localStorage:", e);
+    }
+  }, [tabs]); // Dijalankan setiap kali 'tabs' berubah
+
+  // useEffect untuk MENYIMPAN 'activeTabId' ke localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem(ACTIVE_TAB_LS_KEY, JSON.stringify(activeTabId));
+    } catch (e) {
+      console.error("Gagal menyimpan activeTabId ke localStorage:", e);
+    }
+  }, [activeTabId]); // Dijalankan setiap kali 'activeTabId' berubah
+
 
   const activeTab = tabs.find(t => t.id === activeTabId);
 
@@ -35,7 +101,6 @@ function ApiRequestorManager() {
     ));
   };
   
-  // --- FUNGSI YANG DIPERBARUI ---
   // Fungsi ini sekarang bisa menerima (field, value) ATAU ({...updates})
   const handleRequestChange = (fieldOrObject, value) => {
      setTabs(tabs.map(tab => {
@@ -50,7 +115,6 @@ function ApiRequestorManager() {
       return tab;
     }));
   };
-  // --- AKHIR PERUBAHAN ---
 
   // Fungsi untuk mengirim request, sekarang dikelola di sini
   const handleSendRequest = async (request) => {
@@ -79,16 +143,12 @@ function ApiRequestorManager() {
       let responseHeadersText = '';
       res.headers.forEach((value, key) => { responseHeadersText += `${key}: ${value}\n`; });
       
-      try {
-        const json = JSON.parse(responseBodyText);
-        responseBodyText = JSON.stringify(json, null, 2); 
-      } catch (e) { /* Biarkan */ }
-      
+      // Simpan body mentah (sudah di-stringify jika JSON)
       newResponse = {
         status: { code: res.status, text: res.statusText, ok: res.ok },
         time: (endTime - startTime).toFixed(0),
         size: new TextEncoder().encode(responseBodyText).length,
-        body: responseBodyText,
+        body: responseBodyText, // <-- Simpan body mentah
         headers: responseHeadersText
       };
 
@@ -142,7 +202,7 @@ function ApiRequestorManager() {
       <div className="tool-header" style={{ marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '1px solid var(--card-border)' }}>
         <h1 style={{ fontSize: '1.5rem', marginBottom: '0.25rem' }}>API Requestor (cURL Runner)</h1>
         <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', margin: 0 }}>
-          Buat request baru dengan tombol (+). Tempel cURL atau URL biasa di input.
+          Buat request baru dengan tombol (+). Tempel cURL atau URL biasa di input. (State tersimpan otomatis)
         </p>
       </div>
       

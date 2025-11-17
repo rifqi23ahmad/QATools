@@ -1,159 +1,225 @@
-.apiRequestor {
+/* ApiRequestor.module.css */
+
+/* --- global helpers (if using CSS Modules with :global) --- */
+:global(html), :global(body), :global(#root) {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Root wrapper */
+.apiRequestorRoot {
   display: flex;
   flex-direction: column;
-  flex-grow: 1;
+  height: 100%;        /* let component fill parent's height */
   min-height: 0;
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  border-top: none;
-  border-bottom-left-radius: 8px;
-  border-bottom-right-radius: 8px;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background: #f7f8fb;
+  color: #0f1724;
 }
-.apiRequestor .toolHeader {
-  flex-shrink: 0;
-  padding: 1.25rem;
-  padding-bottom: 1rem;
-  margin-bottom: 0;
-  border-bottom: 1px solid var(--card-border);
+
+/* Top toolbar / tabs */
+.apiTabsContainer {
+  flex: 0 0 auto;
+  border-bottom: 1px solid #e6e9ef;
+  background: #fff;
+  padding: 8px 12px;
 }
-.apiRequestor .toolHeader h1 {
-  font-size: 1.25rem;
-  margin-bottom: 0.25rem;
-}
-.apiRequestor .toolHeader p {
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  margin: 0;
-}
-.apiRequestZone {
-  flex-shrink: 0;
-  padding: 1.25rem;
-}
-.apiRequestor .card {
-  padding: 0;
-  border: none;
-  box-shadow: none;
-  border-radius: 0;
-}
-.corsWarning {
-  background-color: #fffbea;
-  border-color: #fbd38d;
-  margin-bottom: 1rem;
-  padding: 0.5rem 1rem;
-  border: 1px solid #fbd38d;
-  border-radius: 6px;
-}
-.corsWarning p {
-  color: #744210;
-  margin: 0;
-  font-size: 0.8rem;
-}
-.corsWarning strong {
-  color: #c05621;
-}
-.apiRequestGrid {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  gap: 0.5rem;
+
+.toolbar {
+  display: flex;
+  gap: 8px;
   align-items: center;
 }
-.apiTabsNav {
-  display: flex;
-  border-bottom: 1px solid var(--card-border);
-  margin-bottom: 1rem;
+
+.methodSelect {
+  width: 84px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  background: white;
 }
-.apiTabBtn {
-  padding: 0.75rem 1.25rem;
-  cursor: pointer;
-  background-color: transparent;
+
+.urlInput {
+  flex: 1 1 auto;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  min-width: 220px;
+}
+
+.sendButton {
+  padding: 8px 12px;
+  border-radius: 6px;
   border: none;
-  border-bottom: 3px solid transparent;
-  font-weight: 500;
-  color: var(--text-secondary);
-  margin-bottom: -1px;
+  background: #0ea5a4;
+  color: white;
+  cursor: pointer;
 }
-.apiTabBtn.active {
-  color: var(--primary-color);
-  border-bottom-color: var(--primary-color);
+
+/* Main content area that contains panels */
+.apiMainContent {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0; /* important so children can overflow internally */
+  overflow: hidden; /* prevent page scroll — panels will scroll internally */
+}
+
+/* Panels wrapper: left + right */
+.apiPanels {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  flex: 1 1 auto;
+  min-height: 0; /* KRUSIAL */
+  box-sizing: border-box;
+}
+
+/* Generic panel (both request & response) */
+.apiPanel {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  min-height: 0; /* allow children to shrink and scroll */
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 0 rgba(16,24,40,0.03);
+  overflow: hidden; /* child handles inner scroll */
+  border: 1px solid #eef2f6;
+}
+
+/* Panel header */
+.panelHeader {
+  flex: 0 0 auto;
+  padding: 10px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   font-weight: 600;
 }
-.apiTabContent {
-  display: none; 
-  flex-grow: 1; 
-  min-height: 0; 
-  flex-direction: column; 
-}
-.apiTabContent.active {
-  display: flex; 
-}
-.apiHeaderRow {
-  display: grid;
-  grid-template-columns: 1fr 1fr auto;
-  gap: 0.75rem;
-  align-items: center;
-}
-.apiHeaderRow .input {
-  font-size: 0.9rem;
-  padding: 0.5rem 0.75rem;
-}
-.apiHeaderRow .removeHeaderBtn {
-  padding: 0.4rem 0.7rem;
-  background-color: #fff5f5;
-  color: var(--danger-color);
-  border-color: #fed7d7;
-}
-.apiHeaderRow .removeHeaderBtn:hover {
-  background-color: #fed7d7;
-}
 
-/* --- PERUBAHAN 1 DI SINI --- */
-.apiResponseZone {
-  flex-grow: 1;
+/* Panel body (area below header) */
+.panelBody {
   display: flex;
   flex-direction: column;
-  min-height: 0; /* <-- DIUBAH DARI 200px */
-  margin-top: 1rem;
-  border-top: 1px solid var(--card-border);
-  padding: 0; /* <-- DIUBAH: Padding dipindahkan ke .card */
-}
-
-/* --- PERUBAHAN 2 DI SINI --- */
-.apiResponseZone .card {
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 0; /* <-- DITAMBAHKAN: Ini sangat penting */
-  
-  /* Dipindahkan dari .apiResponseZone dan digabung dengan padding-top */
-  padding: 0.75rem 1.25rem 1.25rem 1.25rem; 
-  
-  /* Ini akan meng-override padding global .card dari components.css */
-  padding-left: 1.25rem;
-  padding-right: 1.25rem;
-  padding-bottom: 1.25rem;
-}
-
-.apiResponseZone .apiTabsContainer {
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 0; /* <-- DITAMBAHKAN: Ini juga penting */
-}
-
-.apiResponseZone .responseOutput {
+  gap: 8px;
+  padding: 12px;
   flex: 1 1 auto;
-  min-height: 0;      /* penting agar overflow bekerja di flex container */
-  overflow: auto;     /* ini yang menampilkan scrollbar */
-  white-space: pre-wrap;
-  font-size: 0.875rem;
-  padding: 1rem;      /* sesuai kebutuhan */
-  max-height: none;   /* hapus batas statis */
+  min-height: 0;
+  overflow: hidden;
 }
 
-/* Kelas untuk syntax highlighting */
-.jsonKey { color: #63b3ed; }
-.jsonString { color: #f6ad55; }
-.jsonNumber { color: #d53f8c; }
-.jsonBoolean { color: #f56565; }
-.jsonNull { color: #b794f4; }
-.jsonError { color: #fbd38d; font-weight: bold;}
+/* Request-specific layout */
+.requestTop {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.smallLabel {
+  font-size: 12px;
+  color: #4b5563;
+  margin-bottom: 6px;
+}
+
+/* raw headers textarea */
+.headerEditor {
+  width: 100%;
+  min-height: 72px;
+  max-height: 180px;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #e6e9ef;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+/* Panel splitter visual */
+.panelSplitter {
+  height: 6px;
+}
+
+/* Body editor area:
+   We intentionally render both a "pre" (for formatted viewing) and a textarea for editing.
+   The pre/textarea are placed inside a scrollable container.
+*/
+.bodyOutput {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  gap: 8px;
+}
+
+.bodyEditor {
+  width: 100%;
+  height: 120px;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #e6e9ef;
+  resize: vertical;
+  box-sizing: border-box;
+  flex: 0 0 auto;
+}
+
+/* Pre for display inside body/response. We put pre inside a flex child that scrolls. */
+.preInner {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", "Courier New", monospace;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* RESPONSE area specific */
+.responsePanel {}
+
+/* tabs inside response */
+.panelTabs {
+  display: flex;
+  gap: 6px;
+  padding: 8px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  background: #fff;
+}
+
+.tab, .activeTab {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.tab:hover { background: #f8fafc; }
+.activeTab { background: #eef2ff; border-color: #dbeafe; }
+
+/* Response output container that must scroll internally */
+.responseOutput {
+  flex: 1 1 auto;  /* allow growing to fill panel */
+  min-height: 0;   /* critical for flex children to scroll */
+  overflow: auto;  /* THIS creates the per-panel scrollbar */
+  padding: 12px;
+}
+
+/* styling for response metadata in header */
+.responseMeta {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-size: 13px;
+  color: #374151;
+}
+
+.status { font-weight: 600; margin-left: 6px; }
+.metaSmall { font-size: 12px; color: #6b7280; }
+
+/* small responsive tweaks */
+@media (max-width: 880px) {
+  .apiPanels { flex-direction: column; }
+}
