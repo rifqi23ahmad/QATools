@@ -142,7 +142,7 @@ function JsonValueExtractor() {
           {/* Kolom Kiri */}
           <div className="flex flex-col" style={{ gap: '1.5rem' }}>
             <div>
-              <label htmlFor="json-input" className="label">1. Tempelkan JSON Anda di sini</label>
+              <label htmlFor="json-input" className="label">Tempelkan JSON Anda di sini</label>
               {/* --- DIGANTI DARI TEXTAREA --- */}
               <ReusableAceEditor
                 mode="json"
@@ -195,7 +195,7 @@ function JsonValueExtractor() {
 
           {/* Kolom Kanan */}
           <div className="flex flex-col" style={{ height: '100%' }}>
-            <label htmlFor="result-output" className="label">4. Hasil dalam Format SQL</label>
+            <label htmlFor="result-output" className="label">Hasil dalam Format SQL</label>
             <div style={{ position: 'relative', flexGrow: 1, minHeight: '300px' }}>
               {/* --- DIGANTI DARI TEXTAREA --- */}
               <ReusableAceEditor
