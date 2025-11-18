@@ -18,13 +18,12 @@ import SqlScriptGeneratorOtomatis from './tools/SqlScriptGeneratorOtomatis';
 import SqlScriptGenerator from './tools/SQLScriptGenerator';
 import CalculationTools from './tools/CalculationTools.jsx';
 import SqlCompare from './tools/SQLCompare';
-// --- IMPOR BARU ---
-import ExcelToJsonConverter from './tools/ExcelToJsonConverter'; 
+// --- IMPOR FILE BARU ---
+import FileConverter from './tools/FileConverter'; 
 
 
 /**
  * Mendefinisikan grup tool untuk sidebar.
- * Menambahkan properti 'path' unik untuk routing.
  */
 export const toolGroups = [
   {
@@ -37,7 +36,8 @@ export const toolGroups = [
   {
     title: 'Converter Tools',
     tools: [
-      { id: 'ExcelToJsonConverter', path: '/excel-to-json', name: 'Excel to JSON', icon: 'fa-file-export' },
+      // Nama tool dibuat lebih umum
+      { id: 'FileConverter', path: '/universal-converter', name: 'File Converter', icon: 'fa-retweet' },
     ]
   },
   {
@@ -81,7 +81,7 @@ export const toolComponentMap = {
   CalculationTools: CalculationTools,
   
   // Converter
-  ExcelToJsonConverter: ExcelToJsonConverter, // <-- Tambahkan Mapping di sini
+  FileConverter: FileConverter, // <-- Gunakan komponen baru
 
   // JSON Tools
   JsonFormatter: JsonFormatter,
