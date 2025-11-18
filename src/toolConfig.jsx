@@ -1,6 +1,6 @@
 import React from 'react';
 
-// 1. Impor SEMUA tool
+// 1. Impor SEMUA tool yang sudah ada
 import SqlFormatter from './tools/SQLNumberFormatter';
 import JsonValueExtractor from './tools/JSONValueExtractor';
 import DataCompare from './tools/DataCompare';
@@ -17,7 +17,9 @@ import WordingCompare from './tools/WordingCompare.jsx';
 import SqlScriptGeneratorOtomatis from './tools/SqlScriptGeneratorOtomatis';
 import SqlScriptGenerator from './tools/SQLScriptGenerator';
 import CalculationTools from './tools/CalculationTools.jsx';
-import SqlCompare from './tools/SQLCompare'; //
+import SqlCompare from './tools/SQLCompare';
+// --- IMPOR BARU ---
+import ExcelToJsonConverter from './tools/ExcelToJsonConverter'; 
 
 
 /**
@@ -29,6 +31,13 @@ export const toolGroups = [
     title: 'Calculation Tools',
     tools: [
       { id: 'CalculationTools', path: '/kalkulasi', name: 'AIO Calculation', icon: 'fa-calculator' },
+    ]
+  },
+  // --- KATEGORI BARU: Converter ---
+  {
+    title: 'Converter Tools',
+    tools: [
+      { id: 'ExcelToJsonConverter', path: '/excel-to-json', name: 'Excel to JSON', icon: 'fa-file-export' },
     ]
   },
   {
@@ -71,6 +80,9 @@ export const toolComponentMap = {
   // Kalkulasi
   CalculationTools: CalculationTools,
   
+  // Converter
+  ExcelToJsonConverter: ExcelToJsonConverter, // <-- Tambahkan Mapping di sini
+
   // JSON Tools
   JsonFormatter: JsonFormatter,
   JsonCompare: JsonCompare,
