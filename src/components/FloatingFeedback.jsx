@@ -2,7 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import styles from './FloatingFeedback.module.css';
 
-// --- PALET WARNA UNTUK PENGGUNA LAIN (Pastels yang berbeda) ---
+// --- CONSTANTS & UTILITIES ---
+
+// Palet Warna untuk pengguna lain
 const OTHER_COLORS = [
     '#e1f5e1', // Hijau Muda
     '#f5e1e1', // Merah Muda
@@ -14,13 +16,17 @@ const OTHER_COLORS = [
     '#f0e1f5', // Lavender
 ];
 
-// Fungsi Hashing Sederhana untuk menghasilkan warna yang konsisten dari string
+// Key Local Storage
+const LS_DISPLAY_NAME_KEY = 'chat.displayname';
+const LS_NAME_SET_KEY = 'chat.isnameset';
+
+// Fungsi Hashing Sederhana
 function simpleHash(str) {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
     const char = str.charCodeAt(i);
     hash = ((hash << 5) - hash) + char;
-    hash |= 0; // Convert to 32bit integer
+    hash |= 0; 
   }
   return Math.abs(hash);
 }
@@ -33,7 +39,19 @@ const getColorForVisitor = (visitorId) => {
     return OTHER_COLORS[index];
 };
 
+// Fungsi untuk menghasilkan nama Guest yang unik (contoh: Guest-ABCD)
+function generateUniqueGuestName() {
+  const randomSuffix = Math.random().toString(36).substring(2, 6).toUpperCase();
+  return `Guest-${randomSuffix}`;
+}
 
+// Fungsi untuk membuat ID yang mudah dibaca dari visitorId (contoh: Guest-A4B7)
+const getReadableId = (id) => {
+    const hash = simpleHash(id).toString(16);
+    return `Guest-${hash.substring(0, 4).toUpperCase()}`;
+};
+
+// --- KOMPONEN UTAMA ---
 function FloatingFeedback({ supabase, visitorId }) {
   const [isOpen, setIsOpen] = useState(false);
   const [feedbacks, setFeedbacks] = useState([]);
@@ -41,9 +59,46 @@ function FloatingFeedback({ supabase, visitorId }) {
   const [isSending, setIsSending] = useState(false);
   const [onlineCount, setOnlineCount] = useState(1);
   
-  const [time, setTime] = useState(new Date());
+  // --- NEW STATES FOR NAME VALIDATION ---
+  const [isNameSet, setIsNameSet] = useState(false);
+  const [displayName, setDisplayName] = useState('');
+  const [inputName, setInputName] = useState('');
+  // -------------------------------------
 
+  const [time, setTime] = useState(new Date());
   const messagesEndRef = useRef(null);
+
+  // Efek untuk memuat nama dari Local Storage saat mount
+  useEffect(() => {
+    const savedName = localStorage.getItem(LS_DISPLAY_NAME_KEY);
+    const savedIsSet = localStorage.getItem(LS_NAME_SET_KEY) === 'true';
+
+    if (savedIsSet && savedName) {
+      setDisplayName(savedName);
+      setIsNameSet(true);
+    }
+  }, []);
+
+  // --- LOGIKA SET NAMA PENGGUNA ---
+  const handleSetName = (isGuest = false) => {
+    let name = '';
+    if (isGuest) {
+      name = generateUniqueGuestName();
+    } else {
+      const trimmedName = inputName.trim();
+      if (trimmedName.length < 3) {
+        alert("Nama harus lebih dari 2 karakter.");
+        return;
+      }
+      name = trimmedName;
+    }
+
+    setDisplayName(name);
+    setIsNameSet(true);
+    localStorage.setItem(LS_DISPLAY_NAME_KEY, name);
+    localStorage.setItem(LS_NAME_SET_KEY, 'true');
+    setInputName(''); // Clear input after setting
+  };
 
   // Efek Jam Hidup
   useEffect(() => {
@@ -91,9 +146,11 @@ function FloatingFeedback({ supabase, visitorId }) {
   }, [isOpen, supabase, visitorId]);
 
   const fetchFeedbacks = async () => {
+    // NOTE: Kami berasumsi tabel Supabase sudah memiliki kolom 'display_name'.
+    // Jika tidak, Supabase akan mengabaikannya, dan kami akan menggunakan fallback getReadableId.
     const { data, error } = await supabase
       .from('feedback')
-      .select('*')
+      .select('*, display_name') 
       .order('created_at', { ascending: true })
       .limit(100);
 
@@ -111,16 +168,30 @@ function FloatingFeedback({ supabase, visitorId }) {
 
   const handleSend = async (e) => {
     e.preventDefault();
-    if (!inputMsg.trim()) return;
+    // Tambahkan validasi nama sudah di-set
+    if (!inputMsg.trim() || !isNameSet) return; 
     
     setIsSending(true);
     try {
+      // Mengirim display_name bersama pesan (asumsi kolom sudah ada)
       const { error } = await supabase.from('feedback').insert({
         visitor_id: visitorId,
         message: inputMsg,
+        display_name: displayName, // Mengirim nama yang dipilih/dibuat
         user_agent: 'WebChat'
       });
-      if (error) throw error;
+
+      if (error) {
+         console.warn("Gagal insert dengan display_name, mencoba tanpa.");
+         // Fallback ke struktur lama
+         const { error: fallbackError } = await supabase.from('feedback').insert({
+            visitor_id: visitorId,
+            message: inputMsg,
+            user_agent: 'WebChat'
+          });
+         if(fallbackError) throw fallbackError;
+      }
+      
       setInputMsg('');
       scrollToBottom();
     } catch (err) {
@@ -140,6 +211,48 @@ function FloatingFeedback({ supabase, visitorId }) {
       {/* Chat Window */}
       {isOpen && (
         <div className={styles.chatWindow}>
+            
+            {/* --- NAME SELECTION OVERLAY --- */}
+            {!isNameSet && (
+                 <div className={styles.nameOverlay}> 
+                    <div className={styles.namePrompt}>
+                        <h2>Bergabung ke Chat</h2>
+                        <p>Masukkan nama Anda (min. 3 karakter) atau lanjutkan sebagai Tamu.</p>
+                        
+                        <input 
+                            className={styles.input}
+                            placeholder="Nama Panggilan Anda"
+                            value={inputName}
+                            onChange={(e) => setInputName(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' && inputName.trim().length >= 3) {
+                                    handleSetName(false);
+                                }
+                            }}
+                        />
+                        <button 
+                            className={styles.nameBtn} 
+                            onClick={() => handleSetName(false)}
+                            disabled={inputName.trim().length < 3}
+                            style={{marginBottom: '10px'}}
+                        >
+                            Gunakan Nama Ini
+                        </button>
+                        
+                        <div style={{borderBottom: '1px solid #e2e8f0', margin: '15px 0 10px 0'}}></div>
+                        
+                        <button 
+                            className={styles.guestBtn} 
+                            onClick={() => handleSetName(true)}
+                        >
+                            Lanjutkan sebagai Tamu Unik
+                        </button>
+                    </div>
+                </div>
+            )}
+            {/* ------------------------------- */}
+
+
           <div className={styles.header}>
             <div className={styles.headerTop}>
               <span>Live Feedback</span>
@@ -151,7 +264,7 @@ function FloatingFeedback({ supabase, visitorId }) {
             </div>
           </div>
 
-          <div className={styles.messageList}>
+          <div className={styles.messageList} style={{ filter: isNameSet ? 'none' : 'blur(2px)' }}>
             {feedbacks.length === 0 && (
               <div style={{textAlign:'center', color:'#a0aec0', marginTop:'40px', fontSize:'0.85rem'}}>
                 <i className="far fa-comments fa-2x" style={{marginBottom:'10px'}}></i><br/>
@@ -162,26 +275,34 @@ function FloatingFeedback({ supabase, visitorId }) {
             {feedbacks.map((msg) => {
               const isMe = msg.visitor_id === visitorId;
               
-              // --- LOGIKA WARNA DINAMIS ---
+              // Tentukan Nama Pengirim
+              let senderName;
+              if (isMe) {
+                  senderName = displayName; // Gunakan nama lokal yang dipilih/dibuat
+              } else if (msg.display_name) {
+                  senderName = msg.display_name; // Jika DB support, pakai nama dari DB
+              } else {
+                  senderName = getReadableId(msg.visitor_id); // Fallback: Unique ID dari visitor_id
+              }
+
               const color = getColorForVisitor(msg.visitor_id);
               const messageStyle = isMe 
-                ? {} // Gunakan styles.myMessage
+                ? {} 
                 : { 
                     backgroundColor: color, 
-                    color: '#1a202c', // Teks gelap agar terbaca di latar terang
-                    border: '1px solid ' + color.replace('f5', 'e0'), // Border sedikit lebih gelap
+                    color: '#1a202c', 
+                    border: '1px solid ' + color.replace('f5', 'e0'), 
                   };
-              // --- AKHIR LOGIKA WARNA DINAMIS ---
 
               return (
                 <div 
                   key={msg.id} 
                   className={`${styles.messageItem} ${isMe ? styles.myMessage : styles.otherMessage}`}
-                  style={messageStyle} // Terapkan style dinamis di sini
+                  style={messageStyle}
                 >
                   {msg.message}
                   <span className={styles.meta} style={{color: isMe ? 'rgba(255,255,255,0.8)' : '#718096'}}>
-                    {isMe ? 'Anda' : 'Guest'} • {formatTimeStr(msg.created_at)}
+                    {senderName} • {formatTimeStr(msg.created_at)}
                   </span>
                 </div>
               );
@@ -192,12 +313,12 @@ function FloatingFeedback({ supabase, visitorId }) {
           <form className={styles.footer} onSubmit={handleSend}>
             <input 
               className={styles.input}
-              placeholder="Ketik pesan..."
+              placeholder={isNameSet ? "Ketik pesan..." : "Harap tentukan nama dulu"}
               value={inputMsg}
               onChange={(e) => setInputMsg(e.target.value)}
-              disabled={isSending}
+              disabled={isSending || !isNameSet}
             />
-            <button type="submit" className={styles.sendBtn} disabled={isSending || !inputMsg.trim()}>
+            <button type="submit" className={styles.sendBtn} disabled={isSending || !inputMsg.trim() || !isNameSet}>
               <i className="fas fa-paper-plane"></i>
             </button>
           </form>
