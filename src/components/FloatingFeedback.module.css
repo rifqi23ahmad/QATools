@@ -220,5 +220,20 @@
   justify-content: center;
   transition: background 0.2s;
 }
+
+.otherMessage {
+  align-self: flex-start;
+  /* HAPUS/UBAH properti warna/border di sini karena akan di-override di JSX */
+  color: #2d3748; 
+  border-bottom-left-radius: 2px;
+}
+
+/* Pesan Saya */
+.myMessage {
+  align-self: flex-end;
+  background-color: #4299e1;
+  color: white;
+  border-bottom-right-radius: 2px;
+}
 .sendBtn:hover { background: #3182ce; }
 .sendBtn:disabled { background: #cbd5e0; }

@@ -1,6 +1,38 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { createPortal } from 'react-dom'; // <-- PENTING UNTUK SOLUSI LAYOUT
+import { createPortal } from 'react-dom';
 import styles from './FloatingFeedback.module.css';
+
+// --- PALET WARNA UNTUK PENGGUNA LAIN (Pastels yang berbeda) ---
+const OTHER_COLORS = [
+    '#e1f5e1', // Hijau Muda
+    '#f5e1e1', // Merah Muda
+    '#e1e1f5', // Biru Muda
+    '#f5f5e1', // Kuning Muda
+    '#e1f5f5', // Cyan Muda
+    '#f5e1f5', // Ungu Muda
+    '#fff0e1', // Oranye Muda
+    '#f0e1f5', // Lavender
+];
+
+// Fungsi Hashing Sederhana untuk menghasilkan warna yang konsisten dari string
+function simpleHash(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash |= 0; // Convert to 32bit integer
+  }
+  return Math.abs(hash);
+}
+
+// Fungsi untuk mendapatkan warna berdasarkan visitor_id
+const getColorForVisitor = (visitorId) => {
+    if (!visitorId) return OTHER_COLORS[0];
+    const hash = simpleHash(visitorId);
+    const index = hash % OTHER_COLORS.length;
+    return OTHER_COLORS[index];
+};
+
 
 function FloatingFeedback({ supabase, visitorId }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -9,18 +41,16 @@ function FloatingFeedback({ supabase, visitorId }) {
   const [isSending, setIsSending] = useState(false);
   const [onlineCount, setOnlineCount] = useState(1);
   
-  // State untuk Jam Analog
   const [time, setTime] = useState(new Date());
 
   const messagesEndRef = useRef(null);
 
-  // 1. Efek Jam Hidup (Tick setiap detik)
+  // Efek Jam Hidup
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
-  // Hitung rotasi jarum jam
   const seconds = time.getSeconds();
   const minutes = time.getMinutes();
   const hours = time.getHours();
@@ -29,13 +59,11 @@ function FloatingFeedback({ supabase, visitorId }) {
   const minDeg = ((minutes * 60 + seconds) / 3600) * 360;
   const hourDeg = ((hours % 12) / 12) * 360 + (minutes / 60) * 30;
 
-  // 2. Efek Chat (Fetch & Realtime) saat dibuka
+  // Efek Chat (Fetch & Realtime) saat dibuka
   useEffect(() => {
     if (isOpen) {
-      // A. Load Initial Data
       fetchFeedbacks();
       
-      // B. Subscribe Pesan Baru (INSERT)
       const chatChannel = supabase
         .channel('public:feedback')
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'feedback' }, (payload) => {
@@ -44,11 +72,9 @@ function FloatingFeedback({ supabase, visitorId }) {
         })
         .subscribe();
 
-      // C. Subscribe Presence (Siapa yang sedang membuka chat ini)
       const presenceChannel = supabase.channel('feedback_presence')
         .on('presence', { event: 'sync' }, () => {
           const state = presenceChannel.presenceState();
-          // Hitung total device/tab yang konek ke channel ini
           setOnlineCount(Object.keys(state).length);
         })
         .subscribe(async (status) => {
@@ -69,7 +95,7 @@ function FloatingFeedback({ supabase, visitorId }) {
       .from('feedback')
       .select('*')
       .order('created_at', { ascending: true })
-      .limit(100); // Ambil lebih banyak history
+      .limit(100);
 
     if (!error && data) {
       setFeedbacks(data);
@@ -108,9 +134,6 @@ function FloatingFeedback({ supabase, visitorId }) {
     return new Date(isoString).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
   };
 
-  // --- RENDER MENGGUNAKAN PORTAL ---
-  // Ini akan merender komponen di <body>, bukan di dalam <Sidebar>, 
-  // sehingga tidak akan pernah tertutup oleh overflow:hidden atau z-index sidebar.
   return createPortal(
     <div className={styles.wrapper}>
       
@@ -138,11 +161,27 @@ function FloatingFeedback({ supabase, visitorId }) {
 
             {feedbacks.map((msg) => {
               const isMe = msg.visitor_id === visitorId;
+              
+              // --- LOGIKA WARNA DINAMIS ---
+              const color = getColorForVisitor(msg.visitor_id);
+              const messageStyle = isMe 
+                ? {} // Gunakan styles.myMessage
+                : { 
+                    backgroundColor: color, 
+                    color: '#1a202c', // Teks gelap agar terbaca di latar terang
+                    border: '1px solid ' + color.replace('f5', 'e0'), // Border sedikit lebih gelap
+                  };
+              // --- AKHIR LOGIKA WARNA DINAMIS ---
+
               return (
-                <div key={msg.id} className={`${styles.messageItem} ${isMe ? styles.myMessage : styles.otherMessage}`}>
+                <div 
+                  key={msg.id} 
+                  className={`${styles.messageItem} ${isMe ? styles.myMessage : styles.otherMessage}`}
+                  style={messageStyle} // Terapkan style dinamis di sini
+                >
                   {msg.message}
-                  <span className={styles.meta} style={{color: isMe ? 'rgba(255,255,255,0.8)' : '#a0aec0'}}>
-                    {formatTimeStr(msg.created_at)}
+                  <span className={styles.meta} style={{color: isMe ? 'rgba(255,255,255,0.8)' : '#718096'}}>
+                    {isMe ? 'Anda' : 'Guest'} • {formatTimeStr(msg.created_at)}
                   </span>
                 </div>
               );
@@ -172,7 +211,7 @@ function FloatingFeedback({ supabase, visitorId }) {
         title={isOpen ? "Tutup Chat" : "Buka Feedback"}
       >
         {isOpen ? (
-          <i className="fas fa-chevron-down" style={{fontSize:'1.5rem'}}></i>
+          <i className="fas fa-chevron-down" style={{fontSize:'1.5rem', color: '#ecc94b'}}></i>
         ) : (
           <div className={styles.clockFace}>
             <div className={`${styles.hand} ${styles.hourHand}`} style={{ transform: `translateX(-50%) rotate(${hourDeg}deg)` }}></div>
@@ -183,7 +222,7 @@ function FloatingFeedback({ supabase, visitorId }) {
       </button>
 
     </div>,
-    document.body // <-- Target Portal
+    document.body
   );
 }
 
