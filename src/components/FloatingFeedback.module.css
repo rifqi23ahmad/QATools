@@ -1,0 +1,224 @@
+/* src/components/FloatingFeedback.module.css */
+
+.wrapper {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  z-index: 99999; /* Z-Index sangat tinggi agar di atas segalanya */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-family: 'Inter', sans-serif;
+  pointer-events: none; /* Agar area kosong tidak memblokir klik di belakangnya */
+}
+
+/* Aktifkan pointer events hanya pada elemen interaktif */
+.floatingBtn, .chatWindow {
+  pointer-events: auto;
+}
+
+/* Tombol Bulat */
+.floatingBtn {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: #2d3748;
+  color: white;
+  border: 2px solid #4a5568;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s;
+  position: relative;
+  overflow: hidden;
+  padding: 0;
+}
+
+.floatingBtn:hover {
+  transform: scale(1.1);
+  border-color: #ecc94b;
+}
+
+/* JAM ANALOG */
+.clockFace {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #2d3748;
+}
+
+/* Titik tengah jam */
+.clockFace::after {
+  content: '';
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 4px; height: 4px;
+  background: #ecc94b;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+}
+
+/* Jarum Jam */
+.hand {
+  position: absolute;
+  bottom: 50%; left: 50%;
+  transform-origin: bottom center;
+  background: white;
+  border-radius: 4px;
+  transform: translateX(-50%) rotate(0deg);
+}
+
+.hourHand {
+  width: 3px; height: 16px; background: #fff; z-index: 5;
+}
+.minuteHand {
+  width: 2px; height: 22px; background: #cbd5e0; z-index: 6;
+}
+.secondHand {
+  width: 1px; height: 24px; background: #ecc94b; z-index: 7;
+}
+
+/* Panel Chat */
+.chatWindow {
+  width: 360px;
+  height: 550px;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  border: 1px solid #e2e8f0;
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideUp 0.25s ease-out;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.header {
+  background-color: #1a202c;
+  color: white;
+  padding: 12px 15px;
+  border-bottom: 1px solid #2d3748;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.headerTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+}
+
+.onlineStatus {
+  font-size: 0.75rem;
+  color: #48bb78; /* Hijau */
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.onlineDot {
+  width: 8px; height: 8px;
+  background-color: #48bb78;
+  border-radius: 50%;
+  display: inline-block;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+/* List Pesan */
+.messageList {
+  flex: 1;
+  padding: 15px;
+  overflow-y: auto;
+  background-color: #f0f2f5;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.messageItem {
+  max-width: 80%;
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  word-wrap: break-word;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.otherMessage {
+  align-self: flex-start;
+  background-color: #fff;
+  color: #1a202c;
+  border-bottom-left-radius: 2px;
+}
+
+.myMessage {
+  align-self: flex-end;
+  background-color: #4299e1;
+  color: white;
+  border-bottom-right-radius: 2px;
+}
+
+.meta {
+  display: block;
+  font-size: 0.65rem;
+  margin-top: 4px;
+  opacity: 0.7;
+  text-align: right;
+}
+
+/* Footer Input */
+.footer {
+  padding: 10px;
+  background: #fff;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  gap: 8px;
+}
+
+.input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  outline: none;
+  font-size: 0.9rem;
+  background: #f7fafc;
+}
+
+.input:focus {
+  border-color: #4299e1;
+  background: #fff;
+}
+
+.sendBtn {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: #4299e1;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+.sendBtn:hover { background: #3182ce; }
+.sendBtn:disabled { background: #cbd5e0; }

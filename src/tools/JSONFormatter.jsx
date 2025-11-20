@@ -12,12 +12,14 @@ function JsonFormatter() {
   const [fileLabel, setFileLabel] = useState('Pilih File...');
 
   const [isSyncing, setIsSyncing] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  // --- STATE BARU UNTUK FONT SIZE ---
+  const [fontSize, setFontSize] = useState(15); 
   
-  // Ref untuk Ace Editor, sekarang kita dapat mengakses .editor dan .session
+  const containerRef = useRef(null);
   const inputEditorRef = useRef(null);
   const outputEditorRef = useRef(null);
   
-  // Ref untuk mengunci sync scroll agar tidak terjadi infinite loop
   const isScrollUpdatingRef = useRef(false);
 
   const urlInputRef = useRef(null);
@@ -29,24 +31,49 @@ function JsonFormatter() {
 
   const getInputRawText = useCallback(() => inputText, [inputText]);
 
+  // --- LOGIKA FONT SIZE ---
+  const handleFontSizeChange = (delta) => {
+    setFontSize(prev => {
+        const newSize = prev + delta;
+        // Batasi ukuran antara 10px dan 25px
+        if (newSize < 10) return 10;
+        if (newSize > 25) return 25;
+        return newSize;
+    });
+  };
+
+  // --- LOGIKA FULLSCREEN ---
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      containerRef.current.requestFullscreen().catch(err => {
+        alert(`Error: ${err.message}`);
+      });
+    } else {
+      document.exitFullscreen();
+    }
+  };
+
+  useEffect(() => {
+    const handleFsChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFsChange);
+    return () => document.removeEventListener('fullscreenchange', handleFsChange);
+  }, []);
+  
   // --- LOGIKA SCROLL SYNC UTAMA ---
   const handleScrollSync = useCallback((sourceRef, targetRef) => {
-    // Jika sync tidak aktif atau sedang dalam proses programatik scroll, ABAIKAN
     if (!isSyncing || isScrollUpdatingRef.current) return;
 
     const sourceEditor = sourceRef.current?.editor;
     const targetEditor = targetRef.current?.editor;
 
     if (sourceEditor && targetEditor) {
-      isScrollUpdatingRef.current = true; // Kunci
-
+      isScrollUpdatingRef.current = true; 
       const scrollTop = sourceEditor.session.getScrollTop();
       const scrollLeft = sourceEditor.session.getScrollLeft();
-
       targetEditor.session.setScrollTop(scrollTop);
       targetEditor.session.setScrollLeft(scrollLeft);
-
-      // Buka kunci setelah siklus scroll selesai (gunakan timeout yang pendek)
       setTimeout(() => {
         isScrollUpdatingRef.current = false;
       }, 50); 
@@ -61,26 +88,21 @@ function JsonFormatter() {
 
     if (!inputEditor || !outputEditor) return;
     
-    // Matikan sync jika isSyncing false
     if (!isSyncing) {
         isScrollUpdatingRef.current = false;
         return;
     }
     
-    // Handler yang memanggil logika sync
     const syncInputToOutput = () => handleScrollSync(inputEditorRef, outputEditorRef);
     const syncOutputToInput = () => handleScrollSync(outputEditorRef, inputEditorRef);
     
-    // Pasang listener pada kedua editor
     inputEditor.session.on('changeScrollTop', syncInputToOutput);
     inputEditor.session.on('changeScrollLeft', syncInputToOutput);
     outputEditor.session.on('changeScrollTop', syncOutputToInput);
     outputEditor.session.on('changeScrollLeft', syncOutputToInput);
     
-    // Jalankan sync satu kali saat diaktifkan
     syncInputToOutput(); 
 
-    // Cleanup: Hapus listener saat komponen unmount atau isSyncing berubah
     return () => {
         inputEditor.session.off('changeScrollTop', syncInputToOutput);
         inputEditor.session.off('changeScrollLeft', syncInputToOutput);
@@ -150,7 +172,6 @@ function JsonFormatter() {
       .catch(e => setMessage('Copy failed: ' + e));
   }, [outputText, inputText]);
 
-  // (Logika konverter disingkat)
   const escapeCsv = (val) => {
     if (val == null) return '';
     const s = String(val);
@@ -223,7 +244,6 @@ function JsonFormatter() {
   }, []);
 
   
-  // useEffect untuk menyimpan state inputText ke localStorage (Tidak berubah)
   useEffect(() => {
     const last = localStorage.getItem(LS_KEY);
     if (last) setInputText(last);
@@ -235,6 +255,8 @@ function JsonFormatter() {
     }, 800);
   }, [inputText]);
   
+  const editorHeight = isFullscreen ? 'calc(100vh - 100px)' : '70vh';
+
 
   return (
     <div id="JsonFormatter">
@@ -242,28 +264,39 @@ function JsonFormatter() {
         <h1>JSON Formatter</h1>
         <p>Rapikan, validasi, dan kompres data JSON Anda dengan mudah.</p>
       </div>
-      <div className="card">
+      
+      <div 
+        className="card" 
+        ref={containerRef} 
+        style={{ 
+           backgroundColor: 'var(--card-bg, #ffffff)', 
+           borderRadius: isFullscreen ? '0' : '8px',
+           overflow: isFullscreen ? 'hidden' : 'visible',
+           padding: isFullscreen ? '1rem' : '2rem'
+        }}
+      >
         <div className="grid" style={{ gridTemplateColumns: '1fr 220px 1fr', alignItems: 'start' }}>
           
-          {/* --- SISI INPUT (Ace Editor) --- */}
+          {/* --- SISI INPUT --- */}
           <div className="editor-wrapper" style={{ border: '1px solid var(--primary-color)' }}>
             <ReusableAceEditor
-                ref={inputEditorRef} // <--- Ref untuk Ace Input
+                ref={inputEditorRef} 
                 mode="json"
-                theme="textmate" // Tema terang
-                onChange={setInputText} // Input utama
+                theme="textmate"
+                onChange={setInputText}
                 value={inputText}
                 name="json-input-editor"
-                height="70vh"
-                wrapEnabled={true} // FIX: Mencegah scroll horizontal
+                height={editorHeight} 
+                fontSize={fontSize} // <-- Meneruskan state font size
+                wrapEnabled={true} 
                 onLoad={(editor) => {
-                  // Pasang listener di onLoad
                   editor.session.on('changeScrollTop', () => handleScrollSync(inputEditorRef, outputEditorRef));
                   editor.session.on('changeScrollLeft', () => handleScrollSync(inputEditorRef, outputEditorRef));
                 }}
             />
           </div>
           
+          {/* --- KONTROL TENGAH --- */}
           <div className="controls flex flex-col" style={{ gap: '0.75rem', padding: '10px 0' }}>
             <button id="btn-validate" className="button secondary" onClick={validateJSON}>Validate</button>
             <button id="btn-beautify" className="button primary" onClick={beautifyJSON}>Beautify</button>
@@ -289,7 +322,41 @@ function JsonFormatter() {
             
             <button id="btn-load-url" className="button secondary" onClick={() => setShowModal(true)}>Load from URL</button>
             
-            {/* --- SCROLL SYNC BUTTON --- */}
+            <div style={{ borderTop: '1px solid #e2e8f0', margin: '0.5rem 0' }}></div>
+            
+            {/* --- KONTROL FONT SIZE BARU --- */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem' }}>
+                <button 
+                  id="btn-font-minus" 
+                  className="button secondary" 
+                  onClick={() => handleFontSizeChange(-1)} 
+                  title="Perkecil Font"
+                  style={{ width: '40%', padding: '0.5rem 0.8rem' }}
+                >
+                  <i className="fas fa-minus"></i>
+                </button>
+                <span style={{ fontSize: '0.9rem', fontWeight: '600' }}>{fontSize}px</span>
+                <button 
+                  id="btn-font-plus" 
+                  className="button secondary" 
+                  onClick={() => handleFontSizeChange(1)} 
+                  title="Perbesar Font"
+                  style={{ width: '40%', padding: '0.5rem 0.8rem' }}
+                >
+                  <i className="fas fa-plus"></i>
+                </button>
+            </div>
+            <div style={{ borderTop: '1px solid #e2e8f0', margin: '0.5rem 0' }}></div>
+
+            <button 
+              id="btn-fullscreen" 
+              className={`button ${isFullscreen ? 'primary' : 'secondary'}`} 
+              onClick={toggleFullscreen}
+            >
+              <i className={`fas ${isFullscreen ? 'fa-compress' : 'fa-expand'}`} style={{ marginRight: '0.5rem' }}></i>
+              {isFullscreen ? 'Exit Full' : 'Fullscreen'}
+            </button>
+
             <button 
               id="btn-sync-scroll" 
               className={`button ${isSyncing ? 'primary' : 'secondary'}`} 
@@ -298,8 +365,9 @@ function JsonFormatter() {
               <i className={`fas ${isSyncing ? 'fa-link' : 'fa-unlink'}`} style={{ marginRight: '0.5rem' }}></i>
               Scroll Sync
             </button>
-            {/* --- END SCROLL SYNC BUTTON --- */}
             
+            <div style={{ borderTop: '1px solid #e2e8f0', margin: '0.5rem 0' }}></div>
+
             <button id="btn-download" className="button secondary" onClick={downloadOutput}>Download</button>
             <button id="btn-copy" className="button secondary" onClick={copyOutput}>Copy Output</button>
             <div className="dropdown">
@@ -312,20 +380,20 @@ function JsonFormatter() {
             </div>
           </div>
 
-          {/* --- SISI OUTPUT (Ace Editor Editable) --- */}
+          {/* --- SISI OUTPUT --- */}
           <div className="editor-wrapper">
             <ReusableAceEditor
-                ref={outputEditorRef} // <--- Ref untuk Ace Output
+                ref={outputEditorRef} 
                 mode="json" 
                 theme="textmate"
-                onChange={setOutputText} // Output bisa diedit, update state outputText
+                onChange={setOutputText} 
                 value={outputText}
-                readOnly={false} // Sekarang Editable
+                readOnly={false} 
                 name="json-output-editor"
-                height="70vh"
-                wrapEnabled={true} // FIX: Mencegah scroll horizontal
+                height={editorHeight} 
+                fontSize={fontSize} // <-- Meneruskan state font size
+                wrapEnabled={true}
                 onLoad={(editor) => {
-                  // Pasang listener di onLoad
                   editor.session.on('changeScrollTop', () => handleScrollSync(outputEditorRef, inputEditorRef));
                   editor.session.on('changeScrollLeft', () => handleScrollSync(outputEditorRef, inputEditorRef));
                 }}
@@ -335,6 +403,7 @@ function JsonFormatter() {
         <div id="message" style={{ padding: '10px', color: '#333' }}>{message}</div>
       </div>
 
+      {/* Modal Load URL */}
       <div id="loadUrlModal" style={{ display: showModal ? 'flex' : 'none', position: 'fixed', left: 0, right: 0, top: 0, bottom: 0, background: 'rgba(0,0,0,0.6)', alignItems: 'center', justifyContent: 'center', zIndex: 100 }}>
         <div style={{ background: '#fff', padding: '1.5rem', borderRadius: '8px', width: '90%', maxWidth: '600px', margin: 'auto' }}>
           <h4 style={{ marginTop: 0, marginBottom: '1rem' }}>Load JSON from URL</h4>
