@@ -7,6 +7,11 @@ import 'ace-builds/src-noconflict/mode-sql'; // <-- DITAMBAHKAN
 import 'ace-builds/src-noconflict/theme-textmate';      // Tema terang (untuk JSON Formatter)
 import 'ace-builds/src-noconflict/theme-tomorrow_night'; // Tema gelap (untuk API Requestor)
 import 'ace-builds/src-noconflict/ext-language_tools';
+import ace from 'ace-builds';
+ace.config.set('basePath', 'https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.14/'); 
+ace.config.set('modePath', 'https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.14/');
+ace.config.set('themePath', 'https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.14/');
+ace.config.set('workerPath', 'https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.14/');
 
 // 2. Logika 'wrapper' untuk mengatasi masalah import .default
 const AceComp = (AceEditor && AceEditor.default) ? AceEditor.default : AceEditor;
