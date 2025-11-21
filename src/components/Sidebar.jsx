@@ -3,11 +3,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { toolGroups } from '../toolConfig';
 import { createClient } from '@supabase/supabase-js';
 import FloatingFeedback from './FloatingFeedback';
+import { supabase } from '../services/supabaseClient';
 
-// Inisialisasi Klien Supabase
-const supabaseUrl = 'https://aekpdgjnrkkhrdczrspz.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFla3BkZ2pucmtraHJkY3pyc3B6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMzODk0NTEsImV4cCI6MjA3ODk2NTQ1MX0.bKLYQEucOXplidBQ18xA6L4-NJXUpiXbOoxQ27n0_5Y';
-const supabase = createClient(supabaseUrl, supabaseKey);
 
 // --- Fungsi Helper (di luar komponen) ---
 
