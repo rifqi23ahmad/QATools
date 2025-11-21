@@ -4,23 +4,22 @@ import styles from './FloatingFeedback.module.css';
 
 // --- CONSTANTS & UTILITIES ---
 
-// Palet Warna untuk pengguna lain
-const OTHER_COLORS = [
-    '#e1f5e1', // Hijau Muda
-    '#f5e1e1', // Merah Muda
-    '#e1e1f5', // Biru Muda
-    '#f5f5e1', // Kuning Muda
-    '#e1f5f5', // Cyan Muda
-    '#f5e1f5', // Ungu Muda
-    '#fff0e1', // Oranye Muda
-    '#f0e1f5', // Lavender
+const EMOJIS = [
+  '👍', '👋', '😀', '😂', '😅', '🥰', '😍', 
+  '😎', '🤔', '😱', '😭', '😤', '🎉', '🔥', 
+  '🐛', '🤖', '✅', '❌', '❤️', '💔', '👀'
 ];
 
-// Key Local Storage
+// Palet Warna Teks untuk Nama (Mirip WA Group)
+const USER_COLORS = [
+    '#e542a3', '#2ea6ff', '#c65500', '#029d00', 
+    '#5c6bc0', '#b92b27', '#008f7a', '#d63031',
+    '#1f7aec', '#fe5c5c', '#00a884', '#8c52ff'
+];
+
 const LS_DISPLAY_NAME_KEY = 'chat.displayname';
 const LS_NAME_SET_KEY = 'chat.isnameset';
 
-// Fungsi Hashing Sederhana
 function simpleHash(str) {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
@@ -31,21 +30,18 @@ function simpleHash(str) {
   return Math.abs(hash);
 }
 
-// Fungsi untuk mendapatkan warna berdasarkan visitor_id
 const getColorForVisitor = (visitorId) => {
-    if (!visitorId) return OTHER_COLORS[0];
+    if (!visitorId) return USER_COLORS[0];
     const hash = simpleHash(visitorId);
-    const index = hash % OTHER_COLORS.length;
-    return OTHER_COLORS[index];
+    const index = hash % USER_COLORS.length;
+    return USER_COLORS[index];
 };
 
-// Fungsi untuk menghasilkan nama Guest yang unik (contoh: Guest-ABCD)
 function generateUniqueGuestName() {
   const randomSuffix = Math.random().toString(36).substring(2, 6).toUpperCase();
   return `Guest-${randomSuffix}`;
 }
 
-// Fungsi untuk membuat ID yang mudah dibaca dari visitorId (contoh: Guest-A4B7)
 const getReadableId = (id) => {
     const hash = simpleHash(id).toString(16);
     return `Guest-${hash.substring(0, 4).toUpperCase()}`;
@@ -58,17 +54,16 @@ function FloatingFeedback({ supabase, visitorId }) {
   const [inputMsg, setInputMsg] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [onlineCount, setOnlineCount] = useState(1);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   
-  // --- NEW STATES FOR NAME VALIDATION ---
   const [isNameSet, setIsNameSet] = useState(false);
   const [displayName, setDisplayName] = useState('');
   const [inputName, setInputName] = useState('');
-  // -------------------------------------
 
   const [time, setTime] = useState(new Date());
   const messagesEndRef = useRef(null);
+  const inputRef = useRef(null); 
 
-  // Efek untuk memuat nama dari Local Storage saat mount
   useEffect(() => {
     const savedName = localStorage.getItem(LS_DISPLAY_NAME_KEY);
     const savedIsSet = localStorage.getItem(LS_NAME_SET_KEY) === 'true';
@@ -79,7 +74,6 @@ function FloatingFeedback({ supabase, visitorId }) {
     }
   }, []);
 
-  // --- LOGIKA SET NAMA PENGGUNA ---
   const handleSetName = (isGuest = false) => {
     let name = '';
     if (isGuest) {
@@ -97,10 +91,9 @@ function FloatingFeedback({ supabase, visitorId }) {
     setIsNameSet(true);
     localStorage.setItem(LS_DISPLAY_NAME_KEY, name);
     localStorage.setItem(LS_NAME_SET_KEY, 'true');
-    setInputName(''); // Clear input after setting
+    setInputName('');
   };
 
-  // Efek Jam Hidup
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(timer);
@@ -114,7 +107,6 @@ function FloatingFeedback({ supabase, visitorId }) {
   const minDeg = ((minutes * 60 + seconds) / 3600) * 360;
   const hourDeg = ((hours % 12) / 12) * 360 + (minutes / 60) * 30;
 
-  // Efek Chat (Fetch & Realtime) saat dibuka
   useEffect(() => {
     if (isOpen) {
       fetchFeedbacks();
@@ -146,17 +138,13 @@ function FloatingFeedback({ supabase, visitorId }) {
   }, [isOpen, supabase, visitorId]);
 
   const fetchFeedbacks = async () => {
-    // NOTE: Kami berasumsi tabel Supabase sudah memiliki kolom 'display_name'.
-    // Jika tidak, Supabase akan mengabaikannya, dan kami akan menggunakan fallback getReadableId.
-    const { data, error } = await supabase
-      .from('feedback')
-      .select('*, display_name') 
-      .order('created_at', { ascending: true })
-      .limit(100);
+    const { data, error } = await supabase.rpc('getFeedbacks');
 
     if (!error && data) {
       setFeedbacks(data);
       scrollToBottom();
+    } else if (error) {
+      console.error("Error fetching feedbacks:", error);
     }
   };
 
@@ -167,38 +155,43 @@ function FloatingFeedback({ supabase, visitorId }) {
   };
 
   const handleSend = async (e) => {
-    e.preventDefault();
-    // Tambahkan validasi nama sudah di-set
+    if (e) e.preventDefault();
+    
     if (!inputMsg.trim() || !isNameSet) return; 
     
     setIsSending(true);
+    setShowEmojiPicker(false); 
+
     try {
-      // Mengirim display_name bersama pesan (asumsi kolom sudah ada)
-      const { error } = await supabase.from('feedback').insert({
-        visitor_id: visitorId,
+      const { error } = await supabase.rpc('sendFeedback', {
+        visitorId: visitorId,
         message: inputMsg,
-        display_name: displayName, // Mengirim nama yang dipilih/dibuat
-        user_agent: 'WebChat'
+        displayName: displayName,
+        userAgent: 'WebChat'
       });
 
-      if (error) {
-         console.warn("Gagal insert dengan display_name, mencoba tanpa.");
-         // Fallback ke struktur lama
-         const { error: fallbackError } = await supabase.from('feedback').insert({
-            visitor_id: visitorId,
-            message: inputMsg,
-            user_agent: 'WebChat'
-          });
-         if(fallbackError) throw fallbackError;
-      }
+      if (error) throw error;
       
       setInputMsg('');
       scrollToBottom();
+      inputRef.current?.focus();
     } catch (err) {
       console.error("Gagal kirim:", err);
     } finally {
       setIsSending(false);
     }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault(); 
+      handleSend();
+    }
+  };
+
+  const handleAddEmoji = (emoji) => {
+    setInputMsg((prev) => prev + emoji);
+    inputRef.current?.focus(); 
   };
 
   const formatTimeStr = (isoString) => {
@@ -208,20 +201,18 @@ function FloatingFeedback({ supabase, visitorId }) {
   return createPortal(
     <div className={styles.wrapper}>
       
-      {/* Chat Window */}
       {isOpen && (
         <div className={styles.chatWindow}>
             
-            {/* --- NAME SELECTION OVERLAY --- */}
             {!isNameSet && (
                  <div className={styles.nameOverlay}> 
                     <div className={styles.namePrompt}>
-                        <h2>Bergabung ke Chat</h2>
-                        <p>Masukkan nama Anda (min. 3 karakter) atau lanjutkan sebagai Tamu.</p>
+                        <h2>Bergabung</h2>
+                        <p>Masukkan nama Anda untuk mulai chat.</p>
                         
                         <input 
                             className={styles.input}
-                            placeholder="Nama Panggilan Anda"
+                            placeholder="Nama Panggilan..."
                             value={inputName}
                             onChange={(e) => setInputName(e.target.value)}
                             onKeyDown={(e) => {
@@ -229,107 +220,140 @@ function FloatingFeedback({ supabase, visitorId }) {
                                     handleSetName(false);
                                 }
                             }}
+                            style={{border: '1px solid #ccc'}}
                         />
                         <button 
                             className={styles.nameBtn} 
                             onClick={() => handleSetName(false)}
                             disabled={inputName.trim().length < 3}
-                            style={{marginBottom: '10px'}}
                         >
-                            Gunakan Nama Ini
+                            Masuk
                         </button>
-                        
-                        <div style={{borderBottom: '1px solid #e2e8f0', margin: '15px 0 10px 0'}}></div>
                         
                         <button 
                             className={styles.guestBtn} 
                             onClick={() => handleSetName(true)}
                         >
-                            Lanjutkan sebagai Tamu Unik
+                            Masuk sebagai Tamu
                         </button>
                     </div>
                 </div>
             )}
-            {/* ------------------------------- */}
-
 
           <div className={styles.header}>
             <div className={styles.headerTop}>
-              <span>Live Feedback</span>
+              <span style={{display:'flex', alignItems:'center', gap:'8px'}}>
+                <i className="fab fa-whatsapp" style={{fontSize:'1.2rem'}}></i>
+                Live Feedback 
+              </span>
               <button onClick={() => setIsOpen(false)} style={{background:'none',border:'none',color:'white',cursor:'pointer',fontSize:'1.5rem', lineHeight:1}}>&times;</button>
             </div>
             <div className={styles.onlineStatus}>
               <span className={styles.onlineDot}></span>
-              {onlineCount > 1 ? `${onlineCount} orang online` : 'Online (Hanya Anda)'}
+              {onlineCount > 1 ? `${onlineCount} anggota online` : 'Online (Hanya Anda)'}
             </div>
           </div>
 
           <div className={styles.messageList} style={{ filter: isNameSet ? 'none' : 'blur(2px)' }}>
             {feedbacks.length === 0 && (
-              <div style={{textAlign:'center', color:'#a0aec0', marginTop:'40px', fontSize:'0.85rem'}}>
-                <i className="far fa-comments fa-2x" style={{marginBottom:'10px'}}></i><br/>
-                Belum ada pesan. Sapa kami!
+              <div style={{textAlign:'center', padding:'20px', background:'rgba(255,255,255,0.6)', borderRadius:'8px', margin:'auto', fontSize:'0.85rem', color:'#54656f'}}>
+                🔒 Pesan terenkripsi secara end-to-end (canda).<br/>Belum ada pesan di sini. Jadilah yang pertama!
               </div>
             )}
 
             {feedbacks.map((msg) => {
               const isMe = msg.visitor_id === visitorId;
               
-              // Tentukan Nama Pengirim
               let senderName;
               if (isMe) {
-                  senderName = displayName; // Gunakan nama lokal yang dipilih/dibuat
+                  senderName = displayName; 
               } else if (msg.display_name) {
-                  senderName = msg.display_name; // Jika DB support, pakai nama dari DB
+                  senderName = msg.display_name; 
               } else {
-                  senderName = getReadableId(msg.visitor_id); // Fallback: Unique ID dari visitor_id
+                  senderName = getReadableId(msg.visitor_id); 
               }
 
-              const color = getColorForVisitor(msg.visitor_id);
-              const messageStyle = isMe 
-                ? {} 
-                : { 
-                    backgroundColor: color, 
-                    color: '#1a202c', 
-                    border: '1px solid ' + color.replace('f5', 'e0'), 
-                  };
+              // Warna teks nama untuk orang lain
+              const nameColor = getColorForVisitor(msg.visitor_id);
 
               return (
                 <div 
                   key={msg.id} 
                   className={`${styles.messageItem} ${isMe ? styles.myMessage : styles.otherMessage}`}
-                  style={messageStyle}
                 >
-                  {msg.message}
-                  <span className={styles.meta} style={{color: isMe ? 'rgba(255,255,255,0.8)' : '#718096'}}>
-                    {senderName} • {formatTimeStr(msg.created_at)}
-                  </span>
+                  {/* Nama Pengirim (Hanya untuk orang lain) */}
+                  {!isMe && (
+                    <div className={styles.senderName} style={{ color: nameColor }}>
+                      {senderName}
+                    </div>
+                  )}
+                  
+                  {/* Isi Pesan */}
+                  <div className={styles.messageContent}>
+                    {msg.message}
+                  </div>
+
+                  {/* Waktu */}
+                  <div className={styles.timestamp}>
+                    {formatTimeStr(msg.created_at)}
+                  </div>
                 </div>
               );
             })}
             <div ref={messagesEndRef} />
           </div>
 
-          <form className={styles.footer} onSubmit={handleSend}>
-            <input 
+          <div className={styles.footer}>
+            {showEmojiPicker && (
+              <div className={styles.emojiPicker}>
+                {EMOJIS.map((emoji) => (
+                  <div 
+                    key={emoji} 
+                    className={styles.emojiItem}
+                    onClick={() => handleAddEmoji(emoji)}
+                  >
+                    {emoji}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <button 
+              type="button"
+              className={styles.emojiBtn}
+              onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+              title="Emoji"
+            >
+              😃
+            </button>
+
+            <textarea
+              ref={inputRef} 
               className={styles.input}
-              placeholder={isNameSet ? "Ketik pesan..." : "Harap tentukan nama dulu"}
+              placeholder={isNameSet ? "Ketik pesan..." : "Nama dulu..."}
               value={inputMsg}
               onChange={(e) => setInputMsg(e.target.value)}
+              onKeyDown={handleKeyDown}
               disabled={isSending || !isNameSet}
+              rows={1}
             />
-            <button type="submit" className={styles.sendBtn} disabled={isSending || !inputMsg.trim() || !isNameSet}>
+
+            <button 
+              type="button" 
+              className={styles.sendBtn} 
+              onClick={handleSend}
+              disabled={isSending || !inputMsg.trim() || !isNameSet}
+            >
               <i className="fas fa-paper-plane"></i>
             </button>
-          </form>
+          </div>
         </div>
       )}
 
-      {/* Floating Button (Jam Analog) */}
       <button 
         className={styles.floatingBtn} 
         onClick={() => setIsOpen(!isOpen)}
-        title={isOpen ? "Tutup Chat" : "Buka Feedback"}
+        title={isOpen ? "Tutup Chat" : "Buka Chat"}
       >
         {isOpen ? (
           <i className="fas fa-chevron-down" style={{fontSize:'1.5rem', color: '#ecc94b'}}></i>

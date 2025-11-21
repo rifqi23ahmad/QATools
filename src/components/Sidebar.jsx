@@ -2,9 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { toolGroups } from '../toolConfig';
 import { createClient } from '@supabase/supabase-js';
-// --- GANTI IMPORT ---
-// import FeedbackModal from './FeedbackModal'; // <-- HAPUS INI
-import FloatingFeedback from './FloatingFeedback'; // <-- TAMBAH INI
+import FloatingFeedback from './FloatingFeedback';
 
 // Inisialisasi Klien Supabase
 const supabaseUrl = 'https://aekpdgjnrkkhrdczrspz.supabase.co';
@@ -32,7 +30,6 @@ const getVisitorId = () => {
   return visitorId;
 };
 
-
 function Sidebar() {
   const [isMinimized, setIsMinimized] = useState(
     localStorage.getItem('sidebarMinimized') === 'true'
@@ -46,9 +43,6 @@ function Sidebar() {
   // State untuk tombol Like
   const [hasLiked, setHasLiked] = useState(false);
   const [isLiking, setIsLiking] = useState(false);
-
-  // State Modal Feedback LAMA dihapus
-  // const [isFeedbackOpen, setIsFeedbackOpen] = useState(false); // <-- HAPUS
   
   const navigate = useNavigate();
   const location = useLocation();
@@ -58,28 +52,17 @@ function Sidebar() {
     localStorage.setItem('sidebarMinimized', isMinimized);
   }, [isMinimized]);
 
-  
-  // --- useEffect [1]: Log Daily Visitor ---
+  // --- useEffect [1]: Log Daily Visitor (RPC: logDailyVisitor) ---
   useEffect(() => {
     const logDailyVisitorIfNeeded = async () => {
       const today = getTodayDateString();
       try {
-        const { data, error: getError } = await supabase
-          .from('visitors_daily')
-          .select('id')
-          .eq('visitor_id', visitorId)
-          .eq('date', today)
-          .limit(1);
+        const { error } = await supabase.rpc('logDailyVisitor', {
+          visitorId: visitorId,
+          date: today
+        });
 
-        if (getError) throw getError;
-
-        if (!data || data.length === 0) {
-          const { error: postError } = await supabase
-            .from('visitors_daily')
-            .insert({ visitor_id: visitorId, date: today });
-          
-          if (postError) throw postError;
-        }
+        if (error) throw error;
       } catch (error) {
         console.error("Gagal log daily_visitor:", error);
       }
@@ -88,24 +71,19 @@ function Sidebar() {
     logDailyVisitorIfNeeded();
   }, [visitorId]); 
   
-  
-  // --- Fetch Analytics Counts ---
+  // --- Fetch Analytics Counts (RPC: getSidebarStats) ---
   const fetchAnalyticsCounts = useCallback(async (isInitial = false) => {
     if (isInitial) {
       setIsLoadingCounts(true);
     }
     try {
-      const [likesRes, totalVisitorsRes] = await Promise.all([
-        supabase.from('likes').select('*', { count: 'exact', head: true }),
-        supabase.from('visitors_daily').select('*', { count: 'exact', head: true })
-      ]);
+      const { data, error } = await supabase.rpc('getSidebarStats');
 
-      if (likesRes.error) throw likesRes.error;
-      if (totalVisitorsRes.error) throw totalVisitorsRes.error;
+      if (error) throw error;
 
       setCounts({
-        totalLikes: likesRes.count ?? 0,
-        totalVisitors: totalVisitorsRes.count ?? 0
+        totalLikes: data.totalLikes ?? 0,
+        totalVisitors: data.totalVisitors ?? 0
       });
 
     } catch (error) {
@@ -124,8 +102,7 @@ function Sidebar() {
     fetchAnalyticsCounts(true);
   }, [fetchAnalyticsCounts]);
 
-
-  // --- useEffect [3]: REAL-TIME Active Session ---
+  // --- useEffect [2]: REAL-TIME Active Session ---
   useEffect(() => {
     const channel = supabase.channel('presence-sessions', {
       config: { presence: { key: visitorId } },
@@ -149,13 +126,40 @@ function Sidebar() {
     };
   }, [visitorId]);
 
+  // --- useEffect [3]: REAL-TIME Listener untuk Likes & Visitors (BARU) ---
+  useEffect(() => {
+    const statsChannel = supabase
+      .channel('realtime-stats')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'likes' },
+        () => {
+          // Jika ada like baru masuk, refresh counter
+          fetchAnalyticsCounts(false);
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'visitors_daily' },
+        () => {
+          // Jika ada visitor baru, refresh counter
+          fetchAnalyticsCounts(false);
+        }
+      )
+      .subscribe();
 
-  // --- useEffect [4]: Cek Status Like ---
+    return () => {
+      supabase.removeChannel(statsChannel);
+    };
+  }, [fetchAnalyticsCounts]);
+
+  // --- useEffect [4]: Cek Status Like Lokal ---
   useEffect(() => {
     const alreadyLiked = localStorage.getItem('qatools_has_liked') === 'true';
     setHasLiked(alreadyLiked);
   }, []);
   
+  // --- Handle Like (RPC: submitLike) ---
   const handleLike = async () => {
     if (hasLiked || isLiking) return;
 
@@ -164,12 +168,15 @@ function Sidebar() {
     localStorage.setItem('qatools_has_liked', 'true');
 
     try {
-      const { error } = await supabase.from('likes').insert(
-        { visitor_id: visitorId, item_id: 'qatools_app' },
-        { onConflict: 'visitor_id, item_id' }
-      );
+      const { error } = await supabase.rpc('submitLike', {
+        visitorId: visitorId
+      });
+
       if (error) throw error;
-      fetchAnalyticsCounts(false); 
+      
+      // Refresh counter tidak perlu dipanggil manual di sini karena
+      // Realtime Listener di useEffect [3] akan menangkap perubahannya otomatis!
+      
     } catch (error) {
       console.error("Gagal mengirim 'Like':", error.message);
       setHasLiked(false);
@@ -178,7 +185,6 @@ function Sidebar() {
       setIsLiking(false);
     }
   };
-  
   
   // --- Render ---
   return (
@@ -255,7 +261,6 @@ function Sidebar() {
               </>
             )}
             
-            {/* --- TOMBOL LIKE (Tombol Feedback dihapus dari sini) --- */}
             <div style={{ marginTop: 'auto', paddingBottom: '8px', paddingRight: '1rem' }}>
               <button 
                 onClick={handleLike}
@@ -264,7 +269,7 @@ function Sidebar() {
                   background: hasLiked ? 'transparent' : '#2d3748',
                   color: hasLiked ? '#48bb78' : '#a0aec0',
                   border: hasLiked ? '1px solid #48bb78' : '1px solid #4a5568',
-                  width: '100%', // Kembali full width
+                  width: '100%',
                   padding: '4px 8px',
                   borderRadius: '6px',
                   cursor: hasLiked ? 'default' : 'pointer',
@@ -300,7 +305,6 @@ function Sidebar() {
         </button>
       </div>
 
-      {/* 4. Render Floating Feedback (BUBBLE JAM) */}
       <FloatingFeedback 
         supabase={supabase} 
         visitorId={visitorId} 
