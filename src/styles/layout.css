@@ -1,4 +1,5 @@
 .app-layout { display: flex; min-height: 100vh; }
+
 .sidebar { 
     width: 230px; 
     background-color: var(--sidebar-bg); 
@@ -9,9 +10,12 @@
     flex-shrink: 0; 
     height: 100vh; 
     position: sticky; 
-    top: 0; 
+    top: 0;
+    /* PERBAIKAN: Mencegah scrollbar horizontal pada container utama */
+    overflow-x: hidden;
 }
-/* ... (Logo styles) ... */
+
+/* ... (Logo styles tetap sama) ... */
 .sidebar-header {
   padding: 0; margin: 0; height: 90px; display: flex;
   align-items: center; justify-content: center; background: #161c27;
@@ -37,8 +41,20 @@
 .sidebar.minimized .sidebar-logo-minimized {
   display: block !important; width: 40px; height: auto; margin: 0 auto;
 }
+
 /* ... (Nav styles) ... */
-.sidebar-nav { overflow-y: auto; flex-grow: 1; }
+.sidebar-nav { 
+    /* PERBAIKAN: Auto untuk vertikal, Hidden untuk horizontal */
+    overflow-y: auto; 
+    overflow-x: hidden; 
+    flex-grow: 1; 
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+.sidebar-nav::-webkit-scrollbar {
+    display: none;
+}
+
 .sidebar-nav ul { list-style: none; }
 .sidebar-nav .nav-item .nav-link-custom { 
     display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; 
@@ -63,10 +79,13 @@
 .sidebar-nav .nav-group-header:not(:first-child) {
     border-top: 1px solid #2d3748; margin-top: 0.5rem; padding-top: 1.5rem;
 }
+
 /* ... (Footer styles) ... */
 .sidebar-footer {
     padding: 1rem; border-top: 1px solid #2d3748; flex-shrink: 0;
     display: flex; align-items: center;
+    /* Tambahan keamanan untuk footer */
+    overflow: hidden; 
 }
 .sidebar-counter { flex-grow: 1; }
 #sidebar-toggle {
@@ -78,6 +97,7 @@
 #sidebar-toggle:hover {
     background-color: var(--sidebar-hover-bg); color: var(--sidebar-active-text);
 }
+
 /* ... (Minimized styles) ... */
 .sidebar.minimized { width: 80px; }
 .sidebar.minimized .sidebar-header h2,
@@ -107,3 +127,15 @@
 .tool-page { display: none; }
 .tool-page.active { display: block; animation: fadeIn 0.5s ease; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+sidebar.minimized .sidebar-nav {
+    /* Firefox */
+    scrollbar-width: none; 
+    /* IE and Edge */
+    -ms-overflow-style: none;  
+}
+
+/* Chrome, Safari, and Opera */
+.sidebar.minimized .sidebar-nav::-webkit-scrollbar {
+    display: none;
+}
