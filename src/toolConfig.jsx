@@ -18,25 +18,31 @@ import SqlScriptGeneratorOtomatis from './tools/SqlScriptGeneratorOtomatis';
 import SqlScriptGenerator from './tools/SQLScriptGenerator';
 import CalculationTools from './tools/CalculationTools.jsx';
 import SqlCompare from './tools/SQLCompare';
-// --- IMPOR FILE BARU ---
-import FileConverter from './tools/FileConverter'; 
+// Impor Tool Baru
+import TimesheetTracker from './tools/TimesheetTracker';
+import FileConverter from './tools/FileConverter'; // <-- PERBAIKAN PATH (tadinya './tools/Fi')
 
 
 /**
  * Mendefinisikan grup tool untuk sidebar.
  */
+// --- PERBAIKAN: GABUNGKAN SEMUA GRUP DI SINI ---
 export const toolGroups = [
+  {
+    title: 'Personal', //
+    tools: [
+      { id: 'TimesheetTracker', path: '/timesheet', name: 'Timesheet Tracker', icon: 'fa-clock' },
+    ]
+  },
   {
     title: 'Calculation Tools',
     tools: [
       { id: 'CalculationTools', path: '/kalkulasi', name: 'AIO Calculation', icon: 'fa-calculator' },
     ]
   },
-  // --- KATEGORI BARU: Converter ---
   {
     title: 'Converter Tools',
     tools: [
-      // Nama tool dibuat lebih umum
       { id: 'FileConverter', path: '/universal-converter', name: 'File Converter', icon: 'fa-retweet' },
     ]
   },
@@ -77,11 +83,14 @@ export const toolGroups = [
  * Peta untuk mencocokkan 'id' tool dengan Komponen React-nya.
  */
 export const toolComponentMap = {
+  // Personal Productivity
+  TimesheetTracker: TimesheetTracker, // <-- Pastikan didaftarkan di sini
+
   // Kalkulasi
   CalculationTools: CalculationTools,
   
   // Converter
-  FileConverter: FileConverter, // <-- Gunakan komponen baru
+  FileConverter: FileConverter, 
 
   // JSON Tools
   JsonFormatter: JsonFormatter,

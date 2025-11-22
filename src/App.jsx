@@ -1,14 +1,15 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
+// IMPORT KOMPONEN BARU
+import GlobalTimesheetManager from './components/GlobalTimesheetManager';
 
 function App() {
-  // Semua logika Dark Mode telah dihapus
-
   return (
-    // Class 'dark-mode' dihapus dari div utama
     <div className={`app-layout`}> 
-      {/* Props isDarkMode dan toggleTheme dihapus */}
+      {/* PASANG MANAGER DISINI */}
+      <GlobalTimesheetManager />
+      
       <Sidebar /> 
       
       <main className="main-content" style={{ display: 'flex', flexDirection: 'column' }}>
