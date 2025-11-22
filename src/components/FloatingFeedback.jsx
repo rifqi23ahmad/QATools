@@ -301,14 +301,53 @@ function FloatingFeedback({ supabase, visitorId, isSidebarMinimized }) {
   const handleRequestDelete = (id) => { setDeletingMsgId(id); };
   const cancelDelete = () => { setDeletingMsgId(null); };
 
+// --- UPDATE: HAPUS FILE DI STORAGE JUGA ---
+// --- UPDATE: Tambahkan Logika Hapus File Storage di sini ---
   const confirmDelete = async () => {
       if (!deletingMsgId) return;
+
+      // 1. Cari pesan yang mau dihapus untuk cek apakah ada attachment
+      const msgToDelete = feedbacks.find(m => m.id === deletingMsgId);
+
+      // 2. Jika ada attachment berupa URL (file di Storage), hapus fisiknya dulu
+      if (msgToDelete && msgToDelete.attachment_data && msgToDelete.attachment_data.includes('supabase.co')) {
+          try {
+              // Ekstrak path file dari URL Public
+              // URL: .../storage/v1/object/public/feedback-attachments/FOLDER/FILE.jpg
+              // Kita butuh path relatif: FOLDER/FILE.jpg
+              
+              // Decode URI component penting jika nama file mengandung spasi (%20)
+              const fileUrl = decodeURIComponent(msgToDelete.attachment_data);
+              const path = fileUrl.split(`${STORAGE_BUCKET}/`)[1]; 
+
+              if (path) {
+                  console.log("Menghapus file di path:", path); // Debugging
+                  const { error: storageError } = await supabase.storage
+                      .from(STORAGE_BUCKET)
+                      .remove([path]);
+                  
+                  if (storageError) {
+                      console.error("Gagal hapus file storage:", storageError);
+                  } else {
+                      console.log("File storage berhasil dihapus.");
+                  }
+              }
+          } catch (err) {
+              console.error("Error parsing file path:", err);
+          }
+      }
+      
+      // 3. Hapus Record di Database (RPC)
       const { error } = await supabase.rpc('delete_feedback', { p_id: deletingMsgId });
-      if (error) { showToast("Gagal menghapus: " + error.message, 'error'); } 
-      else { showToast("Pesan berhasil dihapus.", 'success'); setFeedbacks(prev => prev.filter(m => m.id !== deletingMsgId)); }
+      
+      if (error) { 
+          showToast("Gagal menghapus: " + error.message, 'error'); 
+      } else { 
+          showToast("Pesan & File berhasil dihapus.", 'success');
+          setFeedbacks(prev => prev.filter(m => m.id !== deletingMsgId));
+      }
       setDeletingMsgId(null); 
   };
-
   const handleTogglePin = async (id, currentStatus) => {
       const { error } = await supabase.rpc('toggle_pin_feedback', { p_id: id, p_status: !currentStatus });
       if (error) showToast("Gagal update pin", 'error'); 
