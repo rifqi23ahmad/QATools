@@ -194,13 +194,21 @@ function Sidebar() {
             }}
           >
             {isLoadingCounts ? (
-              <div style={{ fontSize: '11px', color: '#a0aec0' }}>Memuat statistik...</div>
+              <div style={{ fontSize: '11px', color: '#a0aec0', textAlign: 'center' }}>Memuat statistik...</div>
             ) : (
-              <div style={{display:'flex', justifyContent:'space-between', fontSize:'11px'}}>
-                 <span title="Total Likes"><i className="fas fa-thumbs-up" style={{ color: '#4299e1' }}/> {counts.totalLikes.toLocaleString('id-ID')}</span>
-                 {/* UPDATE: Menambahkan kata "Online" */}
-                 <span title="Online"><i className="fas fa-user-clock" style={{ color: '#48bb78' }}/> {activeSessions.toLocaleString('id-ID')} Online</span>
-                 <span title="Visitors"><i className="fas fa-users" style={{ color: '#ecc94b' }}/> {counts.totalVisitors.toLocaleString('id-ID')}</span>
+              <div style={{display:'flex', justifyContent:'space-between', fontSize:'10px', gap: '2px'}}>
+                 <div title="Total Likes" style={{display:'flex', alignItems:'center', gap:'3px'}}>
+                    <i className="fas fa-thumbs-up" style={{ color: '#4299e1' }}/> 
+                    <span>{counts.totalLikes.toLocaleString('id-ID')} Like</span>
+                 </div>
+                 <div title="Online Users" style={{display:'flex', alignItems:'center', gap:'3px'}}>
+                    <i className="fas fa-user-clock" style={{ color: '#48bb78' }}/> 
+                    <span>{activeSessions.toLocaleString('id-ID')} Online</span>
+                 </div>
+                 <div title="Total Visitors" style={{display:'flex', alignItems:'center', gap:'3px'}}>
+                    <i className="fas fa-users" style={{ color: '#ecc94b' }}/> 
+                    <span>{counts.totalVisitors.toLocaleString('id-ID')} Visitor</span>
+                 </div>
               </div>
             )}
             

@@ -1,310 +1,29 @@
+/*
+================================================================
+TIMESHEET TRACKER STYLES (FIXED COLORS)
+================================================================
+*/
+
 /* --- Global Container --- */
 .container {
   width: 100%;
   max-width: 100%;
   margin: 0;
-}
-
-/* --- LOGIN SECTION (REVAMPED) --- */
-.loginContainer {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 70vh; /* Tinggi area login */
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); /* Background halus */
-  padding: 1rem;
-  border-radius: 12px;
-}
-
-.loginCard {
-  background: #ffffff;
-  padding: 3rem 2.5rem;
-  border-radius: 20px; /* Sudut lebih membulat */
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1); /* Shadow melayang */
-  width: 100%;
-  max-width: 400px;
-  text-align: center;
-  transition: transform 0.3s ease;
-}
-
-.loginCard:hover {
-  transform: translateY(-5px); /* Efek naik dikit saat hover */
-}
-
-/* Ikon Lingkaran di Tengah */
-.iconWrapper {
-  width: 80px;
-  height: 80px;
-  background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
-  color: var(--primary-color);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 1.5rem;
-  font-size: 2.5rem;
-  box-shadow: 0 4px 10px rgba(14, 165, 233, 0.2);
-}
-
-.loginTitle {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #1e293b;
-  margin-bottom: 0.5rem;
-}
-
-.loginSubtitle {
-  font-size: 0.9rem;
-  color: #64748b;
-  margin-bottom: 2rem;
-}
-
-/* Input Field dengan Ikon di Dalamnya */
-.inputGroup {
   position: relative;
-  margin-bottom: 1.5rem;
-  text-align: left;
 }
 
-.inputIcon {
-  position: absolute;
-  left: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #94a3b8;
-  font-size: 1.1rem;
-  transition: color 0.2s;
-}
-
-.styledInput {
-  width: 100%;
-  padding: 14px 16px 14px 48px; /* Padding kiri besar untuk ikon */
-  font-size: 1rem;
-  border: 2px solid #e2e8f0;
-  border-radius: 12px;
-  background-color: #f8fafc;
-  color: #334155;
-  transition: all 0.3s ease;
-  outline: none;
-}
-
-.styledInput:focus {
-  border-color: var(--primary-color);
-  background-color: #fff;
-  box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1);
-}
-
-.styledInput:focus + .inputIcon {
-  color: var(--primary-color);
-}
-
-/* Tombol Login Modern */
-.loginBtn {
-  width: 100%;
-  padding: 14px;
-  font-size: 1rem;
-  font-weight: 600;
-  color: white;
-  background: linear-gradient(to right, #0ea5e9, #2563eb); /* Gradient Biru */
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-.loginBtn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
-  background: linear-gradient(to right, #0284c7, #1d4ed8);
-}
-
-.loginBtn:active {
-  transform: translateY(0);
-}
-
-/* --- CSS DASHBOARD (TIDAK BERUBAH BANYAK) --- */
-.headerBoard {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-  padding: 1.5rem;
-  background-color: #fff;
-  border-radius: 12px;
-  border: 1px solid var(--card-border);
-}
-
-.userInfo h2 { margin: 0; font-size: 1.25rem; }
-.userInfo p { margin: 0; color: var(--text-secondary); font-size: 0.9rem; }
-
-.reminderBanner {
-  background-color: #fff5f5;
-  border: 1px solid #fed7d7;
-  color: #c53030;
-  padding: 1rem;
-  border-radius: 8px;
-  margin-bottom: 1.5rem;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  animation: pulse 2s infinite;
-}
-
-.reminderBanner.success {
+/* --- HELPER CLASSES --- */
+/* Class ini tetap ada untuk dipakai elemen lain jika perlu */
+.success {
   background-color: #f0fff4;
   border-color: #c6f6d5;
   color: #2f855a;
-  animation: none;
 }
 
-@keyframes pulse {
-  0% { box-shadow: 0 0 0 0 rgba(229, 62, 62, 0.4); }
-  70% { box-shadow: 0 0 0 10px rgba(229, 62, 62, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(229, 62, 62, 0); }
-}
-
-.formCard {
-  background: #fff;
-  padding: 2rem;
-  border-radius: 12px;
-  border: 1px solid var(--card-border);
-  margin-bottom: 2rem;
-  transition: all 0.3s ease;
-}
-
-.formHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid #e2e8f0;
-}
-
-.editingMode {
-  border-color: var(--success-color);
-  background-color: #f0fff4;
-  box-shadow: 0 0 0 3px rgba(72, 187, 120, 0.2);
-}
-
-.formGrid { display: flex; flex-direction: column; gap: 1.5rem; }
-
-.rowTwoColumns {
-    display: grid; grid-template-columns: 1fr; gap: 1.5rem;
-}
-@media (min-width: 768px) {
-    .rowTwoColumns { grid-template-columns: 1fr 1fr; }
-}
-
-.formGroup { display: flex; flex-direction: column; gap: 0.5rem; }
-
-.textareaInput {
-    width: 100%; padding: 0.75rem;
-    border: 1px solid var(--card-border); 
-    border-radius: 8px; font-family: inherit; font-size: 1rem;
-    line-height: 1.5; resize: vertical; min-height: 120px; 
-    transition: border-color 0.2s, box-shadow 0.2s;
-}
-.textareaInput:focus {
-     border-color: var(--primary-color);
-     box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2); outline: none;
-}
-
-.formActions { display: flex; justifyContent: flex-end; margin-top: 0.5rem; }
-
-.historySection {
-  background: #fff; border-radius: 12px;
-  border: 1px solid var(--card-border); overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-}
-
-.historyTable { width: 100%; border-collapse: collapse; }
-.historyTable th, .historyTable td {
-  padding: 1rem 1.5rem; text-align: left; border-bottom: 1px solid #f0f0f0;
-}
-.historyTable th {
-  background-color: #f8fafc; font-weight: 700; color: var(--text-secondary);
-  font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;
-}
-.rowEditing { background-color: #fffbeb; }
-.dateBadge {
-  background-color: #edf2f7; padding: 4px 8px; border-radius: 6px;
-  font-family: monospace; font-weight: 600; font-size: 0.9rem;
-  color: var(--text-primary); white-space: nowrap;
-}
-
-/* ... (CSS lama jangan dihapus) ... */
-
-/* --- SETTINGS MODAL STYLES --- */
-.modalOverlay {
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  backdrop-filter: blur(2px);
-  animation: fadeIn 0.2s ease;
-}
-
-.modalContent {
-  background: white;
-  width: 90%;
-  max-width: 400px;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-  overflow: hidden;
-}
-
-.modalHeader {
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid #e2e8f0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #f8fafc;
-}
-
-.modalHeader h3 { margin: 0; color: #2d3748; font-size: 1.1rem; }
-
-.closeBtn {
-  background: none; border: none; font-size: 1.5rem;
-  cursor: pointer; color: #718096; line-height: 1;
-}
-
-.modalBody { padding: 2rem; text-align: center; }
-
-.timeInput {
-  padding: 0.5rem;
-  font-size: 1.5rem;
-  width: 80px;
-  text-align: center;
-  border: 2px solid #e2e8f0;
-  border-radius: 8px;
-}
-
-.timeInput:focus { border-color: var(--primary-color); outline: none; }
-
-.modalFooter {
-  padding: 1rem 1.5rem;
-  border-top: 1px solid #e2e8f0;
-  background-color: #f8fafc;
-}
-
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-/* --- Container Utama: Full Width --- */
-.container {
-  width: 100%;
-  max-width: 100%; 
-  margin: 0;
-  position: relative; /* Untuk toast absolut */
+.error {
+  background-color: #fff5f5;
+  border-color: #fed7d7;
+  color: #c53030;
 }
 
 /* --- TOAST NOTIFICATION --- */
@@ -327,348 +46,234 @@
   white-space: nowrap;
 }
 
-.toast.success { background-color: #00a884; }
-.toast.error { background-color: #e53e3e; }
+.toast.success { background-color: #00a884; color: white; border: none; }
+.toast.error { background-color: #e53e3e; color: white; border: none; }
 
 @keyframes slideDown {
   from { top: -50px; opacity: 0; }
   to { top: 20px; opacity: 1; }
 }
 
-/* --- Login Section --- */
+/* --- LOGIN SECTION --- */
 .loginContainer {
-  display: flex; align-items: center; justify-content: center; min-height: 70vh; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); padding: 1rem; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  min-height: 70vh; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 1rem; border-radius: 12px;
 }
 .loginCard {
-  background: #ffffff; padding: 3rem 2.5rem; border-radius: 20px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1); width: 100%; max-width: 400px; text-align: center; transition: transform 0.3s ease;
+  background: #ffffff; padding: 3rem 2.5rem; border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1); width: 100%; max-width: 400px;
+  text-align: center; transition: transform 0.3s ease;
 }
 .loginCard:hover { transform: translateY(-5px); }
-.iconWrapper { width: 80px; height: 80px; background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); color: var(--primary-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; font-size: 2.5rem; box-shadow: 0 4px 10px rgba(14, 165, 233, 0.2); }
+.iconWrapper {
+  width: 80px; height: 80px; background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+  color: var(--primary-color); border-radius: 50%; display: flex; align-items: center;
+  justify-content: center; margin: 0 auto 1.5rem; font-size: 2.5rem;
+  box-shadow: 0 4px 10px rgba(14, 165, 233, 0.2);
+}
 .loginTitle { font-size: 1.5rem; font-weight: 700; color: #1e293b; margin-bottom: 0.5rem; }
 .loginSubtitle { font-size: 0.9rem; color: #64748b; margin-bottom: 2rem; }
 .inputGroup { position: relative; margin-bottom: 1.5rem; text-align: left; }
-.inputIcon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 1.1rem; transition: color 0.2s; }
-.styledInput { width: 100%; padding: 14px 16px 14px 48px; font-size: 1rem; border: 2px solid #e2e8f0; border-radius: 12px; background-color: #f8fafc; color: #334155; transition: all 0.3s ease; outline: none; }
-.styledInput:focus { border-color: var(--primary-color); background-color: #fff; box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1); }
+.inputIcon {
+  position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+  color: #94a3b8; font-size: 1.1rem; transition: color 0.2s;
+}
+.styledInput {
+  width: 100%; padding: 14px 16px 14px 48px; font-size: 1rem;
+  border: 2px solid #e2e8f0; border-radius: 12px; background-color: #f8fafc;
+  color: #334155; transition: all 0.3s ease; outline: none;
+}
+.styledInput:focus {
+  border-color: var(--primary-color); background-color: #fff;
+  box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1);
+}
 .styledInput:focus + .inputIcon { color: var(--primary-color); }
-.loginBtn { width: 100%; padding: 14px; font-size: 1rem; font-weight: 600; color: white; background: linear-gradient(to right, #0ea5e9, #2563eb); border: none; border-radius: 12px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); display: flex; align-items: center; justify-content: center; gap: 8px; }
-.loginBtn:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4); background: linear-gradient(to right, #0284c7, #1d4ed8); }
+.loginBtn {
+  width: 100%; padding: 14px; font-size: 1rem; font-weight: 600;
+  color: white; background: linear-gradient(to right, #0ea5e9, #2563eb);
+  border: none; border-radius: 12px; cursor: pointer; transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); display: flex; align-items: center;
+  justify-content: center; gap: 8px;
+}
+.loginBtn:hover {
+  transform: translateY(-2px); box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+  background: linear-gradient(to right, #0284c7, #1d4ed8);
+}
+.loginBtn:active { transform: translateY(0); }
 
-/* --- Dashboard Header --- */
-.headerBoard { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding: 1.5rem; background-color: #fff; border-radius: 12px; border: 1px solid var(--card-border); }
+/* --- DASHBOARD HEADER --- */
+.headerBoard {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 1.5rem; padding: 1.5rem; background-color: #fff;
+  border-radius: 12px; border: 1px solid var(--card-border);
+}
 .userInfo h2 { margin: 0; font-size: 1.25rem; }
 .userInfo p { margin: 0; color: var(--text-secondary); font-size: 0.9rem; }
 
-/* --- Banner Peringatan --- */
-.reminderBanner { background-color: #fff5f5; border: 1px solid #fed7d7; color: #c53030; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 1rem; animation: pulse 2s infinite; }
-.reminderBanner.success { background-color: #f0fff4; border-color: #c6f6d5; color: #2f855a; animation: none; }
-@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(229, 62, 62, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(229, 62, 62, 0); } 100% { box-shadow: 0 0 0 0 rgba(229, 62, 62, 0); } }
+/* --- REMINDER BANNER --- */
+.reminderBanner {
+  background-color: #fff5f5;
+  border: 1px solid #fed7d7;
+  color: #c53030;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  animation: pulse 2s infinite;
+}
 
-/* --- Form Card --- */
-.formCard { background: #fff; padding: 2rem; border-radius: 12px; border: 1px solid var(--card-border); margin-bottom: 2rem; transition: all 0.3s ease; }
-.formHeader { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #e2e8f0; }
-.editingMode { border-color: var(--success-color); background-color: #f0fff4; box-shadow: 0 0 0 3px rgba(72, 187, 120, 0.2); }
+/* PERBAIKAN DI SINI: Override eksplisit untuk status sukses (Hijau) */
+.reminderBanner.success {
+  background-color: #f0fff4;
+  border-color: #c6f6d5;
+  color: #2f855a;
+  animation: none;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(229, 62, 62, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(229, 62, 62, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(229, 62, 62, 0); }
+}
+
+/* --- FORM CARD --- */
+.formCard {
+  background: #fff; padding: 2rem; border-radius: 12px;
+  border: 1px solid var(--card-border); margin-bottom: 2rem; transition: all 0.3s ease;
+}
+.formHeader {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #e2e8f0;
+}
+.editingMode {
+  border-color: var(--success-color); background-color: #f0fff4;
+  box-shadow: 0 0 0 3px rgba(72, 187, 120, 0.2);
+}
 .formGrid { display: flex; flex-direction: column; gap: 1.5rem; }
 .rowTwoColumns { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
 @media (min-width: 768px) { .rowTwoColumns { grid-template-columns: 1fr 1fr; } }
 .formGroup { display: flex; flex-direction: column; gap: 0.5rem; }
-.textareaInput { width: 100%; padding: 0.75rem; border: 1px solid var(--card-border); border-radius: 8px; font-family: inherit; font-size: 1rem; line-height: 1.5; resize: vertical; min-height: 120px; transition: border-color 0.2s, box-shadow 0.2s; }
-.textareaInput:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2); outline: none; }
+.textareaInput {
+  width: 100%; padding: 0.75rem; border: 1px solid var(--card-border);
+  border-radius: 8px; font-family: inherit; font-size: 1rem; line-height: 1.5;
+  resize: vertical; min-height: 120px; transition: border-color 0.2s, box-shadow 0.2s;
+}
+.textareaInput:focus {
+  border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2); outline: none;
+}
 .formActions { display: flex; justify-content: flex-end; margin-top: 0.5rem; }
 
-/* --- Tabel Riwayat (SCROLLABLE) --- */
+/* --- HISTORY SECTION --- */
 .historySection {
   background: #fff;
   border-radius: 12px;
   border: 1px solid var(--card-border);
-  overflow: hidden;
   box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-  /* Tidak perlu padding bottom di sini */
 }
 
-/* Wrapper baru untuk scroll */
+.historyHeader {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 1rem 1.5rem; background-color: #fff; border-bottom: 1px solid #e2e8f0;
+  flex-wrap: wrap; gap: 1rem;
+  border-top-left-radius: 12px; border-top-right-radius: 12px;
+}
+
+.filterGroup { display: flex; align-items: center; gap: 10px; }
+.monthSummary {
+  display: flex; gap: 1.5rem; font-size: 0.9rem; color: #64748b;
+  background-color: #f8fafc; padding: 6px 12px; border-radius: 8px;
+  border: 1px solid #edf2f7;
+}
+.summaryItem { display: flex; align-items: center; gap: 6px; }
+.summaryValue { font-weight: 700; color: #2d3748; }
+
 .tableScrollWrapper {
-  max-height: 450px; /* Tinggi maksimal tabel agar tidak memanjangkan halaman */
-  overflow-y: auto;  /* Scroll vertikal aktif jika konten lebih dari 450px */
-  overflow-x: auto;  /* Scroll horizontal jika layar sangat kecil */
+  max-height: 450px; overflow-y: auto; overflow-x: auto;
+  border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;
 }
-
-/* Scrollbar cantik (Webkit) */
 .tableScrollWrapper::-webkit-scrollbar { width: 8px; height: 8px; }
 .tableScrollWrapper::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 4px; }
 .tableScrollWrapper::-webkit-scrollbar-thumb:hover { background: #a0aec0; }
 
 .historyTable { width: 100%; border-collapse: collapse; }
 .historyTable th, .historyTable td { padding: 1rem 1.5rem; text-align: left; border-bottom: 1px solid #f0f0f0; }
-
-/* Header Sticky */
 .stickyHeader th {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  background-color: #f8fafc; /* Warna background header */
-  font-weight: 700; color: var(--text-secondary); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;
-  box-shadow: 0 2px 2px -1px rgba(0,0,0,0.05); /* Garis bayangan bawah header */
+  position: sticky; top: 0; z-index: 10; background-color: #f8fafc;
+  font-weight: 700; color: var(--text-secondary); font-size: 0.85rem;
+  text-transform: uppercase; letter-spacing: 0.05em;
+  box-shadow: 0 2px 2px -1px rgba(0,0,0,0.05);
+}
+.rowEditing { background-color: #fffbeb; }
+.dateBadge {
+  background-color: #edf2f7; padding: 4px 8px; border-radius: 6px;
+  font-family: monospace; font-weight: 600; font-size: 0.9rem; color: var(--text-primary);
+  white-space: nowrap;
 }
 
-.rowEditing { background-color: #fffbeb; }
-.dateBadge { background-color: #edf2f7; padding: 4px 8px; border-radius: 6px; font-family: monospace; font-weight: 600; font-size: 0.9rem; color: var(--text-primary); white-space: nowrap; }
+/* --- MODALS --- */
+.modalOverlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5); display: flex; align-items: center;
+  justify-content: center; z-index: 1000; backdrop-filter: blur(2px); animation: fadeIn 0.2s ease;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-/* --- SETTINGS MODAL STYLES --- */
-.modalOverlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(2px); animation: fadeIn 0.2s ease; }
-.modalContent { background: white; width: 90%; max-width: 400px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); overflow: hidden; }
-.modalHeader { padding: 1rem 1.5rem; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; background-color: #f8fafc; }
+.modalContent {
+  background: white; width: 90%; max-width: 400px; border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2); overflow: hidden;
+}
+.modalHeader {
+  padding: 1rem 1.5rem; border-bottom: 1px solid #e2e8f0; display: flex;
+  justify-content: space-between; align-items: center; background-color: #f8fafc;
+}
 .modalHeader h3 { margin: 0; color: #2d3748; font-size: 1.1rem; }
 .closeBtn { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #718096; line-height: 1; }
 .modalBody { padding: 2rem; text-align: center; }
-.timeInput { padding: 0.5rem; font-size: 1.5rem; width: 80px; text-align: center; border: 2px solid #e2e8f0; border-radius: 8px; }
-.timeInput:focus { border-color: var(--primary-color); outline: none; }
 .modalFooter { padding: 1rem 1.5rem; border-top: 1px solid #e2e8f0; background-color: #f8fafc; }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-
-/* ... (CSS sebelumnya) ... */
-
-/* --- DAY SELECTOR --- */
-.daySelector {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    margin-bottom: 1rem;
-    flex-wrap: wrap;
+.timeInput {
+  padding: 0.5rem; font-size: 1.5rem; width: 80px; text-align: center;
+  border: 2px solid #e2e8f0; border-radius: 8px;
 }
-
+.timeInput:focus { border-color: var(--primary-color); outline: none; }
+.daySelector { display: flex; justify-content: center; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; }
 .dayBtn {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: 1px solid #cbd5e0;
-    background-color: white;
-    color: #718096;
-    font-weight: 600;
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  width: 40px; height: 40px; border-radius: 50%; border: 1px solid #cbd5e0;
+  background-color: white; color: #718096; font-weight: 600; font-size: 0.85rem;
+  cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center;
 }
-
-.dayBtn:hover {
-    background-color: #f7fafc;
-    border-color: #a0aec0;
-}
-
+.dayBtn:hover { background-color: #f7fafc; border-color: #a0aec0; }
 .dayBtnActive {
-    background-color: var(--primary-color);
-    color: white;
-    border-color: var(--primary-color);
-    box-shadow: 0 2px 5px rgba(66, 153, 225, 0.4);
+  background-color: var(--primary-color); color: white; border-color: var(--primary-color);
+  box-shadow: 0 2px 5px rgba(66, 153, 225, 0.4);
 }
+.dayBtnActive:hover { background-color: #3182ce; }
 
-.dayBtnActive:hover {
-    background-color: #3182ce; /* Sedikit lebih gelap */
-}
-
-/* ... (Kode CSS yang sudah ada biarkan saja) ... */
-
-/* --- DELETE CONFIRMATION MODAL --- */
-
-/* Menggunakan overlay yang sama, tapi kontennya spesifik */
+/* --- DELETE MODAL --- */
 .deleteCard {
-  background: white;
-  width: 90%;
-  max-width: 320px;
-  padding: 2rem;
-  border-radius: 16px;
-  text-align: center;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  border: 1px solid #e2e8f0;
+  background: white; width: 90%; max-width: 320px; padding: 2rem;
+  border-radius: 16px; text-align: center; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 1px solid #e2e8f0;
 }
-
+@keyframes popIn { from { opacity: 0; transform: scale(0.9) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
 .deleteIconWrapper {
-  width: 64px;
-  height: 64px;
-  background-color: #fef2f2; /* Merah sangat muda */
-  color: #ef4444; /* Merah danger */
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 1.5rem;
-  font-size: 1.75rem;
-  border: 4px solid #fee2e2; /* Ring merah muda */
+  width: 64px; height: 64px; background-color: #fef2f2; color: #ef4444;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 1.5rem; font-size: 1.75rem; border: 4px solid #fee2e2;
 }
-
-.deleteTitle {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #1e293b;
-  margin-bottom: 0.5rem;
-}
-
-.deleteMessage {
-  font-size: 0.95rem;
-  color: #64748b;
-  margin-bottom: 2rem;
-  line-height: 1.5;
-}
-
-.deleteActions {
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-}
-
+.deleteTitle { font-size: 1.25rem; font-weight: 700; color: #1e293b; margin-bottom: 0.5rem; }
+.deleteMessage { font-size: 0.95rem; color: #64748b; margin-bottom: 2rem; line-height: 1.5; }
+.deleteActions { display: flex; gap: 12px; justify-content: center; }
 .btnCancel {
-  flex: 1;
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #cbd5e0;
-  background-color: white;
-  color: #475569;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
+  flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e0;
+  background-color: white; color: #475569; font-weight: 600; cursor: pointer; transition: all 0.2s;
 }
-
-.btnCancel:hover {
-  background-color: #f1f5f9;
-}
-
+.btnCancel:hover { background-color: #f1f5f9; }
 .btnConfirm {
-  flex: 1;
-  padding: 10px;
-  border-radius: 8px;
-  border: none;
-  background-color: #ef4444;
-  color: white;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 4px 6px rgba(239, 68, 68, 0.2);
+  flex: 1; padding: 10px; border-radius: 8px; border: none;
+  background-color: #ef4444; color: white; font-weight: 600; cursor: pointer;
+  transition: all 0.2s; box-shadow: 0 4px 6px rgba(239, 68, 68, 0.2);
 }
-
-.btnConfirm:hover {
-  background-color: #dc2626;
-  transform: translateY(-1px);
-}
-
-@keyframes popIn {
-  from { opacity: 0; transform: scale(0.9) translateY(10px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
-}
-
-/* ... (Kode CSS lama biarkan saja) ... */
-
-/* --- HISTORY FILTER & SUMMARY --- */
-.historyHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 1.5rem;
-  background-color: #fff;
-  border-bottom: 1px solid #e2e8f0;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.filterGroup {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.monthInput {
-  padding: 8px 12px;
-  border: 1px solid #cbd5e0;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  color: #2d3748;
-  font-family: inherit;
-  outline: none;
-  transition: border-color 0.2s;
-}
-
-.monthInput:focus {
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
-}
-
-.monthSummary {
-  display: flex;
-  gap: 1.5rem;
-  font-size: 0.9rem;
-  color: #64748b;
-  background-color: #f8fafc;
-  padding: 6px 12px;
-  border-radius: 8px;
-  border: 1px solid #edf2f7;
-}
-
-.summaryItem {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.summaryValue {
-  font-weight: 700;
-  color: #2d3748;
-}
-
-/* ... (Kode CSS lama biarkan saja) ... */
-
-/* --- PRETTY DATE PICKER --- */
-.dateInput {
-  width: 100%;
-  padding: 12px 16px; /* Padding lebih lega */
-  font-size: 1rem;
-  color: #1e293b;
-  background-color: #ffffff;
-  border: 2px solid #e2e8f0; /* Border lebih tegas */
-  border-radius: 12px; /* Sudut lebih membulat */
-  outline: none;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  font-family: inherit;
-  font-weight: 500;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  cursor: text;
-}
-
-/* Efek saat hover pada input */
-.dateInput:hover {
-  border-color: #cbd5e0;
-  background-color: #f8fafc;
-}
-
-/* Efek saat fokus (diklik) */
-.dateInput:focus {
-  border-color: var(--primary-color);
-  box-shadow: 0 4px 12px rgba(66, 153, 225, 0.15);
-  transform: translateY(-1px); /* Sedikit naik agar interaktif */
-}
-
-/* ... kode sebelumnya ... */
-
-/* Kustomisasi Ikon Kalender Bawaan */
-.dateInput::-webkit-calendar-picker-indicator {
-  cursor: pointer;
-  font-size: 1.2rem;
-  padding: 6px;
-  border-radius: 8px;
-  transition: all 0.2s ease;
-  
-  /* --- PERUBAHAN WARNA DI SINI --- */
-  /* Mengubah warna ikon menjadi Biru (Primary Blue) agar menyatu */
-  filter: invert(34%) sepia(95%) saturate(1788%) hue-rotate(204deg) brightness(102%) contrast(92%);
-  
-  opacity: 0.6; /* Sedikit transparan agar tidak terlalu mencolok saat diam */
-}
-
-.dateInput::-webkit-calendar-picker-indicator:hover {
-  background-color: #e0f2fe; /* Background biru muda saat hover */
-  opacity: 1; /* Warna penuh saat di-hover */
-  transform: scale(1.1);
-}
+.btnConfirm:hover { background-color: #dc2626; transform: translateY(-1px); }

@@ -3,18 +3,18 @@
   width: 100%;
 }
 
-/* --- INPUT FIELD --- */
+/* --- INPUT FIELD (Compact Version) --- */
 .inputWrapper {
   display: flex;
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 12px 16px;
-  font-size: 0.95rem;
+  padding: 10px 12px; /* Sedikit lebih kecil */
+  font-size: 0.9rem;
   color: #1e293b;
   background-color: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 12px;
+  border-radius: 10px;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   user-select: none;
@@ -47,20 +47,20 @@
   color: #3b82f6;
 }
 
-/* --- POPUP CALENDAR --- */
+/* --- POPUP CALENDAR (Compact Version) --- */
 .calendarPopup {
   position: absolute;
-  top: calc(100% + 10px);
+  top: calc(100% + 8px);
   left: 0;
-  width: 340px; /* Sedikit lebih lebar agar lega */
+  width: 280px; /* Diperkecil dari 340px */
   background: #ffffff;
-  border-radius: 20px;
+  border-radius: 16px;
   box-shadow: 
     0 20px 25px -5px rgba(0, 0, 0, 0.1), 
     0 10px 10px -5px rgba(0, 0, 0, 0.04),
-    0 0 0 1px rgba(0,0,0,0.05); /* Border halus */
-  padding: 20px;
-  z-index: 100;
+    0 0 0 1px rgba(0,0,0,0.05);
+  padding: 16px; /* Padding diperkecil */
+  z-index: 1000; /* Z-index tinggi agar di atas elemen lain */
   animation: slideUpFade 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   transform-origin: top left;
 }
@@ -75,17 +75,17 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
-  padding-bottom: 10px;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
   border-bottom: 1px dashed #e2e8f0;
 }
 
 .navBtn {
   background: transparent;
   border: none;
-  border-radius: 50%; /* Tombol bulat */
-  width: 36px;
-  height: 36px;
+  border-radius: 50%;
+  width: 30px; /* Diperkecil */
+  height: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -101,9 +101,9 @@
 }
 
 .currentMonth {
-  font-weight: 800;
+  font-weight: 700;
   color: #0f172a;
-  font-size: 1.1rem;
+  font-size: 1rem;
   letter-spacing: -0.5px;
 }
 
@@ -111,29 +111,29 @@
 .grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 6px; /* Jarak antar tanggal */
+  gap: 4px; /* Jarak diperkecil */
   text-align: center;
 }
 
 .dayName {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 700;
   color: #94a3b8;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .dayCell {
-  height: 38px;
-  width: 38px;
-  margin: 0 auto; /* Center di grid */
+  height: 32px; /* Diperkecil dari 38px */
+  width: 32px;
+  margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 500;
-  border-radius: 50%; /* FULL CIRCLE */
+  border-radius: 50%;
   cursor: pointer;
   color: #334155;
   transition: all 0.2s ease;
@@ -162,7 +162,7 @@
 .today::after {
   content: '';
   position: absolute;
-  bottom: 4px;
+  bottom: 3px;
   left: 50%;
   transform: translateX(-50%);
   width: 4px;
@@ -189,15 +189,15 @@
 .monthGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-top: 10px;
+  gap: 8px;
+  margin-top: 5px;
 }
 
 .monthCell {
-  padding: 16px 0;
-  border-radius: 12px;
+  padding: 10px 0; /* Diperkecil */
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   font-weight: 500;
   color: #475569;
   transition: all 0.2s;
@@ -214,7 +214,7 @@
 }
 
 .monthCell.selected {
-  background: #0f172a; /* Hitam elegan untuk bulan */
+  background: #0f172a;
   color: white;
   border-color: #0f172a;
   font-weight: 700;
