@@ -11,11 +11,15 @@ function CharacterCounter() {
     }
     
     const withSpaces = text.length;
+    // Menghapus semua spasi (space, tab, newline) untuk hitungan tanpa spasi
     const withoutSpaces = text.replace(/\s/g, '').length;
     
     return { withSpaces, withoutSpaces };
   }, [text]);
 
+  // Logika display: 
+  // Jika includeSpaces = true -> Tampilkan hitungan dengan spasi
+  // Jika includeSpaces = false -> Tampilkan hitungan TANPA spasi
   const displayCount = includeSpaces ? charCount.withSpaces : charCount.withoutSpaces;
 
   return (
@@ -30,23 +34,25 @@ function CharacterCounter() {
         onChange={(e) => setText(e.target.value)}
       />
 
-      {/* Gunakan class dari CSS Module */}
       <div className={styles.charCounterControls}>
-        <label htmlFor="include-spaces-toggle" className="sync-scroll-toggle">
+        {/* PERBAIKAN: Gunakan class dari styles module */}
+        <label htmlFor="include-spaces-toggle" className={styles.charCounterToggle}>
           <span>Hitung Spasi</span>
           <input 
             type="checkbox" 
             id="include-spaces-toggle"
-            className="is-hidden" 
+            className={styles.hiddenInput} // Ganti "is-hidden" dengan class module
             checked={includeSpaces} 
             onChange={() => setIncludeSpaces(!includeSpaces)} 
           />
-          <div className="switch"></div>
+          <div className={styles.switch}></div> {/* Class switch dari module */}
         </label>
       </div>
 
       <div className={styles.charCounterResult}>
-        <span className={styles.charResultValue}>{displayCount}</span>
+        <span className={styles.charResultValue}>
+            {new Intl.NumberFormat('id-ID').format(displayCount)}
+        </span>
         <span className={styles.charResultLabel}>
           {includeSpaces ? 'Karakter (Termasuk Spasi)' : 'Karakter (Tanpa Spasi)'}
         </span>

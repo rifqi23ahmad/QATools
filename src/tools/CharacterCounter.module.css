@@ -36,3 +36,63 @@ CHARACTER COUNTER (PENGHITUNG KARAKTER)
     margin-top: 0.5rem;
     display: block;
 }
+
+/* ... (kode CSS yang sudah ada biarkan saja) ... */
+
+.charCounterControls {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--card-border);
+}
+
+/* --- TAMBAHAN STYLE TOGGLE --- */
+.charCounterToggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    user-select: none;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.hiddenInput {
+    display: none; /* Sembunyikan checkbox asli */
+}
+
+/* Kotak Switch (Background) */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 36px;
+    height: 20px;
+    background-color: #cbd5e0;
+    border-radius: 20px;
+    transition: background-color 0.2s;
+}
+
+/* Lingkaran Switch (Knob) */
+.switch::before {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: white;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+/* Kondisi Checked (Aktif) */
+.hiddenInput:checked + .switch {
+    background-color: var(--primary-color);
+}
+
+.hiddenInput:checked + .switch::before {
+    transform: translateX(16px);
+}

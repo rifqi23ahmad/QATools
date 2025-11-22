@@ -751,3 +751,311 @@
 .namePrompt input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #e2e8f0; border-radius: 4px; box-sizing: border-box; }
 .nameBtn { width: 100%; padding: 10px; background-color: #00a884; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; transition: background 0.2s; }
 .guestBtn { width: 100%; padding: 10px; background-color: #f0f2f5; color: #54656f; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; margin-top: 8px; }
+
+/* ... Kode CSS yang sudah ada (jangan dihapus) ... */
+/* ... (Kode CSS lama jangan dihapus) ... */
+
+/* --- ATTACHMENT & PREVIEW STYLES --- */
+
+.attachBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  padding: 6px;
+  color: #54656f;
+  transition: transform 0.2s;
+  line-height: 1;
+  margin-right: 4px;
+  transform: rotate(45deg);
+}
+
+.attachBtn:hover {
+  color: #00a884;
+  transform: rotate(45deg) scale(1.1);
+}
+
+/* Container Preview (Muncul di atas input) */
+.previewContainer {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  width: 100%;
+  background-color: #f0f2f5;
+  padding: 10px;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  z-index: 10;
+  box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
+  animation: slideUpPreview 0.2s ease;
+}
+
+@keyframes slideUpPreview {
+  from { transform: translateY(10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.previewContent {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #cbd5e0;
+  background: white;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.previewImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.previewPdf {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: bold;
+  color: #2d3748;
+}
+
+.previewPdf i {
+  font-size: 1.5rem;
+  margin-bottom: 2px;
+}
+
+.removeAttachmentBtn {
+  background: #e53e3e;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+}
+
+/* --- CHAT BUBBLE CONTENT STYLES --- */
+
+.attachmentImageWrapper {
+  margin-bottom: 6px;
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.chatImage {
+  display: block;
+  max-width: 100%;
+  max-height: 200px; /* Batasi tinggi di thumbnail chat */
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 6px;
+  transition: transform 0.2s;
+}
+
+.chatImage:hover {
+  opacity: 0.9;
+}
+
+.chatPdfLink {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background-color: rgba(0,0,0,0.05);
+  border-radius: 6px;
+  text-decoration: none;
+  color: #2d3748;
+  margin-bottom: 6px;
+  transition: background 0.2s;
+  border: 1px solid rgba(0,0,0,0.1);
+}
+
+.chatPdfLink:hover {
+  background-color: rgba(0,0,0,0.1);
+}
+
+.chatPdfLink i {
+  color: #e53e3e;
+}
+
+.chatPdfLink span {
+  font-size: 0.85rem;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 150px;
+}
+
+/* --- IMAGE MODAL / LIGHTBOX STYLES --- */
+
+.imageModalOverlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(0, 0, 0, 0.85);
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease;
+  backdrop-filter: blur(3px);
+  
+  /* PERBAIKAN PENTING: Agar bisa diklik */
+  pointer-events: auto; 
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; } to { opacity: 1; }
+}
+
+.imageModalContent {
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Pastikan konten juga menangkap pointer events jika perlu, 
+     tapi pointer-events: auto di parent (overlay) biasanya sudah cukup menurunkan sifatnya. 
+     Untuk keamanan ekstra: */
+  pointer-events: auto;
+}
+
+.expandedImage {
+  max-width: 100%;
+  max-height: 90vh;
+  object-fit: contain;
+  border-radius: 4px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.closeImageModalBtn {
+  position: absolute;
+  top: -40px;
+  right: -10px;
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 2rem;
+  cursor: pointer;
+  line-height: 1;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+  
+  /* Pastikan tombol ada di atas segalanya */
+  z-index: 100002; 
+}
+
+.closeImageModalBtn:hover {
+  opacity: 1;
+  transform: scale(1.1); /* Efek visual saat hover */
+}
+
+/* ... (Kode CSS lama biarkan seperti sebelumnya) ... */
+
+/* --- DELETE CONFIRMATION OVERLAY --- */
+
+.deleteOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5); /* Gelap semi-transparan */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100; /* Di atas pesan, tapi di bawah modal gambar */
+  backdrop-filter: blur(2px);
+  animation: fadeIn 0.2s ease;
+}
+
+.deleteBox {
+  background: white;
+  width: 85%;
+  max-width: 300px;
+  padding: 20px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  transform: scale(0.9);
+  animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+@keyframes popIn {
+  to { transform: scale(1); }
+}
+
+.deleteIcon {
+  width: 50px;
+  height: 50px;
+  background-color: #fed7d7;
+  color: #e53e3e;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 10px;
+  font-size: 1.5rem;
+}
+
+.deleteText {
+  color: #2d3748;
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.deleteActions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.cancelDeleteBtn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e0;
+  background: white;
+  color: #4a5568;
+  cursor: pointer;
+  font-weight: 500;
+  flex: 1;
+  transition: background 0.2s;
+}
+
+.cancelDeleteBtn:hover {
+  background: #f7fafc;
+}
+
+.confirmDeleteBtn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  background: #e53e3e;
+  color: white;
+  cursor: pointer;
+  font-weight: 500;
+  flex: 1;
+  transition: background 0.2s;
+}
+
+.confirmDeleteBtn:hover {
+  background: #c53030;
+}
