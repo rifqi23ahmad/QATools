@@ -10,7 +10,6 @@ const EMOJIS = [
   '🐛', '🤖', '✅', '❌', '❤️', '💔', '👀'
 ];
 
-// Palet Warna Teks untuk Nama (Mirip WA Group)
 const USER_COLORS = [
     '#e542a3', '#2ea6ff', '#c65500', '#029d00', 
     '#5c6bc0', '#b92b27', '#008f7a', '#d63031',
@@ -22,6 +21,7 @@ const LS_NAME_SET_KEY = 'chat.isnameset';
 
 function simpleHash(str) {
   let hash = 0;
+  if (!str) return hash;
   for (let i = 0; i < str.length; i++) {
     const char = str.charCodeAt(i);
     hash = ((hash << 5) - hash) + char;
@@ -56,6 +56,10 @@ function FloatingFeedback({ supabase, visitorId }) {
   const [onlineCount, setOnlineCount] = useState(1);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   
+  // State Admin & Sistem
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [systemNotification, setSystemNotification] = useState(null); // { text: '', type: 'success'|'error' }
+  
   const [isNameSet, setIsNameSet] = useState(false);
   const [displayName, setDisplayName] = useState('');
   const [inputName, setInputName] = useState('');
@@ -63,6 +67,9 @@ function FloatingFeedback({ supabase, visitorId }) {
   const [time, setTime] = useState(new Date());
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null); 
+
+  // Cari pesan yang dipin (ambil yang terakhir jika ada banyak)
+  const pinnedMessage = feedbacks.filter(f => f.is_pinned).pop();
 
   useEffect(() => {
     const savedName = localStorage.getItem(LS_DISPLAY_NAME_KEY);
@@ -74,6 +81,12 @@ function FloatingFeedback({ supabase, visitorId }) {
     }
   }, []);
 
+  // --- NOTIFIKASI CUSTOM (PENGGANTI ALERT) ---
+  const showToast = (text, type = 'info') => {
+      setSystemNotification({ text, type });
+      setTimeout(() => setSystemNotification(null), 3000);
+  };
+
   const handleSetName = (isGuest = false) => {
     let name = '';
     if (isGuest) {
@@ -81,7 +94,7 @@ function FloatingFeedback({ supabase, visitorId }) {
     } else {
       const trimmedName = inputName.trim();
       if (trimmedName.length < 3) {
-        alert("Nama harus lebih dari 2 karakter.");
+        showToast("Nama harus lebih dari 2 karakter.", 'error');
         return;
       }
       name = trimmedName;
@@ -111,11 +124,18 @@ function FloatingFeedback({ supabase, visitorId }) {
     if (isOpen) {
       fetchFeedbacks();
       
+      // Listen ke semua perubahan (INSERT, UPDATE, DELETE)
       const chatChannel = supabase
         .channel('public:feedback')
-        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'feedback' }, (payload) => {
-          setFeedbacks((prev) => [...prev, payload.new]);
-          scrollToBottom();
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'feedback' }, (payload) => {
+          if (payload.eventType === 'INSERT') {
+            setFeedbacks((prev) => [...prev, payload.new]);
+            scrollToBottom();
+          } else if (payload.eventType === 'DELETE') {
+            setFeedbacks((prev) => prev.filter(msg => msg.id !== payload.old.id));
+          } else if (payload.eventType === 'UPDATE') {
+            setFeedbacks((prev) => prev.map(msg => msg.id === payload.new.id ? payload.new : msg));
+          }
         })
         .subscribe();
 
@@ -138,7 +158,10 @@ function FloatingFeedback({ supabase, visitorId }) {
   }, [isOpen, supabase, visitorId]);
 
   const fetchFeedbacks = async () => {
-    const { data, error } = await supabase.rpc('getFeedbacks');
+    const { data, error } = await supabase
+        .from('feedback')
+        .select('*')
+        .order('created_at', { ascending: true });
 
     if (!error && data) {
       setFeedbacks(data);
@@ -154,20 +177,40 @@ function FloatingFeedback({ supabase, visitorId }) {
     }, 100);
   };
 
+  // --- FUNGSI SCROLL KE PESAN ---
+  const handleScrollToMessage = (msgId) => {
+      const element = document.getElementById(`msg-${msgId}`);
+      if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          // Tambahkan efek highlight sementara
+          element.classList.add(styles.highlightFlash);
+          setTimeout(() => {
+              element.classList.remove(styles.highlightFlash);
+          }, 2000);
+      }
+  };
+
   const handleSend = async (e) => {
     if (e) e.preventDefault();
-    
     if (!inputMsg.trim() || !isNameSet) return; 
     
+    // --- ADMIN LOGIN ---
+    if (inputMsg.trim() === '007') {
+        setIsAdmin(true);
+        setInputMsg('');
+        showToast("🔓 Mode Admin Aktif!", 'success');
+        return;
+    }
+
     setIsSending(true);
     setShowEmojiPicker(false); 
 
     try {
-      const { error } = await supabase.rpc('sendFeedback', {
-        visitorId: visitorId,
+      const { error } = await supabase.from('feedback').insert({
+        visitor_id: visitorId,
         message: inputMsg,
-        displayName: displayName,
-        userAgent: 'WebChat'
+        display_name: displayName,
+        user_agent: 'WebChat'
       });
 
       if (error) throw error;
@@ -177,9 +220,32 @@ function FloatingFeedback({ supabase, visitorId }) {
       inputRef.current?.focus();
     } catch (err) {
       console.error("Gagal kirim:", err);
+      showToast("Gagal mengirim pesan.", 'error');
     } finally {
       setIsSending(false);
     }
+  };
+
+  // --- ADMIN ACTIONS ---
+  const handleDeleteMessage = async (id) => {
+      // Menggunakan window.confirm bawaan browser untuk keamanan, tapi notifikasi sukses pakai toast
+      if (!confirm("Hapus pesan ini secara permanen?")) return;
+      
+      const { error } = await supabase.from('feedback').delete().eq('id', id);
+      if (error) showToast("Gagal menghapus: " + error.message, 'error');
+      else showToast("Pesan berhasil dihapus.", 'success');
+  };
+
+  const handleTogglePin = async (id, currentStatus) => {
+      // Unpin pesan lain dulu jika mau strict 1 pin (opsional, saat ini multiple pin allowed di logic ini tapi UI cuma ambil last)
+      // Kita biarkan sederhana: toggle status pesan ini saja
+      const { error } = await supabase
+        .from('feedback')
+        .update({ is_pinned: !currentStatus })
+        .eq('id', id);
+      
+      if (error) showToast("Gagal update pin: " + error.message, 'error');
+      else showToast(!currentStatus ? "Pesan disematkan 📌" : "Pin dilepas", 'success');
   };
 
   const handleKeyDown = (e) => {
@@ -204,38 +270,28 @@ function FloatingFeedback({ supabase, visitorId }) {
       {isOpen && (
         <div className={styles.chatWindow}>
             
+            {/* --- TOAST NOTIFICATION AREA --- */}
+            {systemNotification && (
+                <div className={`${styles.systemToast} ${styles[systemNotification.type]}`}>
+                    {systemNotification.text}
+                </div>
+            )}
+
             {!isNameSet && (
                  <div className={styles.nameOverlay}> 
                     <div className={styles.namePrompt}>
                         <h2>Bergabung</h2>
                         <p>Masukkan nama Anda untuk mulai chat.</p>
-                        
                         <input 
                             className={styles.input}
                             placeholder="Nama Panggilan..."
                             value={inputName}
                             onChange={(e) => setInputName(e.target.value)}
-                            onKeyDown={(e) => {
-                                if (e.key === 'Enter' && inputName.trim().length >= 3) {
-                                    handleSetName(false);
-                                }
-                            }}
+                            onKeyDown={(e) => { if (e.key === 'Enter' && inputName.trim().length >= 3) handleSetName(false); }}
                             style={{border: '1px solid #ccc'}}
                         />
-                        <button 
-                            className={styles.nameBtn} 
-                            onClick={() => handleSetName(false)}
-                            disabled={inputName.trim().length < 3}
-                        >
-                            Masuk
-                        </button>
-                        
-                        <button 
-                            className={styles.guestBtn} 
-                            onClick={() => handleSetName(true)}
-                        >
-                            Masuk sebagai Tamu
-                        </button>
+                        <button className={styles.nameBtn} onClick={() => handleSetName(false)} disabled={inputName.trim().length < 3}>Masuk</button>
+                        <button className={styles.guestBtn} onClick={() => handleSetName(true)}>Masuk sebagai Tamu</button>
                     </div>
                 </div>
             )}
@@ -244,7 +300,7 @@ function FloatingFeedback({ supabase, visitorId }) {
             <div className={styles.headerTop}>
               <span style={{display:'flex', alignItems:'center', gap:'8px'}}>
                 <i className="fab fa-whatsapp" style={{fontSize:'1.2rem'}}></i>
-                Live Feedback 
+                Live Feedback {isAdmin && <span className={styles.adminBadge}>ADMIN</span>}
               </span>
               <button onClick={() => setIsOpen(false)} style={{background:'none',border:'none',color:'white',cursor:'pointer',fontSize:'1.5rem', lineHeight:1}}>&times;</button>
             </div>
@@ -253,6 +309,22 @@ function FloatingFeedback({ supabase, visitorId }) {
               {onlineCount > 1 ? `${onlineCount} anggota online` : 'Online (Hanya Anda)'}
             </div>
           </div>
+
+          {/* --- PINNED MESSAGE PREVIEW (WHATSAPP STYLE) --- */}
+          {pinnedMessage && (
+              <div className={styles.pinnedPreview} onClick={() => handleScrollToMessage(pinnedMessage.id)}>
+                  <div className={styles.pinnedIcon}>
+                      <i className="fas fa-thumbtack"></i>
+                  </div>
+                  <div className={styles.pinnedContent}>
+                      <div className={styles.pinnedTitle}>Pesan Tersemat</div>
+                      <div className={styles.pinnedText}>{pinnedMessage.message}</div>
+                  </div>
+                  <div className={styles.pinnedArrow}>
+                      <i className="fas fa-chevron-down"></i>
+                  </div>
+              </div>
+          )}
 
           <div className={styles.messageList} style={{ filter: isNameSet ? 'none' : 'blur(2px)' }}>
             {feedbacks.length === 0 && (
@@ -263,6 +335,7 @@ function FloatingFeedback({ supabase, visitorId }) {
 
             {feedbacks.map((msg) => {
               const isMe = msg.visitor_id === visitorId;
+              const isPinned = msg.is_pinned;
               
               let senderName;
               if (isMe) {
@@ -273,27 +346,38 @@ function FloatingFeedback({ supabase, visitorId }) {
                   senderName = getReadableId(msg.visitor_id); 
               }
 
-              // Warna teks nama untuk orang lain
               const nameColor = getColorForVisitor(msg.visitor_id);
 
               return (
                 <div 
                   key={msg.id} 
-                  className={`${styles.messageItem} ${isMe ? styles.myMessage : styles.otherMessage}`}
+                  id={`msg-${msg.id}`} // ID untuk scroll target
+                  className={`${styles.messageItem} ${isMe ? styles.myMessage : styles.otherMessage} ${isPinned ? styles.pinnedMessage : ''}`}
                 >
-                  {/* Nama Pengirim (Hanya untuk orang lain) */}
+                  {isPinned && <div className={styles.pinBadge}><i className="fas fa-thumbtack"></i> Disematkan</div>}
+
                   {!isMe && (
                     <div className={styles.senderName} style={{ color: nameColor }}>
                       {senderName}
                     </div>
                   )}
                   
-                  {/* Isi Pesan */}
                   <div className={styles.messageContent}>
                     {msg.message}
                   </div>
 
-                  {/* Waktu */}
+                  {/* CONTROLS ADMIN */}
+                  {isAdmin && (
+                      <div className={styles.adminControls}>
+                          <button className={styles.adminBtn} onClick={() => handleTogglePin(msg.id, isPinned)} title={isPinned ? "Lepas Pin" : "Sematkan"}>
+                              <i className={`fas fa-thumbtack ${isPinned ? styles.iconActive : ''}`}></i>
+                          </button>
+                          <button className={`${styles.adminBtn} ${styles.deleteBtn}`} onClick={() => handleDeleteMessage(msg.id)} title="Hapus">
+                              <i className="fas fa-trash"></i>
+                          </button>
+                      </div>
+                  )}
+
                   <div className={styles.timestamp}>
                     {formatTimeStr(msg.created_at)}
                   </div>
@@ -307,30 +391,17 @@ function FloatingFeedback({ supabase, visitorId }) {
             {showEmojiPicker && (
               <div className={styles.emojiPicker}>
                 {EMOJIS.map((emoji) => (
-                  <div 
-                    key={emoji} 
-                    className={styles.emojiItem}
-                    onClick={() => handleAddEmoji(emoji)}
-                  >
-                    {emoji}
-                  </div>
+                  <div key={emoji} className={styles.emojiItem} onClick={() => handleAddEmoji(emoji)}>{emoji}</div>
                 ))}
               </div>
             )}
 
-            <button 
-              type="button"
-              className={styles.emojiBtn}
-              onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-              title="Emoji"
-            >
-              😃
-            </button>
+            <button type="button" className={styles.emojiBtn} onClick={() => setShowEmojiPicker(!showEmojiPicker)} title="Emoji">😃</button>
 
             <textarea
               ref={inputRef} 
               className={styles.input}
-              placeholder={isNameSet ? "Ketik pesan..." : "Nama dulu..."}
+              placeholder={isNameSet ? (isAdmin ? "Ketik pesan (Admin)..." : "Ketik pesan...") : "Nama dulu..."}
               value={inputMsg}
               onChange={(e) => setInputMsg(e.target.value)}
               onKeyDown={handleKeyDown}
@@ -338,23 +409,14 @@ function FloatingFeedback({ supabase, visitorId }) {
               rows={1}
             />
 
-            <button 
-              type="button" 
-              className={styles.sendBtn} 
-              onClick={handleSend}
-              disabled={isSending || !inputMsg.trim() || !isNameSet}
-            >
+            <button type="button" className={styles.sendBtn} onClick={handleSend} disabled={isSending || !inputMsg.trim() || !isNameSet}>
               <i className="fas fa-paper-plane"></i>
             </button>
           </div>
         </div>
       )}
 
-      <button 
-        className={styles.floatingBtn} 
-        onClick={() => setIsOpen(!isOpen)}
-        title={isOpen ? "Tutup Chat" : "Buka Chat"}
-      >
+      <button className={styles.floatingBtn} onClick={() => setIsOpen(!isOpen)} title={isOpen ? "Tutup Chat" : "Buka Chat"}>
         {isOpen ? (
           <i className="fas fa-chevron-down" style={{fontSize:'1.5rem', color: '#ecc94b'}}></i>
         ) : (

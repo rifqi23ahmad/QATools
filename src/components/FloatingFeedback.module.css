@@ -314,3 +314,440 @@
   color: #54656f; border: none; border-radius: 4px;
   cursor: pointer; font-weight: 600; margin-top: 8px;
 }
+
+/* ... (Style yang sudah ada tetap dipertahankan) ... */
+
+/* Tambahan untuk Pesan Tersemat */
+.pinnedMessage {
+  background-color: #fff8e1 !important; /* Kuning muda */
+  border: 1px solid #ffe082;
+}
+
+.pinBadge {
+  font-size: 0.65rem;
+  color: #f57f17;
+  margin-bottom: 4px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Kontrol Admin */
+.adminControls {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+  margin-bottom: 2px;
+  padding-top: 4px;
+  border-top: 1px dashed rgba(0,0,0,0.1);
+  justify-content: flex-end;
+}
+
+.adminBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.8rem;
+  color: #a0aec0;
+  padding: 2px 4px;
+  transition: color 0.2s;
+}
+
+.adminBtn:hover {
+  color: #4a5568;
+}
+
+.iconActive {
+  color: #f57f17; /* Warna pin aktif */
+}
+
+.deleteBtn:hover {
+  color: #e53e3e; /* Merah saat hover hapus */
+}
+
+/* Wrapper dan style dasar lainnya (pastikan ini ada di file Anda) */
+.wrapper {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-family: 'Inter', sans-serif;
+  pointer-events: none;
+}
+
+/* ... sisa CSS dari file asli Anda ... */
+.floatingBtn, .chatWindow { pointer-events: auto; }
+.floatingBtn { width: 60px; height: 60px; border-radius: 50%; background-color: #2d3748; color: white; border: 2px solid #4a5568; box-shadow: 0 4px 15px rgba(0,0,0,0.4); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; position: relative; overflow: hidden; padding: 0; }
+.floatingBtn:hover { transform: scale(1.1); border-color: #ecc94b; }
+.clockFace { position: relative; width: 100%; height: 100%; border-radius: 50%; background: #2d3748; }
+.clockFace::after { content: ''; position: absolute; top: 50%; left: 50%; width: 4px; height: 4px; background: #ecc94b; border-radius: 50%; transform: translate(-50%, -50%); z-index: 10; }
+.hand { position: absolute; bottom: 50%; left: 50%; transform-origin: bottom center; background: white; border-radius: 4px; transform: translateX(-50%) rotate(0deg); }
+.hourHand { width: 3px; height: 16px; background: #fff; z-index: 5; }
+.minuteHand { width: 2px; height: 22px; background: #cbd5e0; z-index: 6; }
+.secondHand { width: 1px; height: 24px; background: #ecc94b; z-index: 7; }
+.chatWindow { width: 360px; height: 550px; background-color: #efe7dd; background-image: url("https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png"); background-repeat: repeat; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 1px solid #e2e8f0; margin-bottom: 15px; display: flex; flex-direction: column; overflow: hidden; animation: slideUp 0.25s ease-out; position: relative; }
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+.header { background-color: #075e54; color: white; padding: 10px 15px; display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; z-index: 2; }
+.headerTop { display: flex; justify-content: space-between; align-items: center; font-weight: 600; }
+.onlineStatus { font-size: 0.75rem; color: #e0f2f1; display: flex; align-items: center; gap: 6px; }
+.onlineDot { width: 8px; height: 8px; background-color: #25d366; border-radius: 50%; display: inline-block; animation: pulse 2s infinite; }
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+.messageList { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
+.messageItem { max-width: 80%; padding: 6px 8px 6px 10px; border-radius: 8px; font-size: 0.9rem; line-height: 1.4; white-space: pre-wrap; word-wrap: break-word; box-shadow: 0 1px 1px rgba(0,0,0,0.13); display: flex; flex-direction: column; position: relative; margin-bottom: 4px; }
+.otherMessage { align-self: flex-start; background-color: #ffffff; color: #111b21; border-top-left-radius: 0; }
+.myMessage { align-self: flex-end; background-color: #d9fdd3; color: #111b21; border-top-right-radius: 0; }
+.senderName { font-weight: bold; font-size: 0.8rem; margin-bottom: 2px; line-height: 1.2; }
+.messageContent { margin-bottom: 0; }
+.timestamp { font-size: 0.65rem; color: rgba(0,0,0,0.45); align-self: flex-end; margin-top: 2px; margin-bottom: -3px; margin-right: -2px; line-height: 1; }
+.footer { padding: 8px 10px; background: #f0f2f5; display: flex; align-items: flex-end; gap: 8px; position: relative; z-index: 2; }
+.emojiBtn { background: none; border: none; cursor: pointer; font-size: 1.3rem; padding: 6px; color: #54656f; transition: transform 0.2s; line-height: 1; }
+.emojiBtn:hover { transform: scale(1.1); color: #00a884; }
+.input { flex: 1; padding: 9px 12px; border: 1px solid #fff; border-radius: 8px; outline: none; font-size: 0.95rem; background: #ffffff; font-family: inherit; resize: none; min-height: 24px; max-height: 100px; overflow-y: auto; }
+.input:focus { box-shadow: inset 0 0 0 1px #fff; }
+.sendBtn { width: 40px; height: 40px; border-radius: 50%; border: none; background: #00a884; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; flex-shrink: 0; }
+.sendBtn:hover { background: #008f6f; }
+.sendBtn:disabled { background: #cbd5e0; cursor: not-allowed; }
+.emojiPicker { position: absolute; bottom: 100%; left: 10px; width: 280px; background: #fff; border-radius: 8px; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); padding: 10px; display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-bottom: 8px; z-index: 20; }
+.emojiItem { cursor: pointer; font-size: 1.4rem; text-align: center; padding: 4px; border-radius: 4px; }
+.emojiItem:hover { background-color: #f0f2f5; }
+.nameOverlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255, 255, 255, 0.98); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; z-index: 50; }
+.namePrompt { width: 100%; max-width: 300px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); border: 1px solid #e2e8f0; text-align: center; }
+.namePrompt h2 { margin-top: 0; margin-bottom: 10px; font-size: 1.2rem; color: #2d3748; }
+.namePrompt p { font-size: 0.9rem; color: #718096; margin-bottom: 15px; }
+.namePrompt input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #e2e8f0; border-radius: 4px; box-sizing: border-box; }
+.nameBtn { width: 100%; padding: 10px; background-color: #00a884; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; transition: background 0.2s; }
+.guestBtn { width: 100%; padding: 10px; background-color: #f0f2f5; color: #54656f; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; margin-top: 8px; }
+
+/* ... (STYLE LAMA TETAP DIPERTAHANKAN, TAMBAHKAN DI BAWAH) ... */
+
+/* Admin Badge di Header */
+.adminBadge {
+  font-size: 0.7rem;
+  background: #e53e3e; /* Merah */
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+}
+
+/* System Toast (Notifikasi dalam chat) */
+.systemToast {
+  position: absolute;
+  bottom: 80px; /* Di atas footer */
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  color: white;
+  z-index: 20;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  animation: fadeInOut 0.3s ease;
+  width: max-content;
+  max-width: 80%;
+  text-align: center;
+}
+
+.systemToast.success {
+  background-color: #00a884; /* Hijau WA */
+}
+
+.systemToast.error {
+  background-color: #e53e3e; /* Merah */
+}
+
+.systemToast.info {
+  background-color: #3182ce; /* Biru */
+}
+
+@keyframes fadeInOut {
+  from { opacity: 0; transform: translate(-50%, 10px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* Style untuk pesan yang disematkan (Pinned) */
+.pinnedMessage {
+  background-color: #fffde7 !important; /* Kuning pudar */
+  border: 1px solid #fff59d;
+}
+
+.pinBadge {
+  font-size: 0.7rem;
+  color: #fbc02d;
+  font-weight: bold;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Admin Controls dalam Bubble */
+.adminControls {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  border-top: 1px dashed rgba(0,0,0,0.1);
+  margin-top: 4px;
+  padding-top: 4px;
+}
+
+.adminBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.8rem;
+  color: #a0aec0;
+  padding: 2px;
+  transition: color 0.2s;
+}
+
+.adminBtn:hover {
+  color: #4a5568;
+}
+
+.adminBtn.deleteBtn:hover {
+  color: #e53e3e;
+}
+
+.iconActive {
+  color: #fbc02d; /* Warna pin aktif */
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+/* --- PASTE KODE CSS SEBELUMNYA DI SINI JIKA BELUM ADA --- */
+/* Pastikan class wrapper, chatWindow, dll sudah ada */
+.wrapper { position: fixed; bottom: 30px; right: 30px; z-index: 99999; display: flex; flex-direction: column; align-items: flex-end; font-family: 'Inter', sans-serif; pointer-events: none; }
+.floatingBtn, .chatWindow { pointer-events: auto; }
+.floatingBtn { width: 60px; height: 60px; border-radius: 50%; background-color: #2d3748; color: white; border: 2px solid #4a5568; box-shadow: 0 4px 15px rgba(0,0,0,0.4); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; position: relative; overflow: hidden; padding: 0; }
+.floatingBtn:hover { transform: scale(1.1); border-color: #ecc94b; }
+.clockFace { position: relative; width: 100%; height: 100%; border-radius: 50%; background: #2d3748; }
+.clockFace::after { content: ''; position: absolute; top: 50%; left: 50%; width: 4px; height: 4px; background: #ecc94b; border-radius: 50%; transform: translate(-50%, -50%); z-index: 10; }
+.hand { position: absolute; bottom: 50%; left: 50%; transform-origin: bottom center; background: white; border-radius: 4px; transform: translateX(-50%) rotate(0deg); }
+.hourHand { width: 3px; height: 16px; background: #fff; z-index: 5; }
+.minuteHand { width: 2px; height: 22px; background: #cbd5e0; z-index: 6; }
+.secondHand { width: 1px; height: 24px; background: #ecc94b; z-index: 7; }
+.chatWindow { width: 360px; height: 550px; background-color: #efe7dd; background-image: url("https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png"); background-repeat: repeat; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 1px solid #e2e8f0; margin-bottom: 15px; display: flex; flex-direction: column; overflow: hidden; animation: slideUp 0.25s ease-out; position: relative; }
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+.header { background-color: #075e54; color: white; padding: 10px 15px; display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; z-index: 2; }
+.headerTop { display: flex; justify-content: space-between; align-items: center; font-weight: 600; }
+.onlineStatus { font-size: 0.75rem; color: #e0f2f1; display: flex; align-items: center; gap: 6px; }
+.onlineDot { width: 8px; height: 8px; background-color: #25d366; border-radius: 50%; display: inline-block; animation: pulse 2s infinite; }
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+.messageList { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
+.messageItem { max-width: 80%; padding: 6px 8px 6px 10px; border-radius: 8px; font-size: 0.9rem; line-height: 1.4; white-space: pre-wrap; word-wrap: break-word; box-shadow: 0 1px 1px rgba(0,0,0,0.13); display: flex; flex-direction: column; position: relative; margin-bottom: 4px; }
+.otherMessage { align-self: flex-start; background-color: #ffffff; color: #111b21; border-top-left-radius: 0; }
+.myMessage { align-self: flex-end; background-color: #d9fdd3; color: #111b21; border-top-right-radius: 0; }
+.senderName { font-weight: bold; font-size: 0.8rem; margin-bottom: 2px; line-height: 1.2; }
+.messageContent { margin-bottom: 0; }
+.timestamp { font-size: 0.65rem; color: rgba(0,0,0,0.45); align-self: flex-end; margin-top: 2px; margin-bottom: -3px; margin-right: -2px; line-height: 1; }
+.footer { padding: 8px 10px; background: #f0f2f5; display: flex; align-items: flex-end; gap: 8px; position: relative; z-index: 2; }
+.emojiBtn { background: none; border: none; cursor: pointer; font-size: 1.3rem; padding: 6px; color: #54656f; transition: transform 0.2s; line-height: 1; }
+.emojiBtn:hover { transform: scale(1.1); color: #00a884; }
+.input { flex: 1; padding: 9px 12px; border: 1px solid #fff; border-radius: 8px; outline: none; font-size: 0.95rem; background: #ffffff; font-family: inherit; resize: none; min-height: 24px; max-height: 100px; overflow-y: auto; }
+.input:focus { box-shadow: inset 0 0 0 1px #fff; }
+.sendBtn { width: 40px; height: 40px; border-radius: 50%; border: none; background: #00a884; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; flex-shrink: 0; }
+.sendBtn:hover { background: #008f6f; }
+.sendBtn:disabled { background: #cbd5e0; cursor: not-allowed; }
+.emojiPicker { position: absolute; bottom: 100%; left: 10px; width: 280px; background: #fff; border-radius: 8px; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); padding: 10px; display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-bottom: 8px; z-index: 20; }
+.emojiItem { cursor: pointer; font-size: 1.4rem; text-align: center; padding: 4px; border-radius: 4px; }
+.emojiItem:hover { background-color: #f0f2f5; }
+.nameOverlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255, 255, 255, 0.98); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; z-index: 50; }
+.namePrompt { width: 100%; max-width: 300px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); border: 1px solid #e2e8f0; text-align: center; }
+.namePrompt h2 { margin-top: 0; margin-bottom: 10px; font-size: 1.2rem; color: #2d3748; }
+.namePrompt p { font-size: 0.9rem; color: #718096; margin-bottom: 15px; }
+.namePrompt input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #e2e8f0; border-radius: 4px; box-sizing: border-box; }
+.nameBtn { width: 100%; padding: 10px; background-color: #00a884; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; transition: background 0.2s; }
+.guestBtn { width: 100%; padding: 10px; background-color: #f0f2f5; color: #54656f; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; margin-top: 8px; }
+
+/* ... (Code CSS yang sudah ada biarkan saja, tambahkan/update yang ini) ... */
+
+/* --- Pinned Preview (WhatsApp Style) --- */
+.pinnedPreview {
+  background-color: #f0f2f5; /* Abu-abu muda ala WA */
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid #e2e8f0;
+  cursor: pointer;
+  position: relative;
+  z-index: 5;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  flex-shrink: 0; /* Jangan menyusut */
+}
+
+.pinnedPreview:hover {
+  background-color: #e2e8f0;
+}
+
+.pinnedIcon {
+  color: #00a884;
+  font-size: 0.9rem;
+}
+
+.pinnedContent {
+  flex: 1;
+  overflow: hidden;
+}
+
+.pinnedTitle {
+  font-size: 0.75rem;
+  color: #00a884;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.pinnedText {
+  font-size: 0.8rem;
+  color: #54656f;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pinnedArrow {
+  color: #8696a0;
+  font-size: 0.8rem;
+}
+
+/* --- System Toast (Pengganti Alert) --- */
+.systemToast {
+  position: absolute;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  color: white;
+  z-index: 50;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  animation: fadeInUp 0.3s ease;
+  white-space: nowrap;
+  max-width: 85%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.systemToast.success { background-color: #00a884; }
+.systemToast.error { background-color: #e53e3e; }
+.systemToast.info { background-color: #3182ce; }
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translate(-50%, 10px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* --- Admin Badge & Controls --- */
+.adminBadge {
+  font-size: 0.7rem;
+  background: #e53e3e;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: bold;
+  margin-left: 5px;
+}
+
+.adminControls {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px dashed rgba(0,0,0,0.1);
+}
+
+.adminBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: #a0aec0;
+  padding: 2px;
+}
+.adminBtn:hover { color: #4a5568; }
+.deleteBtn:hover { color: #e53e3e; }
+.iconActive { color: #fbc02d; }
+
+/* --- Pinned Message Bubble Style --- */
+.pinnedMessage {
+  background-color: #fffde7 !important; /* Kuning sangat muda */
+  border: 1px solid #fff59d;
+}
+
+.pinBadge {
+  font-size: 0.7rem;
+  color: #fbc02d;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+/* --- Animasi Highlight saat di-scroll --- */
+.highlightFlash {
+  animation: flashBg 1.5s ease;
+}
+
+@keyframes flashBg {
+  0% { background-color: #fffde7; transform: scale(1); }
+  50% { background-color: #fff9c4; transform: scale(1.02); }
+  100% { background-color: #fffde7; transform: scale(1); }
+}
+
+/* ... (Pastikan sisa CSS lama Anda seperti .wrapper, .chatWindow tetap ada) ... */
+.wrapper { position: fixed; bottom: 30px; right: 30px; z-index: 99999; display: flex; flex-direction: column; align-items: flex-end; font-family: 'Inter', sans-serif; pointer-events: none; }
+.floatingBtn, .chatWindow { pointer-events: auto; }
+.floatingBtn { width: 60px; height: 60px; border-radius: 50%; background-color: #2d3748; color: white; border: 2px solid #4a5568; box-shadow: 0 4px 15px rgba(0,0,0,0.4); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; position: relative; overflow: hidden; padding: 0; }
+.floatingBtn:hover { transform: scale(1.1); border-color: #ecc94b; }
+.clockFace { position: relative; width: 100%; height: 100%; border-radius: 50%; background: #2d3748; }
+.clockFace::after { content: ''; position: absolute; top: 50%; left: 50%; width: 4px; height: 4px; background: #ecc94b; border-radius: 50%; transform: translate(-50%, -50%); z-index: 10; }
+.hand { position: absolute; bottom: 50%; left: 50%; transform-origin: bottom center; background: white; border-radius: 4px; transform: translateX(-50%) rotate(0deg); }
+.hourHand { width: 3px; height: 16px; background: #fff; z-index: 5; }
+.minuteHand { width: 2px; height: 22px; background: #cbd5e0; z-index: 6; }
+.secondHand { width: 1px; height: 24px; background: #ecc94b; z-index: 7; }
+.chatWindow { width: 360px; height: 550px; background-color: #efe7dd; background-image: url("https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png"); background-repeat: repeat; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 1px solid #e2e8f0; margin-bottom: 15px; display: flex; flex-direction: column; overflow: hidden; animation: slideUp 0.25s ease-out; position: relative; }
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+.header { background-color: #075e54; color: white; padding: 10px 15px; display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; z-index: 2; }
+.headerTop { display: flex; justify-content: space-between; align-items: center; font-weight: 600; }
+.onlineStatus { font-size: 0.75rem; color: #e0f2f1; display: flex; align-items: center; gap: 6px; }
+.onlineDot { width: 8px; height: 8px; background-color: #25d366; border-radius: 50%; display: inline-block; animation: pulse 2s infinite; }
+@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+.messageList { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
+.messageItem { max-width: 80%; padding: 6px 8px 6px 10px; border-radius: 8px; font-size: 0.9rem; line-height: 1.4; white-space: pre-wrap; word-wrap: break-word; box-shadow: 0 1px 1px rgba(0,0,0,0.13); display: flex; flex-direction: column; position: relative; margin-bottom: 4px; }
+.otherMessage { align-self: flex-start; background-color: #ffffff; color: #111b21; border-top-left-radius: 0; }
+.myMessage { align-self: flex-end; background-color: #d9fdd3; color: #111b21; border-top-right-radius: 0; }
+.senderName { font-weight: bold; font-size: 0.8rem; margin-bottom: 2px; line-height: 1.2; }
+.messageContent { margin-bottom: 0; }
+.timestamp { font-size: 0.65rem; color: rgba(0,0,0,0.45); align-self: flex-end; margin-top: 2px; margin-bottom: -3px; margin-right: -2px; line-height: 1; }
+.footer { padding: 8px 10px; background: #f0f2f5; display: flex; align-items: flex-end; gap: 8px; position: relative; z-index: 2; }
+.emojiBtn { background: none; border: none; cursor: pointer; font-size: 1.3rem; padding: 6px; color: #54656f; transition: transform 0.2s; line-height: 1; }
+.emojiBtn:hover { transform: scale(1.1); color: #00a884; }
+.input { flex: 1; padding: 9px 12px; border: 1px solid #fff; border-radius: 8px; outline: none; font-size: 0.95rem; background: #ffffff; font-family: inherit; resize: none; min-height: 24px; max-height: 100px; overflow-y: auto; }
+.input:focus { box-shadow: inset 0 0 0 1px #fff; }
+.sendBtn { width: 40px; height: 40px; border-radius: 50%; border: none; background: #00a884; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; flex-shrink: 0; }
+.sendBtn:hover { background: #008f6f; }
+.sendBtn:disabled { background: #cbd5e0; cursor: not-allowed; }
+.emojiPicker { position: absolute; bottom: 100%; left: 10px; width: 280px; background: #fff; border-radius: 8px; box-shadow: 0 -2px 10px rgba(0,0,0,0.1); padding: 10px; display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-bottom: 8px; z-index: 20; }
+.emojiItem { cursor: pointer; font-size: 1.4rem; text-align: center; padding: 4px; border-radius: 4px; }
+.emojiItem:hover { background-color: #f0f2f5; }
+.nameOverlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255, 255, 255, 0.98); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; z-index: 50; }
+.namePrompt { width: 100%; max-width: 300px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); border: 1px solid #e2e8f0; text-align: center; }
+.namePrompt h2 { margin-top: 0; margin-bottom: 10px; font-size: 1.2rem; color: #2d3748; }
+.namePrompt p { font-size: 0.9rem; color: #718096; margin-bottom: 15px; }
+.namePrompt input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #e2e8f0; border-radius: 4px; box-sizing: border-box; }
+.nameBtn { width: 100%; padding: 10px; background-color: #00a884; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; transition: background 0.2s; }
+.guestBtn { width: 100%; padding: 10px; background-color: #f0f2f5; color: #54656f; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; margin-top: 8px; }
