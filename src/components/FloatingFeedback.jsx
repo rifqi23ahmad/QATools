@@ -5,10 +5,14 @@ import styles from './FloatingFeedback.module.css';
 // --- CONSTANTS ---
 const EMOJIS = ['👍','👋','😀','😂','😅','🥰','😍','😎','🤔','😱','😭','😤','🎉','🔥','🐛','🤖','✅','❌','❤️','💔','👀'];
 const USER_COLORS = ['#e542a3', '#2ea6ff', '#c65500', '#029d00', '#5c6bc0', '#b92b27', '#008f7a', '#d63031', '#1f7aec', '#fe5c5c', '#00a884', '#8c52ff'];
-const MAX_FILE_SIZE_MB = 2;
+
+// --- UPDATE DI SINI: BATAS MAKSIMAL 1 MB ---
+const MAX_FILE_SIZE_MB = 1; 
+
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
 const LS_DISPLAY_NAME_KEY = 'chat.displayname';
 const LS_NAME_SET_KEY = 'chat.isnameset';
+const STORAGE_BUCKET = 'feedback-attachments'; // Pastikan nama bucket sesuai di Supabase
 
 // --- UTILS ---
 function simpleHash(str) {
@@ -39,6 +43,7 @@ const getReadableId = (id) => {
     return `Guest-${hash.substring(0, 4).toUpperCase()}`;
 };
 
+// Helper untuk preview lokal
 const fileToBase64 = (file) => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -99,7 +104,6 @@ function FloatingFeedback({ supabase, visitorId, isSidebarMinimized }) {
   // --- HANDLE CLICK OUTSIDE ---
   useEffect(() => {
     const handleClickOutside = (event) => {
-      // 1. Logic Menutup Emoji Picker
       if (
         showEmojiPicker && 
         emojiPickerRef.current && 
@@ -110,7 +114,6 @@ function FloatingFeedback({ supabase, visitorId, isSidebarMinimized }) {
         setShowEmojiPicker(false);
       }
 
-      // 2. Logic Menutup Chat Window
       if (
         isOpen && 
         chatWindowRef.current && 
@@ -197,10 +200,22 @@ function FloatingFeedback({ supabase, visitorId, isSidebarMinimized }) {
   
   const processFile = async (file) => {
     if (!ALLOWED_TYPES.includes(file.type)) { showToast("Format file tidak didukung.", 'error'); return; }
-    if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) { showToast(`File terlalu besar! Maksimal ${MAX_FILE_SIZE_MB}MB.`, 'error'); return; }
+    
+    // --- VALIDASI UKURAN FILE (1 MB) ---
+    if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) { 
+        showToast(`File terlalu besar! Maksimal ${MAX_FILE_SIZE_MB}MB.`, 'error'); 
+        return; 
+    }
+
     try {
         const base64 = await fileToBase64(file);
-        setAttachment({ name: file.name, type: file.type.includes('pdf') ? 'pdf' : 'image', data: base64, isPdf: file.type.includes('pdf') });
+        setAttachment({ 
+            name: file.name, 
+            type: file.type.includes('pdf') ? 'pdf' : 'image', 
+            previewData: base64, 
+            fileObject: file, 
+            isPdf: file.type.includes('pdf') 
+        });
     } catch (e) { showToast("Gagal memproses file.", 'error'); }
   };
   
@@ -219,50 +234,73 @@ function FloatingFeedback({ supabase, visitorId, isSidebarMinimized }) {
     if (e) e.preventDefault();
     if ((!inputMsg.trim() && !attachment) || !isNameSet) return; 
     const trimmedMsg = inputMsg.trim();
+    
+    // Admin commands
     if (trimmedMsg === '007') { setIsAdmin(true); setInputMsg(''); showToast("🔓 Mode Admin Aktif!", 'success'); return; }
     if (trimmedMsg === '008') { setIsAdmin(false); setInputMsg(''); showToast("🔒 Mode Admin Nonaktif!", 'info'); return; }
     
     setIsSending(true); setShowEmojiPicker(false); 
+    
     try {
-      const payload = { visitor_id: visitorId, message: inputMsg, display_name: displayName, user_agent: 'WebChat' };
-      if (attachment) { payload.attachment_data = attachment.data; payload.attachment_type = attachment.type; payload.attachment_name = attachment.name; }
+      let finalAttachmentUrl = null;
+
+      // 1. UPLOAD KE STORAGE (JIKA ADA FILE)
+      if (attachment && attachment.fileObject) {
+          const fileExt = attachment.name.split('.').pop();
+          const fileName = `${visitorId}/${Date.now()}.${fileExt}`; 
+          
+          const { data: uploadData, error: uploadError } = await supabase.storage
+              .from(STORAGE_BUCKET)
+              .upload(fileName, attachment.fileObject);
+
+          if (uploadError) throw new Error("Gagal upload file: " + uploadError.message);
+
+          const { data: urlData } = supabase.storage
+              .from(STORAGE_BUCKET)
+              .getPublicUrl(fileName);
+          
+          finalAttachmentUrl = urlData.publicUrl;
+      }
+
+      // 2. SIMPAN URL KE DB
+      const payload = { 
+          visitor_id: visitorId, 
+          message: inputMsg, 
+          display_name: displayName, 
+          user_agent: 'WebChat' 
+      };
+
+      if (attachment) { 
+          payload.attachment_data = finalAttachmentUrl; 
+          payload.attachment_type = attachment.type; 
+          payload.attachment_name = attachment.name; 
+      }
       
-      // INSERT Biasa (Asumsi Policy RLS mengizinkan Anon Insert)
       const { error } = await supabase.from('feedback').insert(payload);
       if (error) throw error;
       
       setInputMsg(''); setAttachment(null); scrollToBottom(); inputRef.current?.focus();
-    } catch (err) { showToast("Gagal kirim.", 'error'); } finally { setIsSending(false); }
+    } catch (err) { 
+        console.error(err);
+        showToast("Gagal kirim: " + err.message, 'error'); 
+    } finally { 
+        setIsSending(false); 
+    }
   };
 
   const handleRequestDelete = (id) => { setDeletingMsgId(id); };
   const cancelDelete = () => { setDeletingMsgId(null); };
 
-  // --- [FIXED] MENGGUNAKAN RPC UNTUK DELETE (Bypass RLS) ---
   const confirmDelete = async () => {
       if (!deletingMsgId) return;
-      
-      // Menggunakan RPC 'delete_feedback' yang sudah dibuat SECURITY DEFINER
       const { error } = await supabase.rpc('delete_feedback', { p_id: deletingMsgId });
-      
-      if (error) { 
-          showToast("Gagal menghapus: " + error.message, 'error'); 
-      } else { 
-          showToast("Pesan berhasil dihapus.", 'success');
-          // Update state lokal manual agar cepat
-          setFeedbacks(prev => prev.filter(m => m.id !== deletingMsgId));
-      }
+      if (error) { showToast("Gagal menghapus: " + error.message, 'error'); } 
+      else { showToast("Pesan berhasil dihapus.", 'success'); setFeedbacks(prev => prev.filter(m => m.id !== deletingMsgId)); }
       setDeletingMsgId(null); 
   };
 
-  // --- [FIXED] MENGGUNAKAN RPC UNTUK PIN (Bypass RLS) ---
   const handleTogglePin = async (id, currentStatus) => {
-      // Menggunakan RPC 'toggle_pin_feedback'
-      const { error } = await supabase.rpc('toggle_pin_feedback', { 
-          p_id: id, 
-          p_status: !currentStatus 
-      });
-      
+      const { error } = await supabase.rpc('toggle_pin_feedback', { p_id: id, p_status: !currentStatus });
       if (error) showToast("Gagal update pin", 'error'); 
       else showToast(!currentStatus ? "Pesan disematkan 📌" : "Pin dilepas", 'success');
   };
@@ -270,10 +308,11 @@ function FloatingFeedback({ supabase, visitorId, isSidebarMinimized }) {
   const handleKeyDown = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } };
   const handleAddEmoji = (emoji) => { setInputMsg((prev) => prev + emoji); inputRef.current?.focus(); };
   const formatTimeStr = (isoString) => { return new Date(isoString).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }); };
-  const handleImageClick = (imgData) => { setExpandedImage(imgData); };
+  const handleImageClick = (imgUrl) => { setExpandedImage(imgUrl); };
   
   const renderAttachment = (msg) => {
       if (!msg.attachment_data) return null;
+      
       if (msg.attachment_type === 'image') {
           return ( <div className={styles.attachmentImageWrapper}><img src={msg.attachment_data} alt="Lampiran" className={styles.chatImage} onClick={() => handleImageClick(msg.attachment_data)} title="Klik untuk memperbesar"/></div> );
       } else if (msg.attachment_type === 'pdf') {
@@ -284,23 +323,12 @@ function FloatingFeedback({ supabase, visitorId, isSidebarMinimized }) {
 
   return (
     <div className={styles.wrapper}>
-      {/* TOMBOL SIDEBAR */}
-      <button 
-        ref={sidebarBtnRef}
-        className={`${styles.sidebarFeedbackBtn} ${isOpen ? styles.active : ''} ${isSidebarMinimized ? styles.minimized : ''}`} 
-        onClick={() => setIsOpen(!isOpen)}
-        title="Live Chat & Feedback"
-      >
+      <button ref={sidebarBtnRef} className={`${styles.sidebarFeedbackBtn} ${isOpen ? styles.active : ''} ${isSidebarMinimized ? styles.minimized : ''}`} onClick={() => setIsOpen(!isOpen)} title="Live Chat & Feedback">
         {unreadCount > 0 && <div className={styles.unreadBadge}>{unreadCount}</div>}
-        {isOpen ? (
-            <i className="fas fa-chevron-down" style={{fontSize:'1.1rem', color: '#ecc94b'}}></i>
-        ) : (
-            <i className="far fa-comments" style={{fontSize:'1.1rem'}}></i>
-        )}
+        {isOpen ? ( <i className="fas fa-chevron-down" style={{fontSize:'1.1rem', color: '#ecc94b'}}></i> ) : ( <i className="far fa-comments" style={{fontSize:'1.1rem'}}></i> )}
         <span>Live Chat</span>
       </button>
 
-      {/* MODAL GAMBAR BESAR */}
       {expandedImage && createPortal(
           <div className={`${styles.imageModalOverlay} imageModalOverlay`} onClick={() => setExpandedImage(null)}>
               <div className={styles.imageModalContent} onClick={(e) => e.stopPropagation()}>
@@ -310,13 +338,8 @@ function FloatingFeedback({ supabase, visitorId, isSidebarMinimized }) {
           </div>, document.body
       )}
 
-      {/* CHAT WINDOW (PORTAL) */}
       {isOpen && createPortal(
-        <div 
-            ref={chatWindowRef}
-            className={styles.chatWindow}
-            style={{ left: isSidebarMinimized ? '90px' : '240px' }}
-        >
+        <div ref={chatWindowRef} className={styles.chatWindow} style={{ left: isSidebarMinimized ? '90px' : '240px' }}>
             {deletingMsgId && (
                 <div className={styles.deleteOverlay}>
                     <div className={styles.deleteBox}>
@@ -377,10 +400,10 @@ function FloatingFeedback({ supabase, visitorId, isSidebarMinimized }) {
             <div ref={messagesEndRef} />
           </div>
           <div className={styles.footer}>
-            {attachment && ( <div className={styles.previewContainer}><div className={styles.previewContent}>{attachment.isPdf ? ( <div className={styles.previewPdf}><i className="fas fa-file-pdf" style={{color: '#e53e3e'}}></i><span>PDF</span></div> ) : ( <img src={attachment.data} alt="Preview" className={styles.previewImage} /> )}</div><button className={styles.removeAttachmentBtn} onClick={removeAttachment}>&times;</button></div> )}
+            {attachment && ( <div className={styles.previewContainer}><div className={styles.previewContent}>{attachment.isPdf ? ( <div className={styles.previewPdf}><i className="fas fa-file-pdf" style={{color: '#e53e3e'}}></i><span>PDF</span></div> ) : ( <img src={attachment.previewData} alt="Preview" className={styles.previewImage} /> )}</div><button className={styles.removeAttachmentBtn} onClick={removeAttachment}>&times;</button></div> )}
             {showEmojiPicker && ( <div className={styles.emojiPicker} ref={emojiPickerRef}>{EMOJIS.map((emoji) => ( <div key={emoji} className={styles.emojiItem} onClick={() => handleAddEmoji(emoji)}>{emoji}</div> ))}</div> )}
             <button type="button" className={styles.emojiBtn} onClick={() => setShowEmojiPicker(!showEmojiPicker)} ref={emojiBtnRef}>😃</button>
-            <button type="button" className={styles.attachBtn} onClick={handleAttachClick} title="Lampirkan Gambar/PDF"><i className="fas fa-paperclip"></i></button>
+            <button type="button" className={styles.attachBtn} onClick={handleAttachClick} title="Lampirkan Gambar/PDF (Max 1MB)"><i className="fas fa-paperclip"></i></button>
             <textarea ref={inputRef} className={styles.input} placeholder={isNameSet ? "Ketik pesan / Paste gambar..." : "Nama dulu..."} value={inputMsg} onChange={(e) => setInputMsg(e.target.value)} onKeyDown={handleKeyDown} onPaste={handlePaste} disabled={isSending || !isNameSet} rows={1} />
             <button type="button" className={styles.sendBtn} onClick={handleSend} disabled={isSending || (!inputMsg.trim() && !attachment) || !isNameSet}><i className="fas fa-paper-plane"></i></button>
           </div>
