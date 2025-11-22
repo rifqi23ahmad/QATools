@@ -1,0 +1,222 @@
+.container {
+  position: relative;
+  width: 100%;
+}
+
+/* --- INPUT FIELD --- */
+.inputWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 0.95rem;
+  color: #1e293b;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.inputWrapper:hover {
+  border-color: #cbd5e0;
+  background-color: #f8fafc;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.inputWrapper.active {
+  border-color: #3b82f6;
+  ring: 2px solid rgba(59, 130, 246, 0.2);
+}
+
+.inputText {
+  font-weight: 600;
+  color: #334155;
+}
+
+.calendarIcon {
+  color: #64748b;
+  transition: color 0.2s;
+}
+
+.inputWrapper:hover .calendarIcon {
+  color: #3b82f6;
+}
+
+/* --- POPUP CALENDAR --- */
+.calendarPopup {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  width: 340px; /* Sedikit lebih lebar agar lega */
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 
+    0 20px 25px -5px rgba(0, 0, 0, 0.1), 
+    0 10px 10px -5px rgba(0, 0, 0, 0.04),
+    0 0 0 1px rgba(0,0,0,0.05); /* Border halus */
+  padding: 20px;
+  z-index: 100;
+  animation: slideUpFade 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: top left;
+}
+
+@keyframes slideUpFade {
+  from { opacity: 0; transform: scale(0.95) translateY(-8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed #e2e8f0;
+}
+
+.navBtn {
+  background: transparent;
+  border: none;
+  border-radius: 50%; /* Tombol bulat */
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #64748b;
+  transition: all 0.2s;
+}
+
+.navBtn:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+  transform: scale(1.1);
+}
+
+.currentMonth {
+  font-weight: 800;
+  color: #0f172a;
+  font-size: 1.1rem;
+  letter-spacing: -0.5px;
+}
+
+/* Grid Hari (Date Picker) */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px; /* Jarak antar tanggal */
+  text-align: center;
+}
+
+.dayName {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #94a3b8;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dayCell {
+  height: 38px;
+  width: 38px;
+  margin: 0 auto; /* Center di grid */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border-radius: 50%; /* FULL CIRCLE */
+  cursor: pointer;
+  color: #334155;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.dayCell:hover:not(.empty):not(.disabled):not(.selected) {
+  background-color: #e0f2fe;
+  color: #0284c7;
+  transform: scale(1.1);
+}
+
+.selected {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white !important;
+  font-weight: 700;
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3);
+  transform: scale(1.05);
+}
+
+.today {
+  color: #2563eb;
+  font-weight: 700;
+}
+
+.today::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  background-color: #2563eb;
+  border-radius: 50%;
+}
+
+.selected.today::after {
+  background-color: white;
+}
+
+.disabled {
+  color: #cbd5e0;
+  cursor: not-allowed;
+  background: transparent;
+}
+
+.empty {
+  cursor: default;
+}
+
+/* Grid Bulan (Month Picker) */
+.monthGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.monthCell {
+  padding: 16px 0;
+  border-radius: 12px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #475569;
+  transition: all 0.2s;
+  border: 1px solid #f1f5f9;
+  text-align: center;
+}
+
+.monthCell:hover:not(.selected):not(.disabled) {
+  background-color: #f8fafc;
+  border-color: #cbd5e0;
+  color: #0f172a;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.monthCell.selected {
+  background: #0f172a; /* Hitam elegan untuk bulan */
+  color: white;
+  border-color: #0f172a;
+  font-weight: 700;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}

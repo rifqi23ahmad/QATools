@@ -74,12 +74,12 @@ function FloatingFeedback({ supabase, visitorId, isSidebarMinimized }) {
   const fileInputRef = useRef(null); 
   const emojiPickerRef = useRef(null);
   const emojiBtnRef = useRef(null);
-  const chatWindowRef = useRef(null); // Ref untuk jendela chat
-  const sidebarBtnRef = useRef(null); // Ref untuk tombol sidebar
+  const chatWindowRef = useRef(null); 
+  const sidebarBtnRef = useRef(null); 
 
   const pinnedMessage = feedbacks.filter(f => f.is_pinned).pop();
 
-  // Load saved name
+  // Load nama dari LocalStorage
   useEffect(() => {
     const savedName = localStorage.getItem(LS_DISPLAY_NAME_KEY);
     const savedIsSet = localStorage.getItem(LS_NAME_SET_KEY) === 'true';
@@ -96,7 +96,7 @@ function FloatingFeedback({ supabase, visitorId, isSidebarMinimized }) {
     }
   }, [isOpen]);
 
-  // --- HANDLE CLICK OUTSIDE (PERBAIKAN DI SINI) ---
+  // --- HANDLE CLICK OUTSIDE ---
   useEffect(() => {
     const handleClickOutside = (event) => {
       // 1. Logic Menutup Emoji Picker
@@ -111,24 +111,18 @@ function FloatingFeedback({ supabase, visitorId, isSidebarMinimized }) {
       }
 
       // 2. Logic Menutup Chat Window
-      // Chat tertutup jika:
-      // - Sedang terbuka
-      // - Klik BUKAN di dalam chat window
-      // - Klik BUKAN di tombol sidebar (agar toggle tidak bentrok)
-      // - Klik BUKAN di modal gambar (expanded image)
       if (
         isOpen && 
         chatWindowRef.current && 
         !chatWindowRef.current.contains(event.target) &&
         sidebarBtnRef.current && 
         !sidebarBtnRef.current.contains(event.target) &&
-        !event.target.closest('.imageModalOverlay') // Cek class overlay modal
+        !event.target.closest('.imageModalOverlay') 
       ) {
         setIsOpen(false);
       }
     };
 
-    // Gunakan mousedown agar lebih responsif
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
@@ -185,6 +179,7 @@ function FloatingFeedback({ supabase, visitorId, isSidebarMinimized }) {
 
   // --- Helpers & Handlers ---
   const showToast = (text, type = 'info') => { setSystemNotification({ text, type }); setTimeout(() => setSystemNotification(null), 3000); };
+  
   const handleSetName = (isGuest = false) => {
     let name = '';
     if (isGuest) name = generateUniqueGuestName();
@@ -197,7 +192,9 @@ function FloatingFeedback({ supabase, visitorId, isSidebarMinimized }) {
     localStorage.setItem(LS_DISPLAY_NAME_KEY, name); localStorage.setItem(LS_NAME_SET_KEY, 'true');
     setInputName('');
   };
+  
   const scrollToBottom = () => { setTimeout(() => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, 100); };
+  
   const processFile = async (file) => {
     if (!ALLOWED_TYPES.includes(file.type)) { showToast("Format file tidak didukung.", 'error'); return; }
     if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) { showToast(`File terlalu besar! Maksimal ${MAX_FILE_SIZE_MB}MB.`, 'error'); return; }
@@ -206,45 +203,75 @@ function FloatingFeedback({ supabase, visitorId, isSidebarMinimized }) {
         setAttachment({ name: file.name, type: file.type.includes('pdf') ? 'pdf' : 'image', data: base64, isPdf: file.type.includes('pdf') });
     } catch (e) { showToast("Gagal memproses file.", 'error'); }
   };
+  
   const handleFileSelect = (e) => { const file = e.target.files[0]; if (file) processFile(file); e.target.value = null; };
   const handleAttachClick = () => { fileInputRef.current?.click(); };
+  
   const handlePaste = (e) => {
     if (!isNameSet) return;
     const items = e.clipboardData.items;
     for (const item of items) { if (item.kind === 'file') { const file = item.getAsFile(); processFile(file); e.preventDefault(); return; } }
   };
+  
   const removeAttachment = () => { setAttachment(null); };
+  
   const handleSend = async (e) => {
     if (e) e.preventDefault();
     if ((!inputMsg.trim() && !attachment) || !isNameSet) return; 
     const trimmedMsg = inputMsg.trim();
     if (trimmedMsg === '007') { setIsAdmin(true); setInputMsg(''); showToast("🔓 Mode Admin Aktif!", 'success'); return; }
     if (trimmedMsg === '008') { setIsAdmin(false); setInputMsg(''); showToast("🔒 Mode Admin Nonaktif!", 'info'); return; }
+    
     setIsSending(true); setShowEmojiPicker(false); 
     try {
       const payload = { visitor_id: visitorId, message: inputMsg, display_name: displayName, user_agent: 'WebChat' };
       if (attachment) { payload.attachment_data = attachment.data; payload.attachment_type = attachment.type; payload.attachment_name = attachment.name; }
+      
+      // INSERT Biasa (Asumsi Policy RLS mengizinkan Anon Insert)
       const { error } = await supabase.from('feedback').insert(payload);
       if (error) throw error;
+      
       setInputMsg(''); setAttachment(null); scrollToBottom(); inputRef.current?.focus();
     } catch (err) { showToast("Gagal kirim.", 'error'); } finally { setIsSending(false); }
   };
+
   const handleRequestDelete = (id) => { setDeletingMsgId(id); };
   const cancelDelete = () => { setDeletingMsgId(null); };
+
+  // --- [FIXED] MENGGUNAKAN RPC UNTUK DELETE (Bypass RLS) ---
   const confirmDelete = async () => {
       if (!deletingMsgId) return;
-      const { error } = await supabase.from('feedback').delete().eq('id', deletingMsgId);
-      if (error) { showToast("Gagal menghapus: " + error.message, 'error'); } else { showToast("Pesan berhasil dihapus.", 'success'); }
+      
+      // Menggunakan RPC 'delete_feedback' yang sudah dibuat SECURITY DEFINER
+      const { error } = await supabase.rpc('delete_feedback', { p_id: deletingMsgId });
+      
+      if (error) { 
+          showToast("Gagal menghapus: " + error.message, 'error'); 
+      } else { 
+          showToast("Pesan berhasil dihapus.", 'success');
+          // Update state lokal manual agar cepat
+          setFeedbacks(prev => prev.filter(m => m.id !== deletingMsgId));
+      }
       setDeletingMsgId(null); 
   };
+
+  // --- [FIXED] MENGGUNAKAN RPC UNTUK PIN (Bypass RLS) ---
   const handleTogglePin = async (id, currentStatus) => {
-      const { error } = await supabase.from('feedback').update({ is_pinned: !currentStatus }).eq('id', id);
-      if (error) showToast("Gagal update pin", 'error'); else showToast(!currentStatus ? "Pesan disematkan 📌" : "Pin dilepas", 'success');
+      // Menggunakan RPC 'toggle_pin_feedback'
+      const { error } = await supabase.rpc('toggle_pin_feedback', { 
+          p_id: id, 
+          p_status: !currentStatus 
+      });
+      
+      if (error) showToast("Gagal update pin", 'error'); 
+      else showToast(!currentStatus ? "Pesan disematkan 📌" : "Pin dilepas", 'success');
   };
+
   const handleKeyDown = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } };
   const handleAddEmoji = (emoji) => { setInputMsg((prev) => prev + emoji); inputRef.current?.focus(); };
   const formatTimeStr = (isoString) => { return new Date(isoString).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }); };
   const handleImageClick = (imgData) => { setExpandedImage(imgData); };
+  
   const renderAttachment = (msg) => {
       if (!msg.attachment_data) return null;
       if (msg.attachment_type === 'image') {
