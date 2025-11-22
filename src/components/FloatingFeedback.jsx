@@ -199,11 +199,9 @@ function FloatingFeedback({ supabase, visitorId }) {
     }
   }, [isOpen, supabase, visitorId]);
 
-  const fetchFeedbacks = async () => {
-    const { data, error } = await supabase
-        .from('feedback')
-        .select('*')
-        .order('created_at', { ascending: true });
+const fetchFeedbacks = async () => {
+    // UPDATE: Panggil fungsi 'getFeedbacks' (sesuai nama baru di DB)
+    const { data, error } = await supabase.rpc('getFeedbacks'); 
 
     if (!error && data) {
       setFeedbacks(data);
@@ -211,11 +209,11 @@ function FloatingFeedback({ supabase, visitorId }) {
     }
   };
 
-  const scrollToBottom = () => {
-    setTimeout(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, 100);
-  };
+  function scrollToBottom() {
+        setTimeout(() => {
+            messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+    }
 
   const processFile = async (file) => {
     if (!ALLOWED_TYPES.includes(file.type)) {
