@@ -230,12 +230,13 @@ function FloatingFeedback({ supabase, visitorId, isSidebarMinimized }) {
   
   const removeAttachment = () => { setAttachment(null); };
   
+
+
   const handleSend = async (e) => {
     if (e) e.preventDefault();
     if ((!inputMsg.trim() && !attachment) || !isNameSet) return; 
     const trimmedMsg = inputMsg.trim();
     
-    // Admin commands
     if (trimmedMsg === '007') { setIsAdmin(true); setInputMsg(''); showToast("🔓 Mode Admin Aktif!", 'success'); return; }
     if (trimmedMsg === '008') { setIsAdmin(false); setInputMsg(''); showToast("🔒 Mode Admin Nonaktif!", 'info'); return; }
     
@@ -244,50 +245,59 @@ function FloatingFeedback({ supabase, visitorId, isSidebarMinimized }) {
     try {
       let finalAttachmentUrl = null;
 
-      // 1. UPLOAD KE STORAGE (JIKA ADA FILE)
+      // 1. UPLOAD KE STORAGE
       if (attachment && attachment.fileObject) {
-          const fileExt = attachment.name.split('.').pop();
-          const fileName = `${visitorId}/${Date.now()}.${fileExt}`; 
+          // Sanitasi nama file: hapus spasi dan karakter aneh
+          const cleanFileName = attachment.name.replace(/[^a-zA-Z0-9.]/g, '_');
+          const fileExt = cleanFileName.split('.').pop();
+          const filePath = `${visitorId}/${Date.now()}.${fileExt}`; 
           
           const { data: uploadData, error: uploadError } = await supabase.storage
               .from(STORAGE_BUCKET)
-              .upload(fileName, attachment.fileObject);
+              .upload(filePath, attachment.fileObject, {
+                  cacheControl: '3600',
+                  upsert: false,
+                  // [FIX PENTING] Paksa Content-Type agar browser tidak bingung
+                  contentType: attachment.fileObject.type 
+              });
 
           if (uploadError) throw new Error("Gagal upload file: " + uploadError.message);
 
           const { data: urlData } = supabase.storage
               .from(STORAGE_BUCKET)
-              .getPublicUrl(fileName);
+              .getPublicUrl(filePath);
           
           finalAttachmentUrl = urlData.publicUrl;
+          
+          // [DEBUG] Cek di Console browser (F12)
+          console.log("Upload Sukses. URL:", finalAttachmentUrl);
       }
 
-      // 2. SIMPAN URL KE DB
+      // 2. SIMPAN KE DB
       const payload = { 
           visitor_id: visitorId, 
           message: inputMsg, 
           display_name: displayName, 
-          user_agent: 'WebChat' 
+          user_agent: 'WebChat',
+          // Pastikan field ini diisi, null jika tidak ada attachment
+          attachment_data: finalAttachmentUrl || null, 
+          attachment_type: attachment ? attachment.type : null,
+          attachment_name: attachment ? attachment.name : null
       };
-
-      if (attachment) { 
-          payload.attachment_data = finalAttachmentUrl; 
-          payload.attachment_type = attachment.type; 
-          payload.attachment_name = attachment.name; 
-      }
       
       const { error } = await supabase.from('feedback').insert(payload);
       if (error) throw error;
       
       setInputMsg(''); setAttachment(null); scrollToBottom(); inputRef.current?.focus();
     } catch (err) { 
-        console.error(err);
+        console.error("Error Sending:", err);
         showToast("Gagal kirim: " + err.message, 'error'); 
     } finally { 
         setIsSending(false); 
     }
   };
 
+ 
   const handleRequestDelete = (id) => { setDeletingMsgId(id); };
   const cancelDelete = () => { setDeletingMsgId(null); };
 
