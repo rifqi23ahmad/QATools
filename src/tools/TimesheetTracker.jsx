@@ -2,229 +2,95 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../services/supabaseClient';
 import styles from './TimesheetTracker.module.css';
 
+// ... (CONSTANTS & HELPER FUNCTIONS TIDAK BERUBAH) ...
 const LS_USER_CODE = 'timesheet_user_code';
 const LS_DEADLINE_HOUR = 'timesheet_deadline_hour';
 const LS_DEADLINE_MINUTE = 'timesheet_deadline_minute';
-const LS_ALARM_DAYS = 'timesheet_alarm_days'; // Key baru
-
+const LS_ALARM_DAYS = 'timesheet_alarm_days'; 
 const DEFAULT_HOUR = 17;
 const DEFAULT_MINUTE = 0;
-const DEFAULT_DAYS = [1, 2, 3, 4, 5]; // Senin-Jumat
+const DEFAULT_DAYS = [1, 2, 3, 4, 5]; 
 
 const DAYS_LABEL = [
-    { id: 1, label: 'Sen' },
-    { id: 2, label: 'Sel' },
-    { id: 3, label: 'Rab' },
-    { id: 4, label: 'Kam' },
-    { id: 5, label: 'Jum' },
-    { id: 6, label: 'Sab' },
-    { id: 0, label: 'Min' },
+    { id: 1, label: 'Sen' }, { id: 2, label: 'Sel' }, { id: 3, label: 'Rab' },
+    { id: 4, label: 'Kam' }, { id: 5, label: 'Jum' }, { id: 6, label: 'Sab' }, { id: 0, label: 'Min' },
 ];
 
-const getTodayStr = () => {
-  const d = new Date();
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${year}-${month}-${day}`;
-};
-
-const formatDateToID = (isoDate) => {
-  if (!isoDate) return '-';
-  const [year, month, day] = isoDate.split('-');
-  return `${day}-${month}-${year}`;
-};
+const getTodayStr = () => { /* ... */ const d = new Date(); const year = d.getFullYear(); const month = String(d.getMonth() + 1).padStart(2, '0'); const day = String(d.getDate()).padStart(2, '0'); return `${year}-${month}-${day}`; };
+const formatDateToID = (isoDate) => { /* ... */ if (!isoDate) return '-'; const [year, month, day] = isoDate.split('-'); return `${day}-${month}-${year}`; };
 
 function TimesheetTracker() {
+  // ... (State lama tetap sama) ...
   const [userCode, setUserCode] = useState(localStorage.getItem(LS_USER_CODE) || '');
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem(LS_USER_CODE));
-  
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(false);
   const [hasFilledToday, setHasFilledToday] = useState(false);
   const [currentTimeStr, setCurrentTimeStr] = useState('');
-  
   const [inputDate, setInputDate] = useState(getTodayStr());
   const [activity, setActivity] = useState('');
   const [duration, setDuration] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingId, setEditingId] = useState(null);
-
-  // Settings State
   const [showSettings, setShowSettings] = useState(false);
   const [settingHour, setSettingHour] = useState(DEFAULT_HOUR);
   const [settingMinute, setSettingMinute] = useState(DEFAULT_MINUTE);
-  const [settingDays, setSettingDays] = useState(DEFAULT_DAYS); // State hari aktif
-
+  const [settingDays, setSettingDays] = useState(DEFAULT_DAYS);
   const [toast, setToast] = useState(null);
+
+  // --- STATE BARU UNTUK MODAL HAPUS ---
+  const [idToDelete, setIdToDelete] = useState(null); 
 
   const showToast = (message, type = 'success') => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
   };
 
-  // --- LOGIN/LOGOUT ---
-  const handleLogin = (e) => {
-    e.preventDefault();
-    const code = userCode.trim().toLowerCase();
-    if (!code) { showToast("Masukkan kode unik!", 'error'); return; }
-    localStorage.setItem(LS_USER_CODE, code);
-    setUserCode(code);
-    setIsLoggedIn(true);
-    window.dispatchEvent(new Event('timesheet_auth_changed'));
-    if (Notification.permission !== 'granted') Notification.requestPermission();
+  // ... (handleLogin, handleLogout, fetchEntries, useEffect timer, Settings Logic, handleEditClick, handleCancelEdit, handleSubmit TETAP SAMA) ...
+  
+  const handleLogin = (e) => { e.preventDefault(); const code = userCode.trim().toLowerCase(); if (!code) { showToast("Masukkan kode unik!", 'error'); return; } localStorage.setItem(LS_USER_CODE, code); setUserCode(code); setIsLoggedIn(true); window.dispatchEvent(new Event('timesheet_auth_changed')); if (Notification.permission !== 'granted') Notification.requestPermission(); };
+  const handleLogout = () => { localStorage.removeItem(LS_USER_CODE); setUserCode(''); setIsLoggedIn(false); setEntries([]); window.dispatchEvent(new Event('timesheet_auth_changed')); };
+  const fetchEntries = useCallback(async () => { if (!userCode) return; setLoading(true); const { data, error } = await supabase.rpc('getTimesheets', { p_user_code: userCode }); if (!error) { setEntries(data || []); const todayStr = getTodayStr(); const filled = (data || []).some(item => item.work_date === todayStr); setHasFilledToday(filled); } else { console.error("RPC Error:", error); showToast("Gagal memuat data.", "error"); } setLoading(false); }, [userCode]);
+  useEffect(() => { if (isLoggedIn) { fetchEntries(); const h = localStorage.getItem(LS_DEADLINE_HOUR); const m = localStorage.getItem(LS_DEADLINE_MINUTE); const d = localStorage.getItem(LS_ALARM_DAYS); if (h !== null) setSettingHour(parseInt(h)); if (m !== null) setSettingMinute(parseInt(m)); if (d !== null) { try { setSettingDays(JSON.parse(d)); } catch(e){} } } }, [isLoggedIn, fetchEntries]);
+  useEffect(() => { if (!isLoggedIn) return; const timer = setInterval(() => { const now = new Date(); const h = String(now.getHours()).padStart(2,'0'); const m = String(now.getMinutes()).padStart(2,'0'); const s = String(now.getSeconds()).padStart(2,'0'); setCurrentTimeStr(`${h}:${m}:${s}`); }, 1000); return () => clearInterval(timer); }, [isLoggedIn]);
+  const toggleDay = (dayId) => { if (settingDays.includes(dayId)) { setSettingDays(settingDays.filter(d => d !== dayId)); } else { setSettingDays([...settingDays, dayId]); } };
+  const saveSettings = () => { localStorage.setItem(LS_DEADLINE_HOUR, settingHour); localStorage.setItem(LS_DEADLINE_MINUTE, settingMinute); localStorage.setItem(LS_ALARM_DAYS, JSON.stringify(settingDays)); setShowSettings(false); showToast("Pengaturan alarm berhasil disimpan.", "success"); window.dispatchEvent(new Event('timesheet_settings_changed')); };
+  const handleEditClick = (entry) => { setEditingId(entry.id); setInputDate(entry.work_date); setActivity(entry.activity); setDuration(entry.duration); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+  const handleCancelEdit = () => { setEditingId(null); setActivity(''); setDuration(''); setInputDate(getTodayStr()); };
+  const handleSubmit = async (e) => { e.preventDefault(); if (!activity) { showToast("Aktivitas wajib diisi!", "error"); return; } const durationVal = duration ? parseFloat(duration) : 0; if (durationVal > 10) { showToast("Durasi maksimal 10 jam!", "error"); return; } setIsSubmitting(true); const params = { p_user_code: userCode, p_work_date: inputDate, p_activity: activity, p_duration: durationVal }; let error; if (editingId) { const { error: rpcError } = await supabase.rpc('updateTimesheet', { p_id: editingId, ...params }); error = rpcError; } else { const { error: rpcError } = await supabase.rpc('addTimesheet', params); error = rpcError; } if (error) { showToast("Gagal: " + error.message, "error"); } else { setActivity(''); setDuration(''); setInputDate(getTodayStr()); setEditingId(null); fetchEntries(); window.dispatchEvent(new Event('timesheet_data_updated')); showToast(editingId ? "Data diperbarui!" : "Data disimpan!", "success"); } setIsSubmitting(false); };
+
+  // --- UPDATE: LOGIKA HAPUS DENGAN MODAL CUSTOM ---
+  
+  // 1. Trigger saat tombol sampah diklik (hanya set ID)
+  const handleRequestDelete = (id) => {
+    setIdToDelete(id);
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem(LS_USER_CODE);
-    setUserCode('');
-    setIsLoggedIn(false);
-    setEntries([]);
-    window.dispatchEvent(new Event('timesheet_auth_changed'));
-  };
-
-  // --- FETCH DATA ---
-  const fetchEntries = useCallback(async () => {
-    if (!userCode) return;
-    setLoading(true);
-    const { data, error } = await supabase.rpc('getTimesheets', { p_user_code: userCode });
-    if (!error) {
-      setEntries(data || []);
-      const todayStr = getTodayStr();
-      const filled = (data || []).some(item => item.work_date === todayStr);
-      setHasFilledToday(filled);
-    } else {
-      console.error("RPC Error:", error);
-      showToast("Gagal memuat data.", "error");
-    }
-    setLoading(false);
-  }, [userCode]);
-
-  useEffect(() => {
-    if (isLoggedIn) {
-        fetchEntries();
-        // Load Settings
-        const h = localStorage.getItem(LS_DEADLINE_HOUR);
-        const m = localStorage.getItem(LS_DEADLINE_MINUTE);
-        const d = localStorage.getItem(LS_ALARM_DAYS);
-        
-        if (h !== null) setSettingHour(parseInt(h));
-        if (m !== null) setSettingMinute(parseInt(m));
-        if (d !== null) {
-            try { setSettingDays(JSON.parse(d)); } catch(e){}
-        }
-    }
-  }, [isLoggedIn, fetchEntries]);
-
-  // --- UI UPDATE ---
-  useEffect(() => {
-    if (!isLoggedIn) return;
-    const timer = setInterval(() => {
-      const now = new Date();
-      const h = String(now.getHours()).padStart(2,'0');
-      const m = String(now.getMinutes()).padStart(2,'0');
-      const s = String(now.getSeconds()).padStart(2,'0');
-      setCurrentTimeStr(`${h}:${m}:${s}`);
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [isLoggedIn]);
-
-  // --- SETTINGS ---
-  const toggleDay = (dayId) => {
-      if (settingDays.includes(dayId)) {
-          setSettingDays(settingDays.filter(d => d !== dayId));
-      } else {
-          setSettingDays([...settingDays, dayId]);
-      }
-  };
-
-  const saveSettings = () => {
-      localStorage.setItem(LS_DEADLINE_HOUR, settingHour);
-      localStorage.setItem(LS_DEADLINE_MINUTE, settingMinute);
-      localStorage.setItem(LS_ALARM_DAYS, JSON.stringify(settingDays));
-      
-      setShowSettings(false);
-      showToast("Pengaturan alarm berhasil disimpan.", "success");
-      window.dispatchEvent(new Event('timesheet_settings_changed'));
-  };
-
-  // --- CRUD ---
-  const handleEditClick = (entry) => {
-    setEditingId(entry.id);
-    setInputDate(entry.work_date);
-    setActivity(entry.activity);
-    setDuration(entry.duration);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleCancelEdit = () => {
-    setEditingId(null);
-    setActivity('');
-    setDuration('');
-    setInputDate(getTodayStr());
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!activity) { showToast("Aktivitas wajib diisi!", "error"); return; }
-    const durationVal = duration ? parseFloat(duration) : 0;
-    if (durationVal > 10) { showToast("Durasi maksimal 10 jam!", "error"); return; }
-
-    setIsSubmitting(true);
-    const params = { p_user_code: userCode, p_work_date: inputDate, p_activity: activity, p_duration: durationVal };
-    let error;
+  // 2. Trigger saat tombol "Hapus" di modal diklik (eksekusi)
+  const confirmDeleteAction = async () => {
+    if (!idToDelete) return;
     
-    if (editingId) {
-        const { error: rpcError } = await supabase.rpc('updateTimesheet', { p_id: editingId, ...params });
-        error = rpcError;
-    } else {
-        const { error: rpcError } = await supabase.rpc('addTimesheet', params);
-        error = rpcError;
-    }
-
-    if (error) {
-      showToast("Gagal: " + error.message, "error");
-    } else {
-      setActivity(''); setDuration(''); setInputDate(getTodayStr());
-      setEditingId(null);
-      fetchEntries(); 
-      window.dispatchEvent(new Event('timesheet_data_updated'));
-      showToast(editingId ? "Data diperbarui!" : "Data disimpan!", "success");
-    }
-    setIsSubmitting(false);
-  };
-
-  const handleDelete = async (id) => {
-    if (!window.confirm("Hapus entri ini?")) return;
-    const { error } = await supabase.rpc('deleteTimesheet', { p_id: id });
+    const { error } = await supabase.rpc('deleteTimesheet', { p_id: idToDelete });
+    
     if (!error) {
-        if (editingId === id) handleCancelEdit();
+        if (editingId === idToDelete) handleCancelEdit();
         fetchEntries();
         window.dispatchEvent(new Event('timesheet_data_updated'));
-        showToast("Data dihapus.", "success");
+        showToast("Data berhasil dihapus.", "success");
     } else {
         showToast("Gagal menghapus.", "error");
     }
+    // Tutup modal
+    setIdToDelete(null);
+  };
+
+  // 3. Batal hapus
+  const cancelDeleteAction = () => {
+    setIdToDelete(null);
   };
 
   // --- RENDER ---
-  if (!isLoggedIn) return (
-    <div className={styles.loginContainer}>
-        {toast && <div className={`${styles.toast} ${styles[toast.type]}`}><span>{toast.message}</span></div>}
-        <div className={styles.loginCard}>
-            <div className={styles.iconWrapper}><i className="fas fa-user-astronaut"></i></div>
-            <h2 className={styles.loginTitle}>Selamat Datang</h2>
-            <p className={styles.loginSubtitle}>Masukkan Kode Unik untuk mengakses Timesheet</p>
-            <form onSubmit={handleLogin}>
-                <div className={styles.inputGroup}>
-                    <input type="text" className={styles.styledInput} placeholder="Contoh: rifqi123" value={userCode} onChange={e=>setUserCode(e.target.value)} autoFocus />
-                    <i className={`fas fa-key ${styles.inputIcon}`}></i>
-                </div>
-                <button className={styles.loginBtn}>Masuk Sekarang <i className="fas fa-arrow-right"></i></button>
-            </form>
-        </div>
-    </div>
-  );
+  if (!isLoggedIn) return ( <div className={styles.loginContainer}> {toast && <div className={`${styles.toast} ${styles[toast.type]}`}><span>{toast.message}</span></div>} <div className={styles.loginCard}> <div className={styles.iconWrapper}><i className="fas fa-user-astronaut"></i></div> <h2 className={styles.loginTitle}>Selamat Datang</h2> <p className={styles.loginSubtitle}>Masukkan Kode Unik untuk mengakses Timesheet</p> <form onSubmit={handleLogin}> <div className={styles.inputGroup}> <input type="text" className={styles.styledInput} placeholder="Contoh: rifqi123" value={userCode} onChange={e=>setUserCode(e.target.value)} autoFocus /> <i className={`fas fa-key ${styles.inputIcon}`}></i> </div> <button className={styles.loginBtn}>Masuk Sekarang <i className="fas fa-arrow-right"></i></button> </form> </div> </div> );
 
   const deadlineStr = `${String(settingHour).padStart(2,'0')}:${String(settingMinute).padStart(2,'0')}`;
 
@@ -262,7 +128,26 @@ function TimesheetTracker() {
           )}
       </div>
 
-      {/* SETTINGS MODAL (DENGAN DAY SELECTOR) */}
+      {/* --- MODAL KONFIRMASI HAPUS BARU --- */}
+      {idToDelete && (
+        <div className={styles.modalOverlay}>
+            <div className={styles.deleteCard}>
+                <div className={styles.deleteIconWrapper}>
+                    <i className="fas fa-trash-alt"></i>
+                </div>
+                <h3 className={styles.deleteTitle}>Hapus Entri?</h3>
+                <p className={styles.deleteMessage}>
+                    Apakah Anda yakin ingin menghapus aktivitas ini? Tindakan ini tidak dapat dibatalkan.
+                </p>
+                <div className={styles.deleteActions}>
+                    <button onClick={cancelDeleteAction} className={styles.btnCancel}>Batal</button>
+                    <button onClick={confirmDeleteAction} className={styles.btnConfirm}>Ya, Hapus</button>
+                </div>
+            </div>
+        </div>
+      )}
+
+      {/* SETTINGS MODAL */}
       {showSettings && (
           <div className={styles.modalOverlay}>
               <div className={styles.modalContent}>
@@ -348,7 +233,16 @@ function TimesheetTracker() {
                             <td style={{textAlign:'right', verticalAlign: 'top'}}>
                                 <div style={{display:'flex', justifyContent:'flex-end', gap:'6px'}}>
                                     <button className="button secondary" onClick={()=>handleEditClick(e)} title="Edit" style={{padding:'6px 10px', color:'var(--primary-color)'}}><i className="fas fa-pencil-alt"></i></button>
-                                    <button className="button secondary" onClick={()=>handleDelete(e.id)} title="Hapus" style={{padding:'6px 10px', color:'#e53e3e', borderColor:'#fed7d7', background:'#fff5f5'}}><i className="fas fa-trash"></i></button>
+                                    
+                                    {/* UPDATE TOMBOL HAPUS: Panggil handleRequestDelete */}
+                                    <button 
+                                        className="button secondary" 
+                                        onClick={()=>handleRequestDelete(e.id)} 
+                                        title="Hapus" 
+                                        style={{padding:'6px 10px', color:'#e53e3e', borderColor:'#fed7d7', background:'#fff5f5'}}
+                                    >
+                                        <i className="fas fa-trash"></i>
+                                    </button>
                                 </div>
                             </td>
                         </tr>

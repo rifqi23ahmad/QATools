@@ -1,14 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { toolGroups } from '../toolConfig';
-import { createClient } from '@supabase/supabase-js';
 import FloatingFeedback from './FloatingFeedback';
 import { supabase } from '../services/supabaseClient';
 
-
 // --- Fungsi Helper (di luar komponen) ---
 
-// Mendapatkan tanggal YYYY-MM-DD
 const getTodayDateString = () => {
   const today = new Date();
   const year = today.getFullYear();
@@ -17,11 +14,10 @@ const getTodayDateString = () => {
   return `${year}-${month}-${day}`;
 };
 
-// Mendapatkan atau membuat Visitor ID unik di localStorage
 const getVisitorId = () => {
   let visitorId = localStorage.getItem('qatools_visitor_id');
   if (!visitorId) {
-    visitorId = crypto.randomUUID(); // Buat ID unik baru
+    visitorId = crypto.randomUUID();
     localStorage.setItem('qatools_visitor_id', visitorId);
   }
   return visitorId;
@@ -32,12 +28,10 @@ function Sidebar() {
     localStorage.getItem('sidebarMinimized') === 'true'
   );
   
-  // State untuk 3 metrik
   const [counts, setCounts] = useState({ totalLikes: '...', totalVisitors: '...' });
   const [activeSessions, setActiveSessions] = useState('...');
   const [isLoadingCounts, setIsLoadingCounts] = useState(true);
   
-  // State untuk tombol Like
   const [hasLiked, setHasLiked] = useState(false);
   const [isLiking, setIsLiking] = useState(false);
   
@@ -49,7 +43,7 @@ function Sidebar() {
     localStorage.setItem('sidebarMinimized', isMinimized);
   }, [isMinimized]);
 
-  // --- useEffect [1]: Log Daily Visitor (RPC: logDailyVisitor) ---
+  // --- Log Daily Visitor ---
   useEffect(() => {
     const logDailyVisitorIfNeeded = async () => {
       const today = getTodayDateString();
@@ -58,40 +52,28 @@ function Sidebar() {
           visitorId: visitorId,
           date: today
         });
-
         if (error) throw error;
       } catch (error) {
         console.error("Gagal log daily_visitor:", error);
       }
     };
-    
     logDailyVisitorIfNeeded();
   }, [visitorId]); 
   
-  // --- Fetch Analytics Counts (RPC: getSidebarStats) ---
+  // --- Fetch Analytics ---
   const fetchAnalyticsCounts = useCallback(async (isInitial = false) => {
-    if (isInitial) {
-      setIsLoadingCounts(true);
-    }
+    if (isInitial) setIsLoadingCounts(true);
     try {
       const { data, error } = await supabase.rpc('getSidebarStats');
-
       if (error) throw error;
-
       setCounts({
         totalLikes: data.totalLikes ?? 0,
         totalVisitors: data.totalVisitors ?? 0
       });
-
     } catch (error) {
-      console.error("Fetch analytics error:", error);
-      if (isInitial) {
-        setCounts({ totalLikes: 'Err', totalVisitors: 'Err' });
-      }
+      if (isInitial) setCounts({ totalLikes: 'Err', totalVisitors: 'Err' });
     } finally {
-      if (isInitial) {
-        setIsLoadingCounts(false); 
-      }
+      if (isInitial) setIsLoadingCounts(false); 
     }
   }, []);
 
@@ -99,14 +81,12 @@ function Sidebar() {
     fetchAnalyticsCounts(true);
   }, [fetchAnalyticsCounts]);
 
-  // --- useEffect [2]: REAL-TIME Active Session ---
+  // --- Active Session ---
   useEffect(() => {
     const channel = supabase.channel('presence-sessions', {
       config: { presence: { key: visitorId } },
     });
-
     const updateCount = () => setActiveSessions(Object.keys(channel.presenceState()).length);
-
     channel
       .on('presence', { event: 'sync' }, updateCount)
       .on('presence', { event: 'join' }, updateCount)
@@ -116,66 +96,37 @@ function Sidebar() {
           await channel.track({ visitor_id: visitorId, joined_at: new Date().toISOString() });
         }
       });
-
     return () => {
       channel.untrack(); 
       supabase.removeChannel(channel);
     };
   }, [visitorId]);
 
-  // --- useEffect [3]: REAL-TIME Listener untuk Likes & Visitors (BARU) ---
+  // --- Realtime Listener ---
   useEffect(() => {
     const statsChannel = supabase
       .channel('realtime-stats')
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'likes' },
-        () => {
-          // Jika ada like baru masuk, refresh counter
-          fetchAnalyticsCounts(false);
-        }
-      )
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'visitors_daily' },
-        () => {
-          // Jika ada visitor baru, refresh counter
-          fetchAnalyticsCounts(false);
-        }
-      )
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'likes' }, () => fetchAnalyticsCounts(false))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'visitors_daily' }, () => fetchAnalyticsCounts(false))
       .subscribe();
-
-    return () => {
-      supabase.removeChannel(statsChannel);
-    };
+    return () => { supabase.removeChannel(statsChannel); };
   }, [fetchAnalyticsCounts]);
 
-  // --- useEffect [4]: Cek Status Like Lokal ---
+  // --- Like Handler ---
   useEffect(() => {
     const alreadyLiked = localStorage.getItem('qatools_has_liked') === 'true';
     setHasLiked(alreadyLiked);
   }, []);
   
-  // --- Handle Like (RPC: submitLike) ---
   const handleLike = async () => {
     if (hasLiked || isLiking) return;
-
     setIsLiking(true);
     setHasLiked(true);
     localStorage.setItem('qatools_has_liked', 'true');
-
     try {
-      const { error } = await supabase.rpc('submitLike', {
-        visitorId: visitorId
-      });
-
+      const { error } = await supabase.rpc('submitLike', { visitorId: visitorId });
       if (error) throw error;
-      
-      // Refresh counter tidak perlu dipanggil manual di sini karena
-      // Realtime Listener di useEffect [3] akan menangkap perubahannya otomatis!
-      
     } catch (error) {
-      console.error("Gagal mengirim 'Like':", error.message);
       setHasLiked(false);
       localStorage.setItem('qatools_has_liked', 'false');
     } finally {
@@ -183,7 +134,6 @@ function Sidebar() {
     }
   };
   
-  // --- Render ---
   return (
     <aside className={`sidebar ${isMinimized ? 'minimized' : ''}`}>
       <div className="sidebar-header">
@@ -220,45 +170,41 @@ function Sidebar() {
         </ul>
       </nav>
       
-      <div className="sidebar-footer">
+      <div className="sidebar-footer" style={{ flexDirection: 'column', alignItems: 'stretch', gap: '10px', padding: '1rem' }}>
+        
+        <FloatingFeedback 
+            supabase={supabase} 
+            visitorId={visitorId}
+            isSidebarMinimized={isMinimized} 
+        />
+
         {!isMinimized && (
           <div 
             className="supabase-counter-container" 
             style={{ 
-              flex: 1, 
-              minHeight: '110px', 
-              padding: '0.5rem 0 0 1rem',
+              padding: '0.5rem 0.5rem 0 0.5rem',
               display: 'flex',
               flexDirection: 'column',
               gap: '8px',
-              backgroundColor: '#1a202c', 
               color: '#a0aec0',
-              fontSize: '14px',
-              fontFamily: 'Inter, system-ui, sans-serif'
+              fontSize: '13px',
+              fontFamily: 'Inter, system-ui, sans-serif',
+              borderTop: '1px solid #2d3748',
+              marginTop: '5px'
             }}
           >
             {isLoadingCounts ? (
-              <div style={{ fontSize: '12px', padding: '6px', color: '#a0aec0' }}>
-                Memuat statistik...
-              </div>
+              <div style={{ fontSize: '11px', color: '#a0aec0' }}>Memuat statistik...</div>
             ) : (
-              <>
-                <div className="counter-item" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <i className="fas fa-thumbs-up fa-fw" style={{ color: '#4299e1', fontSize: '16px' }} />
-                  <span style={{ fontWeight: 500 }}>{counts.totalLikes.toLocaleString('id-ID')} Total Likes</span>
-                </div>
-                <div className="counter-item" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <i className="fas fa-user-clock fa-fw" style={{ color: '#48bb78', fontSize: '16px' }} />
-                  <span style={{ fontWeight: 500 }}>{activeSessions.toLocaleString('id-ID')} Online</span>
-                </div>
-                <div className="counter-item" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <i className="fas fa-users fa-fw" style={{ color: '#ecc94b', fontSize: '16px' }} />
-                  <span style={{ fontWeight: 500 }}>{counts.totalVisitors.toLocaleString('id-ID')} Total Visitors</span>
-                </div>
-              </>
+              <div style={{display:'flex', justifyContent:'space-between', fontSize:'11px'}}>
+                 <span title="Total Likes"><i className="fas fa-thumbs-up" style={{ color: '#4299e1' }}/> {counts.totalLikes.toLocaleString('id-ID')}</span>
+                 {/* UPDATE: Menambahkan kata "Online" */}
+                 <span title="Online"><i className="fas fa-user-clock" style={{ color: '#48bb78' }}/> {activeSessions.toLocaleString('id-ID')} Online</span>
+                 <span title="Visitors"><i className="fas fa-users" style={{ color: '#ecc94b' }}/> {counts.totalVisitors.toLocaleString('id-ID')}</span>
+              </div>
             )}
             
-            <div style={{ marginTop: 'auto', paddingBottom: '8px', paddingRight: '1rem' }}>
+            <div>
               <button 
                 onClick={handleLike}
                 disabled={hasLiked || isLiking}
@@ -267,19 +213,16 @@ function Sidebar() {
                   color: hasLiked ? '#48bb78' : '#a0aec0',
                   border: hasLiked ? '1px solid #48bb78' : '1px solid #4a5568',
                   width: '100%',
-                  padding: '4px 8px',
+                  padding: '6px 8px',
                   borderRadius: '6px',
                   cursor: hasLiked ? 'default' : 'pointer',
-                  fontSize: '13px',
+                  fontSize: '12px',
                   fontWeight: 500,
-                  transition: 'all 0.2s ease',
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis'
+                  transition: 'all 0.2s ease'
                 }}
               >
                 <i className={`fas ${hasLiked ? 'fa-check' : 'fa-thumbs-up'} fa-fw`} style={{ marginRight: '6px' }} />
-                {hasLiked ? 'Liked!' : 'Like This App'}
+                {hasLiked ? 'Liked!' : 'Like App'}
               </button>
             </div>
           </div>
@@ -290,23 +233,18 @@ function Sidebar() {
           title={isMinimized ? "Expand Sidebar" : "Minimize Sidebar"}
           onClick={() => setIsMinimized(prev => !prev)}
           style={{
-            transform: isMinimized ? 'rotate(180deg)' : 'none',
-            transition: 'transform 0.15s ease',
-            marginLeft: isMinimized ? '0' : '0', 
-            backgroundColor: 'var(--sidebar-active-bg)',
-            color: 'var(--sidebar-text)',
-            alignSelf: 'center' 
+            marginTop: '5px', width: '100%', height: '30px',
+            backgroundColor: 'transparent', color: '#4a5568',
+            border: '1px dashed #4a5568', borderRadius: '6px',
+            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            transition: 'all 0.2s ease'
           }}
+          onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = '#2d3748'; e.currentTarget.style.color = '#a0aec0'; }}
+          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = '#4a5568'; }}
         >
-          <i className="fas fa-chevron-left" />
+          <i className={`fas ${isMinimized ? 'fa-chevron-right' : 'fa-chevron-left'}`} />
         </button>
       </div>
-
-      <FloatingFeedback 
-        supabase={supabase} 
-        visitorId={visitorId} 
-      />
-
     </aside>
   );
 }

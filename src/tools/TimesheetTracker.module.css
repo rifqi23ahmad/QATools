@@ -469,3 +469,93 @@
 .dayBtnActive:hover {
     background-color: #3182ce; /* Sedikit lebih gelap */
 }
+
+/* ... (Kode CSS yang sudah ada biarkan saja) ... */
+
+/* --- DELETE CONFIRMATION MODAL --- */
+
+/* Menggunakan overlay yang sama, tapi kontennya spesifik */
+.deleteCard {
+  background: white;
+  width: 90%;
+  max-width: 320px;
+  padding: 2rem;
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border: 1px solid #e2e8f0;
+}
+
+.deleteIconWrapper {
+  width: 64px;
+  height: 64px;
+  background-color: #fef2f2; /* Merah sangat muda */
+  color: #ef4444; /* Merah danger */
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  font-size: 1.75rem;
+  border: 4px solid #fee2e2; /* Ring merah muda */
+}
+
+.deleteTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 0.5rem;
+}
+
+.deleteMessage {
+  font-size: 0.95rem;
+  color: #64748b;
+  margin-bottom: 2rem;
+  line-height: 1.5;
+}
+
+.deleteActions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.btnCancel {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e0;
+  background-color: white;
+  color: #475569;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btnCancel:hover {
+  background-color: #f1f5f9;
+}
+
+.btnConfirm {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  background-color: #ef4444;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 6px rgba(239, 68, 68, 0.2);
+}
+
+.btnConfirm:hover {
+  background-color: #dc2626;
+  transform: translateY(-1px);
+}
+
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.9) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}

@@ -20,16 +20,17 @@ import CalculationTools from './tools/CalculationTools.jsx';
 import SqlCompare from './tools/SQLCompare';
 // Impor Tool Baru
 import TimesheetTracker from './tools/TimesheetTracker';
-import FileConverter from './tools/FileConverter'; // <-- PERBAIKAN PATH (tadinya './tools/Fi')
+import FileConverter from './tools/FileConverter';
+// Impor Tool Column To Comma (Baru)
+import ColumnToComma from './tools/ColumnToComma';
 
 
 /**
  * Mendefinisikan grup tool untuk sidebar.
  */
-// --- PERBAIKAN: GABUNGKAN SEMUA GRUP DI SINI ---
 export const toolGroups = [
   {
-    title: 'Personal', //
+    title: 'Personal',
     tools: [
       { id: 'TimesheetTracker', path: '/timesheet', name: 'Timesheet Tracker', icon: 'fa-clock' },
     ]
@@ -44,6 +45,7 @@ export const toolGroups = [
     title: 'Converter Tools',
     tools: [
       { id: 'FileConverter', path: '/universal-converter', name: 'File Converter', icon: 'fa-retweet' },
+      { id: 'ColumnToComma', path: '/column-to-comma', name: 'Column to Comma', icon: 'fa-list-ol' }, // <-- Tool Baru Ditambahkan
     ]
   },
   {
@@ -84,13 +86,14 @@ export const toolGroups = [
  */
 export const toolComponentMap = {
   // Personal Productivity
-  TimesheetTracker: TimesheetTracker, // <-- Pastikan didaftarkan di sini
+  TimesheetTracker: TimesheetTracker,
 
   // Kalkulasi
   CalculationTools: CalculationTools,
   
   // Converter
   FileConverter: FileConverter, 
+  ColumnToComma: ColumnToComma, // <-- Komponen Baru Didaftarkan
 
   // JSON Tools
   JsonFormatter: JsonFormatter,
